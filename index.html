@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSIA Conseil — SAV Menuiserie</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; display: flex; justify-content: center; padding: 20px; min-height: 100vh; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const AIRTABLE_TOKEN = 'patVv2Jmisci900TY.45d3f25095a992e5f8c3511eb913378e0513afa90f4c7afa3f83a786b8cf8d19';
+const AIRTABLE_BASE = 'appFqAT8WeX0UTudy';
+const AIRTABLE_TABLE = 'Tickets SAV';
+
+const F = {
+  marine: "#111111", or: "#FF6B00", orClair: "#FFD4B3",
+  blanc: "#FFFFFF", grisClair: "#F5F5F5", grisBord: "#E5E5E5",
+  rouge: "#DC2626", rougeClair: "#FEE2E2", vert: "#15803D", vertClair: "#F0FDF4",
+};
+
+const AGENCES = [
+  { id: "ibos", label: "📍 Ibos", ville: "Ibos (65)" },
+  { id: "lescar", label: "📍 Lescar", ville: "Lescar (64)" },
+  { id: "tarnos", label: "📍 Tarnos", ville: "Tarnos (40)" },
+  { id: "saint_gaudens", label: "📍 Saint-Gaudens", ville: "Saint-Gaudens (31)" },
+];
+
+const PRODUITS = [
+  { id: "fenetre", label: "🪟 Fenêtre", pb: [
+    { id: "fermeture", label: "Fermeture difficile" },
+    { id: "infiltration", label: "Infiltration d'eau", urgent: true },
+    { id: "joint", label: "Courant d'air / joint usé" },
+    { id: "vitrage", label: "Vitrage fissuré / cassé" },
+    { id: "bloquee", label: "Fenêtre bloquée ouverte", urgent: true },
+    { id: "autre", label: "Autre problème" },
+  ]},
+  { id: "coulissant", label: "↔️ Coulissant", pb: [
+    { id: "rail", label: "Rail bloqué / difficile à glisser" },
+    { id: "infiltration", label: "Infiltration d'eau", urgent: true },
+    { id: "serrure", label: "Serrure / verrouillage défaillant" },
+    { id: "autre", label: "Autre problème" },
+  ]},
+  { id: "volet_roulant", label: "⬛ Volet roulant", pb: [
+    { id: "bloque", label: "Volet bloqué mi-hauteur", urgent: true },
+    { id: "moteur", label: "Moteur en panne" },
+    { id: "lame", label: "Lame cassée / décrochée" },
+    { id: "telecommande", label: "Télécommande / interrupteur HS" },
+    { id: "autre", label: "Autre problème" },
+  ]},
+  { id: "portail", label: "🚪 Portail", pb: [
+    { id: "moteur", label: "Moteur en panne" },
+    { id: "telecommande", label: "Télécommande ne fonctionne plus" },
+    { id: "gond", label: "Gond arraché / portail affaissé", urgent: true },
+    { id: "fermeture", label: "Fermeture / verrouillage défaillant", urgent: true },
+    { id: "autre", label: "Autre problème" },
+  ]},
+  { id: "porte_garage", label: "🏠 Porte de garage", sousTypes: ["Sectionnelle", "Enroulable", "Basculante"], pb: [
+    { id: "moteur", label: "Moteur en panne" },
+    { id: "ressort", label: "Ressort cassé", urgent: true },
+    { id: "bloquee", label: "Porte bloquée ouverte", urgent: true },
+    { id: "serrure", label: "Serrure / verrouillage défaillant", urgent: true },
+    { id: "autre", label: "Autre problème" },
+  ]},
+  { id: "veranda", label: "🏡 Véranda", pb: [
+    { id: "toiture_fuite", label: "Toiture — Fuite / infiltration", urgent: true },
+    { id: "coulissant_rail", label: "Coulissant — Rail bloqué" },
+    { id: "fenetre_fermeture", label: "Fenêtre — Fermeture difficile" },
+    { id: "autre", label: "Autre problème" },
+  ]},
+  { id: "autre", label: "❓ Autre produit", pb: [{ id: "autre", label: "Décrire mon problème" }] },
+];
+
+async function envoyerAirtable(data) {
+  const fields = {
+    'Name': data.ticket,
+    'Agence': data.agence,
+    'Client': data.nom,
+    'Téléphone': data.tel,
+    'Email': data.email,
+    'Adresse': data.adresse,
+    'Produit': data.produit,
+    'Problème': data.probleme,
+    'Créneau': data.creneau,
+    'Garantie': data.garantie ? 'Oui' : 'Non',
+    'N° Facture': data.facture || '',
+    'Qualification': data.urgent ? 'URGENT' : 'Standard',
+    'Status': 'Nouveau',
+  };
+  const resp = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${encodeURIComponent(AIRTABLE_TABLE)}`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${AIRTABLE_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields })
+  });
+  if (!resp.ok) { const e = await resp.json(); throw new Error(e.error?.message || 'Erreur'); }
+  return resp.json();
+}
+
+function App() {
+  const [etape, setEtape] = React.useState("agence");
+  const [agence, setAgence] = React.useState(null);
+  const [typeClient, setTypeClient] = React.useState(null);
+  const [garantie, setGarantie] = React.useState(null);
+  const [facture, setFacture] = React.useState("");
+  const [client, setClient] = React.useState({ nom: "", adresse: "", tel: "", email: "" });
+  const [erreurs, setErreurs] = React.useState({});
+  const [produit, setProduit] = React.useState(null);
+  const [sousType, setSousType] = React.useState(null);
+  const [probleme, setProbleme] = React.useState(null);
+  const [creneau, setCreneau] = React.useState(null);
+  const [ticket, setTicket] = React.useState(null);
+  const [envoi, setEnvoi] = React.useState(null);
+  const [sending, setSending] = React.useState(false);
+  const bottomRef = React.useRef(null);
+
+  React.useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [etape]);
+
+  const validerInfos = () => {
+    const e = {};
+    if (!client.nom.trim()) e.nom = true;
+    if (!client.adresse.trim()) e.adresse = true;
+    if (!client.tel.trim()) e.tel = true;
+    if (!client.email.trim()) e.email = true;
+    setErreurs(e);
+    if (garantie === true && !facture.trim()) { setErreurs(prev => ({...prev, facture: true})); return false; }
+    return Object.keys(e).length === 0;
+  };
+
+  const confirmer = async () => {
+    setSending(true);
+    const num = `SAV-${new Date().getFullYear()}-${Math.floor(Math.random()*9000)+1000}`;
+    setTicket(num);
+    try {
+      await envoyerAirtable({
+        ticket: num, agence: agence.ville, nom: client.nom, tel: client.tel,
+        email: client.email, adresse: client.adresse,
+        produit: produit.label.substring(2).trim() + (sousType ? ' — ' + sousType : ''),
+        probleme: probleme.label, creneau, garantie, facture, urgent: probleme.urgent
+      });
+      setEnvoi('ok');
+    } catch(e) {
+      setEnvoi('err');
+    }
+    setSending(false);
+    setEtape('merci');
+  };
+
+  const reset = () => {
+    setEtape("agence"); setAgence(null); setTypeClient(null); setGarantie(null);
+    setFacture(""); setClient({ nom: "", adresse: "", tel: "", email: "" });
+    setErreurs({}); setProduit(null); setSousType(null); setProbleme(null);
+    setCreneau(null); setTicket(null); setEnvoi(null); setSending(false);
+  };
+
+  const s = (obj) => Object.entries(obj).map(([k,v]) => `${k}:${v}`).join(';');
+
+  return (
+    <div style={{fontFamily:"'Segoe UI',sans-serif",background:F.grisClair,minHeight:"100vh",display:"flex",flexDirection:"column",maxWidth:"500px",width:"100%"}}>
+      {/* Header */}
+      <div style={{background:F.marine,padding:"14px 20px 10px"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
+            <div style={{width:"40px",height:"40px",background:F.or,borderRadius:"8px",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              <span style={{fontFamily:"Arial Black,Arial",fontSize:"20px",fontWeight:"900",color:"#111",display:"inline-block",transform:"scaleX(-1)",lineHeight:1}}>R</span>
+            </div>
+            <div>
+              <div style={{color:F.blanc,fontWeight:"900",fontSize:"16px"}}>
+                <span style={{display:"inline-block",transform:"scaleX(-1)",fontFamily:"Arial Black,Arial"}}>R</span>S<span style={{color:F.or}}>IA</span>
+                <span style={{fontSize:"12px",fontWeight:"600",marginLeft:"5px",color:"rgba(255,255,255,0.6)"}}>Conseil</span>
+              </div>
+              <div style={{color:"rgba(255,255,255,0.4)",fontSize:"9px",letterSpacing:"2px",textTransform:"uppercase",marginTop:"3px"}}>Solutions IA · SAV Menuiserie</div>
+            </div>
+          </div>
+          {etape !== "agence" && etape !== "merci" && (
+            <button onClick={reset} style={{background:"rgba(201,168,76,0.2)",border:`1px solid ${F.or}`,color:F.or,borderRadius:"8px",padding:"5px 10px",fontSize:"11px",cursor:"pointer"}}>↩ Début</button>
+          )}
+        </div>
+        <div style={{marginTop:"8px",display:"flex",alignItems:"center",gap:"6px"}}>
+          <div style={{width:"8px",height:"8px",background:"#2ECC71",borderRadius:"50%"}}></div>
+          <span style={{color:F.orClair,fontSize:"12px",fontWeight:"500"}}>Alex — SAV en ligne</span>
+        </div>
+      </div>
+      <div style={{height:"3px",background:`linear-gradient(90deg,${F.or},${F.orClair},${F.or})`}} />
+
+      <div style={{flex:1,overflowY:"auto",padding:"16px",display:"flex",flexDirection:"column",gap:"12px"}}>
+
+        {etape === "agence" && (
+          <>
+            <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
+              <div style={{width:"32px",height:"32px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"13px",fontWeight:"700",color:F.blanc,flexShrink:0,border:`2px solid ${F.or}`}}>A</div>
+              <div style={{background:F.blanc,borderRadius:"18px 18px 18px 4px",padding:"12px 16px",fontSize:"13px",lineHeight:"1.6",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:`1px solid ${F.grisBord}`}}>
+                Bonjour ! Je suis <strong style={{color:F.marine}}>Alex</strong>, votre assistant SAV RSIA.<br/>Quelle est votre agence ?
+              </div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+              {AGENCES.map(a => (
+                <button key={a.id} onClick={() => { setAgence(a); setEtape("identification"); }}
+                  style={{background:F.blanc,border:`2px solid ${F.grisBord}`,borderRadius:"14px",padding:"16px 12px",fontSize:"14px",fontWeight:"700",color:F.marine,cursor:"pointer",textAlign:"center",lineHeight:"1.5"}}>
+                  {a.label}<br/><span style={{fontSize:"11px",fontWeight:"400",color:"#64748B"}}>{a.ville}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {etape === "identification" && (
+          <>
+            <div style={{background:"#EFF6FF",border:"1px solid #BFDBFE",borderRadius:"10px",padding:"10px 14px",fontSize:"12px"}}>
+              📍 <strong>{agence?.ville}</strong>
+            </div>
+            <div style={{background:F.blanc,borderRadius:"12px",padding:"14px 16px",border:`1px solid ${F.grisBord}`}}>
+              <div style={{fontSize:"12px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Êtes-vous déjà client RSIA ?</div>
+              <div style={{display:"flex",gap:"8px"}}>
+                {[{val:"existant",label:"✅ Oui, je suis client"},{val:"nouveau",label:"🆕 Première fois"}].map(opt => (
+                  <button key={opt.val} onClick={() => { setTypeClient(opt.val); setGarantie(null); }}
+                    style={{flex:1,padding:"10px",border:`2px solid ${typeClient===opt.val?F.or:F.grisBord}`,borderRadius:"10px",background:typeClient===opt.val?F.marine:F.blanc,color:typeClient===opt.val?F.blanc:F.marine,fontSize:"12px",fontWeight:"600",cursor:"pointer"}}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {typeClient === "existant" && (
+              <div style={{background:F.blanc,borderRadius:"12px",padding:"14px 16px",border:`1px solid ${F.grisBord}`}}>
+                <div style={{fontSize:"12px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Produit sous garantie ?</div>
+                <div style={{display:"flex",gap:"8px"}}>
+                  {[{val:true,label:"✅ Oui"},{val:false,label:"❌ Non / Je ne sais pas"}].map(opt => (
+                    <button key={String(opt.val)} onClick={() => { setGarantie(opt.val); setFacture(""); }}
+                      style={{flex:1,padding:"10px",border:`2px solid ${garantie===opt.val?(opt.val?F.vert:F.rouge):F.grisBord}`,borderRadius:"10px",background:garantie===opt.val?(opt.val?F.vertClair:F.rougeClair):F.blanc,color:garantie===opt.val?(opt.val?F.vert:F.rouge):F.marine,fontSize:"12px",fontWeight:"600",cursor:"pointer"}}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                {garantie === false && (
+                  <div style={{marginTop:"12px",background:"#FFF7ED",border:"1.5px solid #FED7AA",borderRadius:"10px",padding:"12px 14px",fontSize:"12px",color:"#78350F",lineHeight:"1.7"}}>
+                    ⚠️ <strong>Diagnostic 65€</strong> si hors garantie. Avoir déduit à l'acceptation du devis.
+                  </div>
+                )}
+                {garantie === true && (
+                  <div style={{marginTop:"12px"}}>
+                    <label style={{fontSize:"11px",fontWeight:"700",color:F.marine,display:"block",marginBottom:"4px"}}>N° de facture *</label>
+                    <input type="text" placeholder="Ex : FAL-2024-00842" value={facture} onChange={e => setFacture(e.target.value)}
+                      style={{width:"100%",padding:"9px 12px",border:`1.5px solid ${erreurs.facture?F.rouge:F.or}`,borderRadius:"8px",fontSize:"13px",boxSizing:"border-box",outline:"none"}} />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {(typeClient === "nouveau" || (typeClient === "existant" && garantie !== null)) && (
+              <div style={{background:F.blanc,borderRadius:"12px",padding:"14px 16px",border:`1px solid ${F.grisBord}`}}>
+                <div style={{fontSize:"12px",fontWeight:"700",color:F.marine,marginBottom:"12px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Vos coordonnées</div>
+                {[{key:"nom",label:"Nom et prénom",ph:"Ex : Jean Dupont",type:"text"},{key:"adresse",label:"Adresse complète",ph:"Ex : 12 rue des Lilas, 65000 Tarbes",type:"text"},{key:"tel",label:"Téléphone",ph:"Ex : 06 12 34 56 78",type:"tel"},{key:"email",label:"Email",ph:"Ex : jean.dupont@gmail.com",type:"email"}].map(f => (
+                  <div key={f.key} style={{marginBottom:"10px"}}>
+                    <label style={{fontSize:"11px",fontWeight:"600",color:"#64748B",display:"block",marginBottom:"4px"}}>{f.label} *</label>
+                    <input type={f.type} placeholder={f.ph} value={client[f.key]}
+                      onChange={e => setClient({...client,[f.key]:e.target.value})}
+                      style={{width:"100%",padding:"9px 12px",border:`1.5px solid ${erreurs[f.key]?F.rouge:F.grisBord}`,borderRadius:"8px",fontSize:"13px",boxSizing:"border-box",outline:"none"}} />
+                    {erreurs[f.key] && <span style={{fontSize:"11px",color:F.rouge}}>Champ obligatoire</span>}
+                  </div>
+                ))}
+                <button onClick={() => { if (validerInfos()) setEtape("produit"); }}
+                  style={{width:"100%",padding:"13px",background:F.marine,color:F.blanc,border:`2px solid ${F.or}`,borderRadius:"10px",fontSize:"13px",fontWeight:"700",cursor:"pointer",marginTop:"4px"}}>
+                  Continuer →
+                </button>
+              </div>
+            )}
+          </>
+        )}
+
+        {etape === "produit" && (
+          <>
+            <div style={{background:F.vertClair,border:"1px solid #86EFAC",borderRadius:"10px",padding:"10px 14px",fontSize:"12px"}}>
+              <div style={{fontWeight:"700",color:F.marine}}>👤 {client.nom}</div>
+              <div style={{color:"#475569",fontSize:"11px"}}>{agence?.ville}</div>
+            </div>
+            <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
+              <div style={{width:"32px",height:"32px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"13px",fontWeight:"700",color:F.blanc,flexShrink:0,border:`2px solid ${F.or}`}}>A</div>
+              <div style={{background:F.blanc,borderRadius:"18px 18px 18px 4px",padding:"12px 16px",fontSize:"13px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:`1px solid ${F.grisBord}`}}>
+                Quel produit est concerné, <strong style={{color:F.marine}}>{client.nom.split(" ")[0]}</strong> ?
+              </div>
+            </div>
+            {PRODUITS.map(p => (
+              <button key={p.id} onClick={() => { setProduit(p); setSousType(null); setEtape(p.sousTypes ? "sous_type" : "probleme"); }}
+                style={{background:F.blanc,border:`2px solid ${F.grisBord}`,borderRadius:"12px",padding:"14px 16px",fontSize:"13px",fontWeight:"600",color:F.marine,cursor:"pointer",textAlign:"left",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
+                {p.label}
+              </button>
+            ))}
+          </>
+        )}
+
+        {etape === "sous_type" && (
+          <>
+            <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
+              <div style={{width:"32px",height:"32px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"13px",fontWeight:"700",color:F.blanc,flexShrink:0,border:`2px solid ${F.or}`}}>A</div>
+              <div style={{background:F.blanc,borderRadius:"18px 18px 18px 4px",padding:"12px 16px",fontSize:"13px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:`1px solid ${F.grisBord}`}}>
+                Quel type de porte de garage ?
+              </div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"10px"}}>
+              {produit?.sousTypes?.map(st => (
+                <button key={st} onClick={() => { setSousType(st); setEtape("probleme"); }}
+                  style={{background:F.blanc,border:`2px solid ${F.grisBord}`,borderRadius:"14px",padding:"20px 10px",fontSize:"13px",fontWeight:"700",color:F.marine,cursor:"pointer",textAlign:"center"}}>
+                  {st}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {etape === "probleme" && (
+          <>
+            <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
+              <div style={{width:"32px",height:"32px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"13px",fontWeight:"700",color:F.blanc,flexShrink:0,border:`2px solid ${F.or}`}}>A</div>
+              <div style={{background:F.blanc,borderRadius:"18px 18px 18px 4px",padding:"12px 16px",fontSize:"13px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:`1px solid ${F.grisBord}`}}>
+                Quel est le problème avec votre <strong style={{color:F.marine}}>{produit?.label.substring(2).trim()}</strong> ?
+              </div>
+            </div>
+            {produit?.pb.map(p => (
+              <button key={p.id} onClick={() => { setProbleme(p); setEtape("creneau"); }}
+                style={{background:F.blanc,border:`2px solid ${p.urgent?"#FCA5A5":F.grisBord}`,borderRadius:"12px",padding:"12px 16px",fontSize:"13px",fontWeight:"600",color:F.marine,cursor:"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
+                <span>{p.label}</span>
+                {p.urgent && <span style={{background:F.rougeClair,color:F.rouge,fontSize:"10px",fontWeight:"700",padding:"2px 8px",borderRadius:"20px",marginLeft:"8px",flexShrink:0}}>URGENT</span>}
+              </button>
+            ))}
+          </>
+        )}
+
+        {etape === "creneau" && (
+          <div style={{background:F.blanc,borderRadius:"12px",padding:"14px 16px",border:`1px solid ${F.grisBord}`}}>
+            <div style={{fontSize:"13px",fontWeight:"700",color:F.marine,marginBottom:"12px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Quel créneau vous convient ?</div>
+            <div style={{fontSize:"11px",color:"#64748B",marginBottom:"12px",paddingLeft:"11px"}}>Jour exact confirmé sous 24h par votre agence</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+              {[{id:"matin",label:"🌅 Matin",heure:"8h30 — 12h00"},{id:"apres_midi",label:"🌇 Après-midi",heure:"13h00 — 17h00"}].map(c => (
+                <button key={c.id} onClick={() => setCreneau(c.label+" ("+c.heure+")")}
+                  style={{padding:"16px 12px",border:`2px solid ${creneau&&creneau.includes(c.id==="matin"?"Matin":"Après")?F.or:F.grisBord}`,borderRadius:"12px",background:creneau&&creneau.includes(c.id==="matin"?"Matin":"Après")?"#FFFDF5":F.blanc,cursor:"pointer",textAlign:"center"}}>
+                  <div style={{fontSize:"13px",fontWeight:"700",color:F.marine}}>{c.label}</div>
+                  <div style={{fontSize:"12px",color:"#64748B",marginTop:"3px"}}>{c.heure}</div>
+                </button>
+              ))}
+            </div>
+            <button onClick={() => { if (creneau) setEtape("recapitulatif"); }} disabled={!creneau}
+              style={{width:"100%",marginTop:"14px",padding:"13px",background:!creneau?F.grisBord:F.marine,color:!creneau?"#94A3B8":F.blanc,border:`2px solid ${!creneau?F.grisBord:F.or}`,borderRadius:"10px",fontSize:"13px",fontWeight:"700",cursor:!creneau?"not-allowed":"pointer"}}>
+              Continuer →
+            </button>
+          </div>
+        )}
+
+        {etape === "recapitulatif" && (
+          <>
+            <div style={{background:F.blanc,borderRadius:"12px",border:`2px solid ${F.or}`,overflow:"hidden"}}>
+              <div style={{background:F.marine,padding:"12px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{color:F.blanc,fontWeight:"700",fontSize:"13px"}}>Récapitulatif de votre demande SAV</span>
+                {probleme?.urgent && <span style={{background:F.rouge,color:F.blanc,fontSize:"10px",fontWeight:"700",padding:"3px 8px",borderRadius:"10px"}}>URGENT</span>}
+              </div>
+              <div style={{padding:"14px 16px"}}>
+                {[
+                  ["Agence", agence?.ville],
+                  ["Client", client.nom],
+                  ["Téléphone", client.tel],
+                  ["Email", client.email],
+                  ["Adresse", client.adresse],
+                  ["Garantie", garantie===true?`Oui — Facture ${facture}`:"Non / Hors garantie"],
+                  ["Produit", produit?.label+(sousType?" — "+sousType:"")],
+                  ["Problème", probleme?.label],
+                  ["Créneau", creneau],
+                ].map(([lbl,val],i) => (
+                  <div key={i} style={{display:"flex",gap:"10px",padding:"7px 0",borderBottom:`1px solid ${F.grisBord}`}}>
+                    <span style={{fontSize:"11px",fontWeight:"700",color:"#64748B",minWidth:"100px",flexShrink:0}}>{lbl}</span>
+                    <span style={{fontSize:"12px",color:F.marine}}>{val}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <button onClick={confirmer} disabled={sending}
+              style={{width:"100%",padding:"15px",background:sending?"#64748B":F.marine,color:F.blanc,border:`2px solid ${F.or}`,borderRadius:"10px",fontSize:"14px",fontWeight:"700",cursor:sending?"not-allowed":"pointer"}}>
+              {sending ? "⏳ Envoi en cours..." : "✅ Confirmer et envoyer ma demande"}
+            </button>
+          </>
+        )}
+
+        {etape === "merci" && (
+          <>
+            <div style={{textAlign:"center",padding:"20px 0"}}>
+              <div style={{fontSize:"40px",marginBottom:"12px"}}>✅</div>
+              <div style={{fontSize:"20px",fontWeight:"900",color:F.marine,marginBottom:"6px"}}>Demande envoyée !</div>
+              <div style={{fontSize:"13px",color:"#64748B"}}>Votre demande SAV a bien été prise en compte.</div>
+            </div>
+            <div style={{background:F.marine,borderRadius:"12px",padding:"16px",textAlign:"center",border:`2px solid ${F.or}`}}>
+              <div style={{color:F.orClair,fontSize:"11px",fontWeight:"600",marginBottom:"6px",letterSpacing:"2px"}}>VOTRE NUMÉRO DE TICKET</div>
+              <div style={{color:F.or,fontSize:"28px",fontWeight:"900",letterSpacing:"2px",fontFamily:"monospace"}}>{ticket}</div>
+              <div style={{color:"rgba(255,255,255,0.4)",fontSize:"11px",marginTop:"6px"}}>Conservez ce numéro pour le suivi</div>
+            </div>
+            {envoi === 'ok' && (
+              <div style={{background:F.vertClair,border:"1px solid #86EFAC",borderRadius:"9px",padding:"10px 14px",fontSize:"12px",color:F.vert,fontWeight:"600"}}>
+                ✅ Ticket enregistré dans Airtable — notification envoyée à l'agence
+              </div>
+            )}
+            {envoi === 'err' && (
+              <div style={{background:F.rougeClair,border:"1px solid #FCA5A5",borderRadius:"9px",padding:"10px 14px",fontSize:"12px",color:F.rouge,fontWeight:"600"}}>
+                ⚠️ Ticket créé — erreur d'envoi Airtable, veuillez contacter l'agence directement
+              </div>
+            )}
+            <div style={{background:probleme?.urgent?F.rougeClair:F.vertClair,border:`1px solid ${probleme?.urgent?"#FCA5A5":"#86EFAC"}`,borderRadius:"10px",padding:"12px 16px"}}>
+              <div style={{fontWeight:"700",fontSize:"13px",color:F.marine}}>
+                {probleme?.urgent?"⚡ Intervention sous 24-48h":"🕐 Intervention sous 5-10 jours ouvrés"}
+              </div>
+              <div style={{fontSize:"12px",color:"#475569",marginTop:"2px"}}>Créneau : {creneau}</div>
+            </div>
+            <div style={{background:F.blanc,borderRadius:"12px",padding:"14px 16px",border:`1px solid ${F.grisBord}`}}>
+              <div style={{fontSize:"12px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>
+                📍 Votre agence RSIA — {agence?.ville}
+              </div>
+              <div style={{fontSize:"12px",color:"#475569",lineHeight:"2"}}>
+                <div>Lun–Ven : 8h00–12h00 / 13h30–17h30</div>
+                <div>sav@rsia-conseil.fr</div>
+              </div>
+            </div>
+            <button onClick={reset}
+              style={{width:"100%",padding:"13px",background:F.blanc,color:F.marine,border:`2px solid ${F.grisBord}`,borderRadius:"10px",fontSize:"13px",fontWeight:"600",cursor:"pointer"}}>
+              Faire une nouvelle demande SAV
+            </button>
+          </>
+        )}
+
+        <div ref={bottomRef} />
+      </div>
+
+      <div style={{background:F.marine,padding:"8px 16px",textAlign:"center"}}>
+        <span style={{color:F.or,fontSize:"10px",opacity:0.8}}>© RSIA Conseil — Solutions IA pour les PME du bâtiment</span>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
