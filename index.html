@@ -79,13 +79,13 @@ const PRODUITS = [
 ];
 
 async function envoyerAirtable(data) {
-  const resp = await fetch('/api/ticket', {
+  const resp = await fetch('https://hook.eu1.make.com/y22f90neec245a6bhg5usmf3mnkcecg8', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   });
-  if (!resp.ok) { const e = await resp.json(); throw new Error(e.error || 'Erreur'); }
-  return resp.json();
+  if (!resp.ok) throw new Error('Erreur webhook');
+  return true;
 }
 
 function App() {
