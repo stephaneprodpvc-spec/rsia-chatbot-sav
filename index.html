@@ -16,56 +16,25 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; min-height: 100vh; }
-
 #rsia-widget-btn {
-  position: fixed;
-  bottom: 28px;
-  right: 28px;
-  height: 58px;
-  padding: 0 28px;
-  background: #111111;
-  border-radius: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  cursor: pointer;
-  box-shadow: 0 6px 28px rgba(0,0,0,0.5);
-  z-index: 9999;
-  border: none;
-  transition: transform 0.2s;
-  font-family: 'Segoe UI', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-  color: white;
-  white-space: nowrap;
-  letter-spacing: 0.3px;
+  position: fixed; bottom: 28px; right: 28px; height: 58px; padding: 0 28px;
+  background: #111111; border-radius: 34px; display: flex; align-items: center;
+  justify-content: center; gap: 10px; cursor: pointer;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.5); z-index: 9999; border: none;
+  transition: transform 0.2s; font-family: 'Segoe UI', sans-serif;
+  font-size: 17px; font-weight: 700; color: white; white-space: nowrap; letter-spacing: 0.3px;
 }
 #rsia-widget-btn:hover { transform: scale(1.04); }
 #rsia-widget-btn svg { width: 24px; height: 24px; flex-shrink: 0; }
-
 #rsia-widget-panel {
-  position: fixed;
-  bottom: 84px;
-  right: 24px;
-  width: 400px;
-  height: 620px;
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.22);
-  z-index: 9998;
-  display: none;
-  flex-direction: column;
-  background: #F5F5F5;
+  position: fixed; bottom: 84px; right: 24px; width: 400px; height: 620px;
+  border-radius: 18px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.22);
+  z-index: 9998; display: none; flex-direction: column; background: #F5F5F5;
 }
 #rsia-widget-panel.open { display: flex; }
-
-
-
 @media (max-width: 480px) {
   #rsia-widget-panel { bottom: 0; right: 0; width: 100vw; height: 100vh; border-radius: 0; }
   #rsia-widget-btn { bottom: 16px; right: 16px; }
-  #rsia-badge { display: none; }
 }
 </style>
 </head>
@@ -77,7 +46,6 @@ body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; min-height: 100
     <rect x="310" y="0" width="370" height="420" fill="#FF6B00"/>
     <polygon points="290,0 350,0 310,420 250,420" fill="#FF6B00" opacity="0.06"/>
   </svg>
-
   <div style="position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;min-height:100vh;padding:60px;">
     <div style="max-width:360px;">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:48px;">
@@ -92,31 +60,24 @@ body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; min-height: 100
           <div style="color:rgba(255,255,255,0.28);font-size:8px;letter-spacing:3px;text-transform:uppercase;margin-top:3px;">Solutions IA · SAV Menuiserie</div>
         </div>
       </div>
-
       <h1 style="color:#fff;font-size:40px;font-weight:900;line-height:1.15;margin-bottom:20px;font-family:'Segoe UI',sans-serif;">
         Le SAV menuiserie<br/><span style="color:#FF6B00;">intelligent.</span>
       </h1>
-
       <div style="width:90px;height:2.5px;background:#FF6B00;border-radius:2px;margin-bottom:24px;"></div>
-
       <p style="color:rgba(255,255,255,0.45);font-size:13px;line-height:1.8;margin-bottom:36px;">
         Ticket automatique · Notification agence<br/>Suivi temps réel · 4 agences
       </p>
-
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:32px;">
         <div style="width:8px;height:8px;background:#2ECC71;border-radius:50%;flex-shrink:0;box-shadow:0 0 8px rgba(46,204,113,0.5);"></div>
         <span style="color:rgba(255,255,255,0.38);font-size:12px;">Disponible 24h/24 — Réponse sous 24h</span>
       </div>
     </div>
   </div>
-
   <div style="position:absolute;bottom:0;left:0;right:0;z-index:2;padding:12px 60px;border-top:1px solid rgba(255,107,0,0.12);display:flex;justify-content:space-between;">
     <span style="color:rgba(255,255,255,0.18);font-size:10px;">© 2025 RSIA Conseil — Solutions IA pour les PME du bâtiment</span>
     <span style="color:rgba(255,107,0,0.4);font-size:10px;">rsia-chatbot-sav.vercel.app</span>
   </div>
 </div>
-
-
 
 <div id="rsia-widget-panel">
   <div id="root" style="height:100%;display:flex;flex-direction:column;"></div>
@@ -136,8 +97,6 @@ body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; min-height: 100
 let widgetOpen = false;
 let reactMounted = false;
 
-
-
 function toggleWidget() {
   widgetOpen = !widgetOpen;
   const panel = document.getElementById('rsia-widget-panel');
@@ -151,18 +110,24 @@ function toggleWidget() {
     iconClose.style.display = 'block';
     if (!reactMounted) {
       reactMounted = true;
-      setTimeout(mountChatbot, 50);
+      setTimeout(function() { mountChatbot(); }, 50);
     }
   } else {
     panel.classList.remove('open');
     iconChat.style.display = 'block';
     btnLabel.style.display = 'inline';
     iconClose.style.display = 'none';
+    if (window.__rsiaReset) window.__rsiaReset();
   }
 }
 </script>
 
 <script type="text/babel">
+
+const AIRTABLE_TOKEN = 'patVv2Jmisci900TY.45d3f25095a992e5f8c3511eb913378e0513afa90f4c7afa3f83a786b8cf8d19';
+const AIRTABLE_BASE = 'appFqAT8WeX0UTudy';
+const CLOUDINARY_CLOUD = 'dvbh3llqq';
+const CLOUDINARY_PRESET = 'rsia_sav_unsigned';
 
 const F = {
   marine: "#111111", or: "#FF6B00", orClair: "#FFD4B3",
@@ -222,10 +187,7 @@ const PRODUITS = [
   { id: "autre", label: "❓ Autre produit", pb: [{ id: "autre", label: "Décrire mon problème" }] },
 ];
 
-const CLOUDINARY_CLOUD = 'dvbh3llqq';
-const CLOUDINARY_PRESET = 'rsia_sav_unsigned';
-
-async function compresserImage(file, maxSizeMB = 1) {
+async function compresserImage(file) {
   return new Promise((resolve) => {
     if (!file.type.startsWith('image/')) { resolve(file); return; }
     const reader = new FileReader();
@@ -240,8 +202,7 @@ async function compresserImage(file, maxSizeMB = 1) {
           else { w = Math.round(w * maxDim / h); h = maxDim; }
         }
         canvas.width = w; canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, w, h);
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
         canvas.toBlob((blob) => {
           resolve(new File([blob], file.name, { type: 'image/jpeg' }));
         }, 'image/jpeg', 0.8);
@@ -258,15 +219,12 @@ async function uploadCloudinary(file) {
   formData.append('file', compressed);
   formData.append('upload_preset', CLOUDINARY_PRESET);
   formData.append('folder', 'rsia-sav');
-  const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/auto/upload`, {
-    method: 'POST',
-    body: formData
-  });
+  const resp = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/auto/upload', { method: 'POST', body: formData });
   const data = await resp.json();
   return data.secure_url;
 }
 
-async function envoyerAirtable(data) {
+async function envoyerWebhook(data) {
   const resp = await fetch('https://hook.eu1.make.com/bkoorc2nn457jgvmvtv6pjme5vrtz68g', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
   });
@@ -274,111 +232,91 @@ async function envoyerAirtable(data) {
   return true;
 }
 
-function CreneauPicker({ agence, onSelect, F, AIRTABLE_TOKEN, AIRTABLE_BASE }) {
-  const [typeCreneauChoisi, setTypeCreneauChoisi] = React.useState(null);
+function CreneauPicker({ agenceVille, onSelect }) {
+  const [typeCreneau, setTypeCreneau] = React.useState(null);
   const [dates, setDates] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
-  const [dateChoisie, setDateChoisie] = React.useState(null);
 
   const CRENEAUX = [
-    { id: "matin", label: "🌅 Matin", heure: "8h30 — 12h00", valeur: "Matin (8h30 — 12h00)" },
-    { id: "apres_midi", label: "🌇 Après-midi", heure: "13h00 — 17h00", valeur: "Après-midi (13h00 — 17h00)" },
+    { id: "matin", label: "🌅 Matin", heure: "8h30 — 12h00", valeur: "Matin (8h30 \u2014 12h00)" },
+    { id: "apres_midi", label: "🌇 Après-midi", heure: "13h00 — 17h00", valeur: "Apr\u00e8s-midi (13h00 \u2014 17h00)" },
   ];
 
-  const chargerDates = async (creneau) => {
-    if (!agence || !agence.ville) return;
+  const charger = async (c) => {
     setLoading(true);
     setDates([]);
-    setDateChoisie(null);
     try {
-      const filtre = encodeURIComponent('AND({Agence}="' + agence.ville + '",{Créneau}="' + creneau.valeur + '",{Statut}="Libre")');
-      const resp = await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + filtre + '&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=20', {
-        headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN }
+      const f = encodeURIComponent('AND({Agence}="' + agenceVille + '",{Cr\u00e9neau}="' + c.valeur + '",{Statut}="Libre")');
+      const url = 'https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + f + '&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=20';
+      const r = await fetch(url, { headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN } });
+      const json = await r.json();
+      const map = {};
+      (json.records || []).forEach(rec => {
+        const d = rec.fields.Date;
+        if (!map[d]) map[d] = { date: d, ids: [] };
+        map[d].ids.push(rec.id);
       });
-      const data = await resp.json();
-      const parDate = {};
-      (data.records || []).forEach(r => {
-        const d = r.fields.Date;
-        if (!parDate[d]) parDate[d] = { date: d, slots: 0, ids: [] };
-        parDate[d].slots++;
-        parDate[d].ids.push(r.id);
-      });
-      const datesUniques = Object.values(parDate).filter(d => d.slots > 0).slice(0, 5);
-      setDates(datesUniques);
-    } catch(e) { console.error('Erreur chargement dates:', e); }
+      setDates(Object.values(map).slice(0, 5));
+    } catch(e) { console.error(e); }
     setLoading(false);
   };
 
-  const choisirDate = async (dateInfo) => {
-    setDateChoisie(dateInfo.date);
+  const choisir = async (dateInfo) => {
     try {
       await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning/' + dateInfo.ids[0], {
         method: 'PATCH',
         headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
         body: JSON.stringify({ fields: { Statut: 'Pris' } })
       });
-    } catch(e) { console.error('Erreur réservation:', e); }
-    const dateFormatee = new Date(dateInfo.date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
-    onSelect(typeCreneauChoisi.label + ' (' + typeCreneauChoisi.heure + ') — ' + dateFormatee);
+    } catch(e) { console.error(e); }
+    const d = new Date(dateInfo.date + 'T12:00:00');
+    const label = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+    onSelect(typeCreneau.label + ' (' + typeCreneau.heure + ') \u2014 ' + label);
   };
 
+  if (!typeCreneau) {
+    return (
+      <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:"1px solid " + F.grisBord}}>
+        <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:"3px solid " + F.or,paddingLeft:"8px"}}>Quel créneau vous convient ?</div>
+        <div style={{fontSize:"10px",color:"#64748B",marginBottom:"10px"}}>Matin ou après-midi ?</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
+          {CRENEAUX.map(c => (
+            <button key={c.id} onClick={() => { setTypeCreneau(c); charger(c); }}
+              style={{padding:"14px 10px",border:"2px solid " + F.grisBord,borderRadius:"12px",background:F.blanc,cursor:"pointer",textAlign:"center"}}>
+              <div style={{fontSize:"12px",fontWeight:"700",color:F.marine}}>{c.label}</div>
+              <div style={{fontSize:"11px",color:"#64748B",marginTop:"2px"}}>{c.heure}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:`1px solid ${F.grisBord}`}}>
-      <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Choisissez votre créneau</div>
-
-      {!typeCreneauChoisi && (
-        <>
-          <div style={{fontSize:"10px",color:"#64748B",marginBottom:"10px"}}>Matin ou après-midi ?</div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
-            {CRENEAUX.map(c => (
-              <button key={c.id} onClick={() => { setTypeCreneauChoisi(c); chargerDates(c); }}
-                style={{padding:"14px 10px",border:`2px solid ${F.grisBord}`,borderRadius:"12px",background:F.blanc,cursor:"pointer",textAlign:"center"}}>
-                <div style={{fontSize:"12px",fontWeight:"700",color:F.marine}}>{c.label}</div>
-                <div style={{fontSize:"11px",color:"#64748B",marginTop:"2px"}}>{c.heure}</div>
-              </button>
-            ))}
-          </div>
-        </>
+    <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:"1px solid " + F.grisBord}}>
+      <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"12px"}}>
+        <span style={{fontSize:"11px",color:F.or,fontWeight:"700"}}>{typeCreneau.label}</span>
+        <button onClick={() => { setTypeCreneau(null); setDates([]); }}
+          style={{fontSize:"10px",color:"#94A3B8",background:"none",border:"none",cursor:"pointer"}}>← Changer</button>
+      </div>
+      {loading && <div style={{textAlign:"center",padding:"16px",color:"#64748B",fontSize:"12px"}}>⏳ Chargement des disponibilités...</div>}
+      {!loading && dates.length === 0 && (
+        <div style={{textAlign:"center",padding:"16px",color:F.rouge,fontSize:"12px"}}>Aucune disponibilité. Essayez l'autre créneau.</div>
       )}
-
-      {typeCreneauChoisi && (
-        <>
-          <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"10px"}}>
-            <span style={{fontSize:"11px",color:F.or,fontWeight:"700"}}>{typeCreneauChoisi.label}</span>
-            <button onClick={() => { setTypeCreneauChoisi(null); setDates([]); }}
-              style={{fontSize:"10px",color:"#94A3B8",background:"none",border:"none",cursor:"pointer"}}>← Changer</button>
-          </div>
-
-          {loading && <div style={{textAlign:"center",padding:"20px",color:"#64748B",fontSize:"12px"}}>⏳ Chargement des disponibilités...</div>}
-
-          {!loading && dates.length === 0 && (
-            <div style={{textAlign:"center",padding:"20px",color:F.rouge,fontSize:"12px"}}>
-              Aucune disponibilité pour ce créneau. Essayez l'autre créneau.
-            </div>
-          )}
-
-          {!loading && dates.length > 0 && (
-            <>
-              <div style={{fontSize:"10px",color:"#64748B",marginBottom:"8px"}}>Prochaines dates disponibles pour <strong>{agence.ville}</strong> :</div>
-              <div style={{display:"flex",flexDirection:"column",gap:"6px"}}>
-                {dates.map((d,i) => {
-                  const dateObj = new Date(d.date);
-                  const label = dateObj.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
-                  return (
-                    <button key={i} onClick={() => choisirDate(d)}
-                      style={{padding:"12px 14px",border:`2px solid ${F.grisBord}`,borderRadius:"10px",background:F.blanc,cursor:"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                      <div>
-                        <div style={{fontSize:"12px",fontWeight:"700",color:F.marine,textTransform:"capitalize"}}>{label}</div>
-                        <div style={{fontSize:"10px",color:"#64748B",marginTop:"2px"}}>{d.slots} place{d.slots>1?'s':''} disponible{d.slots>1?'s':''}</div>
-                      </div>
-                      <span style={{color:F.or,fontSize:"16px"}}>→</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          )}
-        </>
+      {!loading && dates.length > 0 && (
+        <div style={{display:"flex",flexDirection:"column",gap:"6px"}}>
+          {dates.map((d, i) => {
+            const dateObj = new Date(d.date + 'T12:00:00');
+            const label = dateObj.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
+            return (
+              <button key={i} onClick={() => choisir(d)}
+                style={{padding:"12px 14px",border:"2px solid " + F.grisBord,borderRadius:"10px",background:F.blanc,cursor:"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div style={{fontSize:"12px",fontWeight:"700",color:F.marine,textTransform:"capitalize"}}>{label}</div>
+                <span style={{color:F.or,fontSize:"16px"}}>→</span>
+              </button>
+            );
+          })}
+        </div>
       )}
     </div>
   );
@@ -403,6 +341,7 @@ function App() {
   const bottomRef = React.useRef(null);
 
   React.useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [etape]);
+  React.useEffect(() => { window.__rsiaReset = reset; }, []);
 
   const validerInfos = () => {
     const e = {};
@@ -417,16 +356,15 @@ function App() {
 
   const confirmer = async () => {
     setSending(true);
-    const num = `SAV-${new Date().getFullYear()}-${Math.floor(Math.random()*9000)+1000}`;
+    const num = 'SAV-' + new Date().getFullYear() + '-' + (Math.floor(Math.random()*9000)+1000);
     setTicket(num);
     try {
-      // Upload photos vers Cloudinary
       let photoUrls = '';
       if (photos.length > 0) {
         const urls = await Promise.all(photos.map(f => uploadCloudinary(f)));
         photoUrls = urls.join(', ');
       }
-      await envoyerAirtable({
+      await envoyerWebhook({
         ticket: num, agence: agence.ville, nom: client.nom, tel: client.tel,
         email: client.email, adresse: client.adresse,
         produit: produit.label.substring(2).trim() + (sousType ? ' — ' + sousType : ''),
@@ -464,7 +402,7 @@ function App() {
           </div>
           <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
             {etape !== "agence" && etape !== "merci" && (
-              <button onClick={reset} style={{background:"rgba(255,107,0,0.15)",border:`1px solid ${F.or}`,color:F.or,borderRadius:"8px",padding:"4px 9px",fontSize:"10px",cursor:"pointer"}}>↩ Début</button>
+              <button onClick={reset} style={{background:"rgba(255,107,0,0.15)",border:"1px solid " + F.or,color:F.or,borderRadius:"8px",padding:"4px 9px",fontSize:"10px",cursor:"pointer"}}>↩ Début</button>
             )}
             <button onClick={() => window.toggleWidget()} style={{background:"rgba(255,255,255,0.1)",border:"1px solid rgba(255,255,255,0.2)",color:"rgba(255,255,255,0.7)",borderRadius:"8px",width:"28px",height:"28px",cursor:"pointer",fontSize:"14px",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
           </div>
@@ -474,22 +412,22 @@ function App() {
           <span style={{color:F.orClair,fontSize:"11px",fontWeight:"500"}}>Alex — SAV en ligne</span>
         </div>
       </div>
-      <div style={{height:"3px",background:`linear-gradient(90deg,${F.or},${F.orClair},${F.or})`,flexShrink:0}} />
+      <div style={{height:"3px",background:"linear-gradient(90deg," + F.or + "," + F.orClair + "," + F.or + ")",flexShrink:0}} />
 
       <div style={{flex:1,overflowY:"auto",padding:"14px",display:"flex",flexDirection:"column",gap:"10px"}}>
 
         {etape === "agence" && (
           <>
             <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
-              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:`2px solid ${F.or}`}}>A</div>
-              <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",lineHeight:"1.6",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:`1px solid ${F.grisBord}`}}>
+              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:"2px solid " + F.or}}>A</div>
+              <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",lineHeight:"1.6",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:"1px solid " + F.grisBord}}>
                 Bonjour ! Je suis <strong style={{color:F.marine}}>Alex</strong>, votre assistant SAV RSIA.<br/>Quelle est votre agence ?
               </div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
               {AGENCES.map(a => (
                 <button key={a.id} onClick={() => { setAgence(a); setEtape("identification"); }}
-                  style={{background:F.blanc,border:`2px solid ${F.grisBord}`,borderRadius:"12px",padding:"14px 10px",fontSize:"13px",fontWeight:"700",color:F.marine,cursor:"pointer",textAlign:"center",lineHeight:"1.5"}}>
+                  style={{background:F.blanc,border:"2px solid " + F.grisBord,borderRadius:"12px",padding:"14px 10px",fontSize:"13px",fontWeight:"700",color:F.marine,cursor:"pointer",textAlign:"center",lineHeight:"1.5"}}>
                   {a.label}<br/><span style={{fontSize:"10px",fontWeight:"400",color:"#64748B"}}>{a.ville}</span>
                 </button>
               ))}
@@ -502,24 +440,24 @@ function App() {
             <div style={{background:"#EFF6FF",border:"1px solid #BFDBFE",borderRadius:"10px",padding:"8px 12px",fontSize:"11px"}}>
               📍 <strong>{agence?.ville}</strong>
             </div>
-            <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:`1px solid ${F.grisBord}`}}>
-              <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"8px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Êtes-vous déjà client RSIA ?</div>
+            <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:"1px solid " + F.grisBord}}>
+              <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"8px",borderLeft:"3px solid " + F.or,paddingLeft:"8px"}}>Êtes-vous déjà client RSIA ?</div>
               <div style={{display:"flex",gap:"8px"}}>
                 {[{val:"existant",label:"✅ Oui, je suis client"},{val:"nouveau",label:"🆕 Première fois"}].map(opt => (
                   <button key={opt.val} onClick={() => { setTypeClient(opt.val); setGarantie(null); }}
-                    style={{flex:1,padding:"9px",border:`2px solid ${typeClient===opt.val?F.or:F.grisBord}`,borderRadius:"10px",background:typeClient===opt.val?F.marine:F.blanc,color:typeClient===opt.val?F.blanc:F.marine,fontSize:"11px",fontWeight:"600",cursor:"pointer"}}>
+                    style={{flex:1,padding:"9px",border:"2px solid " + (typeClient===opt.val?F.or:F.grisBord),borderRadius:"10px",background:typeClient===opt.val?F.marine:F.blanc,color:typeClient===opt.val?F.blanc:F.marine,fontSize:"11px",fontWeight:"600",cursor:"pointer"}}>
                     {opt.label}
                   </button>
                 ))}
               </div>
             </div>
             {typeClient === "existant" && (
-              <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:`1px solid ${F.grisBord}`}}>
-                <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"8px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Produit sous garantie ?</div>
+              <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:"1px solid " + F.grisBord}}>
+                <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"8px",borderLeft:"3px solid " + F.or,paddingLeft:"8px"}}>Produit sous garantie ?</div>
                 <div style={{display:"flex",gap:"8px"}}>
                   {[{val:true,label:"✅ Oui"},{val:false,label:"❌ Non / Je ne sais pas"}].map(opt => (
                     <button key={String(opt.val)} onClick={() => { setGarantie(opt.val); setFacture(""); }}
-                      style={{flex:1,padding:"9px",border:`2px solid ${garantie===opt.val?(opt.val?F.vert:F.rouge):F.grisBord}`,borderRadius:"10px",background:garantie===opt.val?(opt.val?F.vertClair:F.rougeClair):F.blanc,color:garantie===opt.val?(opt.val?F.vert:F.rouge):F.marine,fontSize:"11px",fontWeight:"600",cursor:"pointer"}}>
+                      style={{flex:1,padding:"9px",border:"2px solid " + (garantie===opt.val?(opt.val?F.vert:F.rouge):F.grisBord),borderRadius:"10px",background:garantie===opt.val?(opt.val?F.vertClair:F.rougeClair):F.blanc,color:garantie===opt.val?(opt.val?F.vert:F.rouge):F.marine,fontSize:"11px",fontWeight:"600",cursor:"pointer"}}>
                       {opt.label}
                     </button>
                   ))}
@@ -533,24 +471,24 @@ function App() {
                   <div style={{marginTop:"10px"}}>
                     <label style={{fontSize:"10px",fontWeight:"700",color:F.marine,display:"block",marginBottom:"4px"}}>N° de facture *</label>
                     <input type="text" placeholder="Ex : FAL-2024-00842" value={facture} onChange={e => setFacture(e.target.value)}
-                      style={{width:"100%",padding:"8px 10px",border:`1.5px solid ${erreurs.facture?F.rouge:F.or}`,borderRadius:"8px",fontSize:"12px",boxSizing:"border-box",outline:"none"}} />
+                      style={{width:"100%",padding:"8px 10px",border:"1.5px solid " + (erreurs.facture?F.rouge:F.or),borderRadius:"8px",fontSize:"12px",boxSizing:"border-box",outline:"none"}} />
                   </div>
                 )}
               </div>
             )}
             {(typeClient === "nouveau" || (typeClient === "existant" && garantie !== null)) && (
-              <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:`1px solid ${F.grisBord}`}}>
-                <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Vos coordonnées</div>
+              <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:"1px solid " + F.grisBord}}>
+                <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:"3px solid " + F.or,paddingLeft:"8px"}}>Vos coordonnées</div>
                 {[{key:"nom",label:"Nom et prénom",ph:"Ex : Jean Dupont",type:"text"},{key:"adresse",label:"Adresse complète",ph:"Ex : 12 rue des Lilas, 65000 Tarbes",type:"text"},{key:"tel",label:"Téléphone",ph:"Ex : 06 12 34 56 78",type:"tel"},{key:"email",label:"Email",ph:"Ex : jean.dupont@gmail.com",type:"email"}].map(f => (
                   <div key={f.key} style={{marginBottom:"8px"}}>
                     <label style={{fontSize:"10px",fontWeight:"600",color:"#64748B",display:"block",marginBottom:"3px"}}>{f.label} *</label>
                     <input type={f.type} placeholder={f.ph} value={client[f.key]} onChange={e => setClient({...client,[f.key]:e.target.value})}
-                      style={{width:"100%",padding:"8px 10px",border:`1.5px solid ${erreurs[f.key]?F.rouge:F.grisBord}`,borderRadius:"8px",fontSize:"12px",boxSizing:"border-box",outline:"none"}} />
+                      style={{width:"100%",padding:"8px 10px",border:"1.5px solid " + (erreurs[f.key]?F.rouge:F.grisBord),borderRadius:"8px",fontSize:"12px",boxSizing:"border-box",outline:"none"}} />
                     {erreurs[f.key] && <span style={{fontSize:"10px",color:F.rouge}}>Champ obligatoire</span>}
                   </div>
                 ))}
                 <button onClick={() => { if (validerInfos()) setEtape("produit"); }}
-                  style={{width:"100%",padding:"11px",background:F.marine,color:F.blanc,border:`2px solid ${F.or}`,borderRadius:"10px",fontSize:"12px",fontWeight:"700",cursor:"pointer",marginTop:"4px"}}>
+                  style={{width:"100%",padding:"11px",background:F.marine,color:F.blanc,border:"2px solid " + F.or,borderRadius:"10px",fontSize:"12px",fontWeight:"700",cursor:"pointer",marginTop:"4px"}}>
                   Continuer →
                 </button>
               </div>
@@ -565,14 +503,14 @@ function App() {
               <div style={{color:"#475569",fontSize:"10px"}}>{agence?.ville}</div>
             </div>
             <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
-              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:`2px solid ${F.or}`}}>A</div>
-              <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:`1px solid ${F.grisBord}`}}>
+              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:"2px solid " + F.or}}>A</div>
+              <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:"1px solid " + F.grisBord}}>
                 Quel produit est concerné, <strong style={{color:F.marine}}>{client.nom.split(" ")[0]}</strong> ?
               </div>
             </div>
             {PRODUITS.map(p => (
               <button key={p.id} onClick={() => { setProduit(p); setSousType(null); setEtape(p.sousTypes ? "sous_type" : "probleme"); }}
-                style={{background:F.blanc,border:`2px solid ${F.grisBord}`,borderRadius:"10px",padding:"11px 14px",fontSize:"12px",fontWeight:"600",color:F.marine,cursor:"pointer",textAlign:"left",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
+                style={{background:F.blanc,border:"2px solid " + F.grisBord,borderRadius:"10px",padding:"11px 14px",fontSize:"12px",fontWeight:"600",color:F.marine,cursor:"pointer",textAlign:"left",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
                 {p.label}
               </button>
             ))}
@@ -582,15 +520,15 @@ function App() {
         {etape === "sous_type" && (
           <>
             <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
-              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:`2px solid ${F.or}`}}>A</div>
-              <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:`1px solid ${F.grisBord}`}}>
+              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:"2px solid " + F.or}}>A</div>
+              <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:"1px solid " + F.grisBord}}>
                 Quel type de porte de garage ?
               </div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
               {produit?.sousTypes?.map(st => (
                 <button key={st} onClick={() => { setSousType(st); setEtape("probleme"); }}
-                  style={{background:F.blanc,border:`2px solid ${F.grisBord}`,borderRadius:"12px",padding:"16px 8px",fontSize:"12px",fontWeight:"700",color:F.marine,cursor:"pointer",textAlign:"center"}}>
+                  style={{background:F.blanc,border:"2px solid " + F.grisBord,borderRadius:"12px",padding:"16px 8px",fontSize:"12px",fontWeight:"700",color:F.marine,cursor:"pointer",textAlign:"center"}}>
                   {st}
                 </button>
               ))}
@@ -601,14 +539,14 @@ function App() {
         {etape === "probleme" && (
           <>
             <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
-              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:`2px solid ${F.or}`}}>A</div>
-              <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:`1px solid ${F.grisBord}`}}>
+              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:"2px solid " + F.or}}>A</div>
+              <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:"1px solid " + F.grisBord}}>
                 Quel est le problème avec votre <strong style={{color:F.marine}}>{produit?.label.substring(2).trim()}</strong> ?
               </div>
             </div>
             {produit?.pb.map(p => (
               <button key={p.id} onClick={() => { setProbleme(p); setEtape("photos"); }}
-                style={{background:F.blanc,border:`2px solid ${p.urgent?"#FCA5A5":F.grisBord}`,borderRadius:"10px",padding:"10px 14px",fontSize:"12px",fontWeight:"600",color:F.marine,cursor:"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
+                style={{background:F.blanc,border:"2px solid " + (p.urgent?"#FCA5A5":F.grisBord),borderRadius:"10px",padding:"10px 14px",fontSize:"12px",fontWeight:"600",color:F.marine,cursor:"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
                 <span>{p.label}</span>
                 {p.urgent && <span style={{background:F.rougeClair,color:F.rouge,fontSize:"9px",fontWeight:"700",padding:"2px 7px",borderRadius:"20px",marginLeft:"8px",flexShrink:0}}>URGENT</span>}
               </button>
@@ -617,29 +555,24 @@ function App() {
         )}
 
         {etape === "photos" && (
-          <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:`1px solid ${F.grisBord}`}}>
-            <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"8px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>
+          <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:"1px solid " + F.grisBord}}>
+            <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"8px",borderLeft:"3px solid " + F.or,paddingLeft:"8px"}}>
               📎 Photos ou documents (facultatif)
             </div>
             <div style={{fontSize:"11px",color:"#64748B",marginBottom:"12px"}}>
               Joignez une photo du problème, votre facture ou tout document utile.
             </div>
-
-            <label style={{display:"block",border:`2px dashed ${F.or}`,borderRadius:"10px",padding:"20px",textAlign:"center",cursor:"pointer",background:"#FFFDF5"}}>
+            <label style={{display:"block",border:"2px dashed " + F.or,borderRadius:"10px",padding:"20px",textAlign:"center",cursor:"pointer",background:"#FFFDF5"}}>
               <input type="file" multiple accept="image/*,.pdf,.jpg,.jpeg,.png" style={{display:"none"}}
-                onChange={e => {
-                  const files = Array.from(e.target.files);
-                  setPhotos(prev => [...prev, ...files].slice(0, 5));
-                }}/>
+                onChange={e => { const files = Array.from(e.target.files); setPhotos(prev => [...prev, ...files].slice(0, 5)); }}/>
               <div style={{fontSize:"28px",marginBottom:"6px"}}>📷</div>
               <div style={{fontSize:"12px",fontWeight:"700",color:F.or}}>Appuyer pour ajouter</div>
               <div style={{fontSize:"10px",color:"#94A3B8",marginTop:"3px"}}>Photos, facture PDF — max 5 fichiers</div>
             </label>
-
             {photos.length > 0 && (
               <div style={{marginTop:"10px",display:"flex",flexDirection:"column",gap:"6px"}}>
                 {photos.map((f,i) => (
-                  <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#F8FAFC",borderRadius:"8px",padding:"7px 10px",border:`1px solid ${F.grisBord}`}}>
+                  <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#F8FAFC",borderRadius:"8px",padding:"7px 10px",border:"1px solid " + F.grisBord}}>
                     <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
                       <span style={{fontSize:"16px"}}>{f.type.includes('pdf') ? '📄' : '🖼️'}</span>
                       <span style={{fontSize:"11px",color:F.marine,fontWeight:"600"}}>{f.name}</span>
@@ -650,39 +583,20 @@ function App() {
                 ))}
               </div>
             )}
-
-            <div style={{display:"flex",gap:"8px",marginTop:"12px"}}>
-              <button onClick={() => { setEtape("creneau"); }}
-                style={{flex:1,padding:"11px",background:F.marine,color:F.blanc,border:`2px solid ${F.or}`,borderRadius:"10px",fontSize:"12px",fontWeight:"700",cursor:"pointer"}}>
-                {photos.length > 0 ? `Continuer (${photos.length} fichier${photos.length>1?'s':''}) →` : "Passer cette étape →"}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {etape === "creneau" && (
-          <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:`1px solid ${F.grisBord}`}}>
-            <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Quel créneau vous convient ?</div>
-            <div style={{fontSize:"10px",color:"#64748B",marginBottom:"10px",paddingLeft:"11px"}}>Jour exact confirmé sous 24h par votre agence</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
-              {[{id:"matin",label:"🌅 Matin",heure:"8h30 — 12h00"},{id:"apres_midi",label:"🌇 Après-midi",heure:"13h00 — 17h00"}].map(c => (
-                <button key={c.id} onClick={() => setCreneau(c.label+" ("+c.heure+")")}
-                  style={{padding:"14px 10px",border:`2px solid ${creneau&&creneau.includes(c.id==="matin"?"Matin":"Après")?F.or:F.grisBord}`,borderRadius:"12px",background:creneau&&creneau.includes(c.id==="matin"?"Matin":"Après")?"#FFFDF5":F.blanc,cursor:"pointer",textAlign:"center"}}>
-                  <div style={{fontSize:"12px",fontWeight:"700",color:F.marine}}>{c.label}</div>
-                  <div style={{fontSize:"11px",color:"#64748B",marginTop:"2px"}}>{c.heure}</div>
-                </button>
-              ))}
-            </div>
-            <button onClick={() => { if (creneau) setEtape("recapitulatif"); }} disabled={!creneau}
-              style={{width:"100%",marginTop:"12px",padding:"11px",background:!creneau?F.grisBord:F.marine,color:!creneau?"#94A3B8":F.blanc,border:`2px solid ${!creneau?F.grisBord:F.or}`,borderRadius:"10px",fontSize:"12px",fontWeight:"700",cursor:!creneau?"not-allowed":"pointer"}}>
-              Continuer →
+            <button onClick={() => setEtape("creneau")}
+              style={{width:"100%",marginTop:"12px",padding:"11px",background:F.marine,color:F.blanc,border:"2px solid " + F.or,borderRadius:"10px",fontSize:"12px",fontWeight:"700",cursor:"pointer"}}>
+              {photos.length > 0 ? "Continuer (" + photos.length + " fichier" + (photos.length>1?'s':'') + ") →" : "Passer cette étape →"}
             </button>
           </div>
         )}
 
+        {etape === "creneau" && agence && (
+          <CreneauPicker agenceVille={agence.ville} onSelect={(c) => { setCreneau(c); setEtape("recapitulatif"); }} />
+        )}
+
         {etape === "recapitulatif" && (
           <>
-            <div style={{background:F.blanc,borderRadius:"12px",border:`2px solid ${F.or}`,overflow:"hidden"}}>
+            <div style={{background:F.blanc,borderRadius:"12px",border:"2px solid " + F.or,overflow:"hidden"}}>
               <div style={{background:F.marine,padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <span style={{color:F.blanc,fontWeight:"700",fontSize:"12px"}}>Récapitulatif de votre demande SAV</span>
                 {probleme?.urgent && <span style={{background:F.rouge,color:F.blanc,fontSize:"9px",fontWeight:"700",padding:"2px 7px",borderRadius:"10px"}}>URGENT</span>}
@@ -694,12 +608,12 @@ function App() {
                   ["Téléphone", client.tel],
                   ["Email", client.email],
                   ["Adresse", client.adresse],
-                  ["Garantie", garantie===true?`Oui — Facture ${facture}`:"Non / Hors garantie"],
+                  ["Garantie", garantie===true?"Oui — Facture " + facture:"Non / Hors garantie"],
                   ["Produit", produit?.label+(sousType?" — "+sousType:"")],
                   ["Problème", probleme?.label],
                   ["Créneau", creneau],
                 ].map(([lbl,val],i) => (
-                  <div key={i} style={{display:"flex",gap:"8px",padding:"6px 0",borderBottom:`1px solid ${F.grisBord}`}}>
+                  <div key={i} style={{display:"flex",gap:"8px",padding:"6px 0",borderBottom:"1px solid " + F.grisBord}}>
                     <span style={{fontSize:"10px",fontWeight:"700",color:"#64748B",minWidth:"80px",flexShrink:0}}>{lbl}</span>
                     <span style={{fontSize:"11px",color:F.marine}}>{val}</span>
                   </div>
@@ -707,7 +621,7 @@ function App() {
               </div>
             </div>
             <button onClick={confirmer} disabled={sending}
-              style={{width:"100%",padding:"13px",background:sending?"#64748B":F.marine,color:F.blanc,border:`2px solid ${F.or}`,borderRadius:"10px",fontSize:"13px",fontWeight:"700",cursor:sending?"not-allowed":"pointer"}}>
+              style={{width:"100%",padding:"13px",background:sending?"#64748B":F.marine,color:F.blanc,border:"2px solid " + F.or,borderRadius:"10px",fontSize:"13px",fontWeight:"700",cursor:sending?"not-allowed":"pointer"}}>
               {sending ? "⏳ Envoi en cours..." : "✅ Confirmer et envoyer ma demande"}
             </button>
           </>
@@ -720,7 +634,7 @@ function App() {
               <div style={{fontSize:"18px",fontWeight:"900",color:F.marine,marginBottom:"4px"}}>Demande envoyée !</div>
               <div style={{fontSize:"12px",color:"#64748B"}}>Votre demande SAV a bien été prise en compte.</div>
             </div>
-            <div style={{background:F.marine,borderRadius:"12px",padding:"14px",textAlign:"center",border:`2px solid ${F.or}`}}>
+            <div style={{background:F.marine,borderRadius:"12px",padding:"14px",textAlign:"center",border:"2px solid " + F.or}}>
               <div style={{color:F.orClair,fontSize:"10px",fontWeight:"600",marginBottom:"6px",letterSpacing:"2px"}}>VOTRE NUMÉRO DE TICKET</div>
               <div style={{color:F.or,fontSize:"24px",fontWeight:"900",letterSpacing:"2px",fontFamily:"monospace"}}>{ticket}</div>
               <div style={{color:"rgba(255,255,255,0.4)",fontSize:"10px",marginTop:"4px"}}>Conservez ce numéro pour le suivi</div>
@@ -735,14 +649,14 @@ function App() {
                 ⚠️ Ticket créé — erreur d'envoi, contactez l'agence directement
               </div>
             )}
-            <div style={{background:probleme?.urgent?F.rougeClair:F.vertClair,border:`1px solid ${probleme?.urgent?"#FCA5A5":"#86EFAC"}`,borderRadius:"10px",padding:"10px 14px"}}>
+            <div style={{background:probleme?.urgent?F.rougeClair:F.vertClair,border:"1px solid " + (probleme?.urgent?"#FCA5A5":"#86EFAC"),borderRadius:"10px",padding:"10px 14px"}}>
               <div style={{fontWeight:"700",fontSize:"12px",color:F.marine}}>
                 {probleme?.urgent?"⚡ Intervention sous 24-48h":"🕐 Intervention sous 5-10 jours ouvrés"}
               </div>
               <div style={{fontSize:"11px",color:"#475569",marginTop:"2px"}}>Créneau : {creneau}</div>
             </div>
             <button onClick={reset}
-              style={{width:"100%",padding:"11px",background:F.blanc,color:F.marine,border:`2px solid ${F.grisBord}`,borderRadius:"10px",fontSize:"12px",fontWeight:"600",cursor:"pointer"}}>
+              style={{width:"100%",padding:"11px",background:F.blanc,color:F.marine,border:"2px solid " + F.grisBord,borderRadius:"10px",fontSize:"12px",fontWeight:"600",cursor:"pointer"}}>
               Faire une nouvelle demande SAV
             </button>
           </>
@@ -758,13 +672,12 @@ function App() {
   );
 }
 
-
 function mountChatbot() {
   ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 }
+
 </script>
 <script>
-
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
