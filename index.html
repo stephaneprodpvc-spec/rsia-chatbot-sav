@@ -54,15 +54,11 @@ body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; min-height: 100
   overflow: hidden;
   box-shadow: 0 8px 40px rgba(0,0,0,0.22);
   z-index: 9998;
-  display: flex;
+  display: none;
   flex-direction: column;
   background: #F5F5F5;
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
 }
-#rsia-widget-panel.open { visibility: visible; opacity: 1; pointer-events: all; }
+#rsia-widget-panel.open { display: flex; }
 
 
 
@@ -772,7 +768,9 @@ window.toggleWidget = function() {
 }
 </script>
 <script>
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+function mountChatbot() {
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+}
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
