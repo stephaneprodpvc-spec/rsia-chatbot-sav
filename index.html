@@ -6,9 +6,9 @@
 <title>RSIA Conseil — SAV Menuiserie</title>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.minA.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }A
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; min-height: 100vh; }
 
 /* Widget flottant */
@@ -118,6 +118,8 @@ let widgetOpen = false;
 // Masquer le badge après 5s
 setTimeout(() => { const b = document.getElementById('rsia-badge'); if(b) b.style.display='none'; }, 5000);
 
+let reactMounted = false;
+
 function toggleWidget() {
   widgetOpen = !widgetOpen;
   const panel = document.getElementById('rsia-widget-panel');
@@ -130,12 +132,16 @@ function toggleWidget() {
     iconChat.style.display = 'none';
     document.getElementById('btn-label').style.display = 'none';
     iconClose.style.display = 'block';
+    // Monter React seulement après que le panel est visible
+    if (!reactMounted) {
+      reactMounted = true;
+      setTimeout(() => { mountChatbot(); }, 50);
+    }
   } else {
     panel.classList.remove('open');
     iconChat.style.display = 'block';
     document.getElementById('btn-label').style.display = 'inline';
     iconClose.style.display = 'none';
-    // Reset du chatbot à la fermeture
     if (window.__rsiaReset) window.__rsiaReset();
   }
 }
@@ -545,7 +551,9 @@ function App() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+function mountChatbot() {
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+}
 </script>
 </body>
 </html>
