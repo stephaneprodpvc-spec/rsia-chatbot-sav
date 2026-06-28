@@ -661,7 +661,23 @@ function App() {
         )}
 
         {etape === "creneau" && (
-          <CreneauPicker agence={agence} onSelect={(c) => { setCreneau(c); setEtape("recapitulatif"); }} F={F} AIRTABLE_TOKEN={AIRTABLE_TOKEN} AIRTABLE_BASE={AIRTABLE_BASE} />
+          <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:`1px solid ${F.grisBord}`}}>
+            <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Quel créneau vous convient ?</div>
+            <div style={{fontSize:"10px",color:"#64748B",marginBottom:"10px",paddingLeft:"11px"}}>Jour exact confirmé sous 24h par votre agence</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
+              {[{id:"matin",label:"🌅 Matin",heure:"8h30 — 12h00"},{id:"apres_midi",label:"🌇 Après-midi",heure:"13h00 — 17h00"}].map(c => (
+                <button key={c.id} onClick={() => setCreneau(c.label+" ("+c.heure+")")}
+                  style={{padding:"14px 10px",border:`2px solid ${creneau&&creneau.includes(c.id==="matin"?"Matin":"Après")?F.or:F.grisBord}`,borderRadius:"12px",background:creneau&&creneau.includes(c.id==="matin"?"Matin":"Après")?"#FFFDF5":F.blanc,cursor:"pointer",textAlign:"center"}}>
+                  <div style={{fontSize:"12px",fontWeight:"700",color:F.marine}}>{c.label}</div>
+                  <div style={{fontSize:"11px",color:"#64748B",marginTop:"2px"}}>{c.heure}</div>
+                </button>
+              ))}
+            </div>
+            <button onClick={() => { if (creneau) setEtape("recapitulatif"); }} disabled={!creneau}
+              style={{width:"100%",marginTop:"12px",padding:"11px",background:!creneau?F.grisBord:F.marine,color:!creneau?"#94A3B8":F.blanc,border:`2px solid ${!creneau?F.grisBord:F.or}`,borderRadius:"10px",fontSize:"12px",fontWeight:"700",cursor:!creneau?"not-allowed":"pointer"}}>
+              Continuer →
+            </button>
+          </div>
         )}
 
         {etape === "recapitulatif" && (
