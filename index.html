@@ -80,9 +80,59 @@ body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; min-height: 100
 </head>
 <body>
 
-<div style="padding: 40px; max-width: 800px; margin: 0 auto;">
-  <h1 style="color:#111; font-size:28px; margin-bottom:12px;">Bienvenue sur le site Falliero</h1>
-  <p style="color:#555; font-size:15px; line-height:1.7;">Votre spécialiste menuiserie dans les Hautes-Pyrénées. Pour toute demande SAV, cliquez sur le bouton orange en bas à droite.</p>
+<div style="min-height:100vh;background:#0f0f0f;position:relative;overflow:hidden;">
+  <svg style="position:absolute;top:0;left:0;width:100%;height:100%;" viewBox="0 0 680 420" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="680" height="420" fill="#0f0f0f"/>
+    <rect x="310" y="0" width="370" height="420" fill="#FF6B00"/>
+    <polygon points="290,0 350,0 310,420 250,420" fill="#FF6B00" opacity="0.06"/>
+    <g fill="white" opacity="0.95">
+      <rect x="400" y="50" width="240" height="310" rx="4"/>
+      <rect x="414" y="64" width="96" height="126" rx="2" fill="#FF6B00"/>
+      <rect x="520" y="64" width="106" height="126" rx="2" fill="#FF6B00"/>
+      <rect x="414" y="202" width="96" height="144" rx="2" fill="#FF6B00"/>
+      <rect x="520" y="202" width="106" height="144" rx="2" fill="#FF6B00"/>
+      <rect x="390" y="356" width="260" height="12" rx="3"/>
+    </g>
+    <rect x="504" y="188" width="22" height="8" rx="4" fill="white" opacity="0.7"/>
+    <rect x="510" y="182" width="8" height="20" rx="4" fill="white" opacity="0.7"/>
+  </svg>
+
+  <div style="position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;min-height:100vh;padding:60px;">
+    <div style="max-width:360px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:48px;">
+        <div style="width:50px;height:50px;background:#FF6B00;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="font-family:'Arial Black',Arial;font-size:26px;font-weight:900;color:#111;display:inline-block;transform:scaleX(-1);line-height:1;">R</span>
+        </div>
+        <div>
+          <div style="color:#fff;font-weight:900;font-size:22px;font-family:'Segoe UI',sans-serif;">
+            <span style="display:inline-block;transform:scaleX(-1);font-family:'Arial Black',Arial;">R</span>S<span style="color:#FF6B00;">IA</span>
+            <span style="font-size:13px;font-weight:500;margin-left:5px;color:rgba(255,255,255,0.4);">Conseil</span>
+          </div>
+          <div style="color:rgba(255,255,255,0.28);font-size:8px;letter-spacing:3px;text-transform:uppercase;margin-top:3px;">Solutions IA · SAV Menuiserie</div>
+        </div>
+      </div>
+
+      <h1 style="color:#fff;font-size:40px;font-weight:900;line-height:1.15;margin-bottom:20px;font-family:'Segoe UI',sans-serif;">
+        Le SAV menuiserie<br/><span style="color:#FF6B00;">intelligent.</span>
+      </h1>
+
+      <div style="width:90px;height:2.5px;background:#FF6B00;border-radius:2px;margin-bottom:24px;"></div>
+
+      <p style="color:rgba(255,255,255,0.45);font-size:13px;line-height:1.8;margin-bottom:36px;">
+        Ticket automatique · Notification agence<br/>Suivi temps réel · 4 agences
+      </p>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:32px;">
+        <div style="width:8px;height:8px;background:#2ECC71;border-radius:50%;flex-shrink:0;box-shadow:0 0 8px rgba(46,204,113,0.5);"></div>
+        <span style="color:rgba(255,255,255,0.38);font-size:12px;">Disponible 24h/24 — Réponse sous 24h</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:absolute;bottom:0;left:0;right:0;z-index:2;padding:12px 60px;border-top:1px solid rgba(255,107,0,0.12);display:flex;justify-content:space-between;">
+    <span style="color:rgba(255,255,255,0.18);font-size:10px;">© 2025 RSIA Conseil — Solutions IA pour les PME du bâtiment</span>
+    <span style="color:rgba(255,107,0,0.4);font-size:10px;">rsia-chatbot-sav.vercel.app</span>
+  </div>
 </div>
 
 <div id="rsia-badge">💬 Besoin d'un SAV ?</div>
