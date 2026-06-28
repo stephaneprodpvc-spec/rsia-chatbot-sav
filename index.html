@@ -11,7 +11,6 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; min-height: 100vh; }
 
-/* Widget flottant */
 #rsia-widget-btn {
   position: fixed;
   bottom: 24px;
@@ -40,7 +39,7 @@ body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; min-height: 100
 
 #rsia-widget-panel {
   position: fixed;
-  bottom: 96px;
+  bottom: 84px;
   right: 24px;
   width: 400px;
   height: 620px;
@@ -51,15 +50,13 @@ body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; min-height: 100
   display: none;
   flex-direction: column;
   background: #F5F5F5;
-  transition: opacity 0.2s;
 }
 #rsia-widget-panel.open { display: flex; }
 
-/* Badge bulle */
 #rsia-badge {
   position: fixed;
-  bottom: 70px;
-  right: 18px;
+  bottom: 82px;
+  right: 24px;
   background: #111111;
   color: #FF6B00;
   font-size: 11px;
@@ -74,13 +71,8 @@ body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; min-height: 100
 }
 @keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
 
-/* Responsive mobile */
 @media (max-width: 480px) {
-  #rsia-widget-panel {
-    bottom: 0; right: 0;
-    width: 100vw; height: 100vh;
-    border-radius: 0;
-  }
+  #rsia-widget-panel { bottom: 0; right: 0; width: 100vw; height: 100vh; border-radius: 0; }
   #rsia-widget-btn { bottom: 16px; right: 16px; }
   #rsia-badge { display: none; }
 }
@@ -88,37 +80,32 @@ body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; min-height: 100
 </head>
 <body>
 
-<!-- Contenu de la page hôte (exemple) -->
 <div style="padding: 40px; max-width: 800px; margin: 0 auto;">
   <h1 style="color:#111; font-size:28px; margin-bottom:12px;">Bienvenue sur le site Falliero</h1>
   <p style="color:#555; font-size:15px; line-height:1.7;">Votre spécialiste menuiserie dans les Hautes-Pyrénées. Pour toute demande SAV, cliquez sur le bouton orange en bas à droite.</p>
 </div>
 
-<!-- Badge d'invitation -->
 <div id="rsia-badge">💬 Besoin d'un SAV ?</div>
 
-<!-- Panel chatbot -->
 <div id="rsia-widget-panel">
-  <div id="root"></div>
+  <div id="root" style="height:100%;display:flex;flex-direction:column;"></div>
 </div>
 
-<!-- Bouton flottant -->
 <button id="rsia-widget-btn" onclick="toggleWidget()" title="Ouvrir le SAV RSIA">
-  <svg id="icon-chat" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px">
+  <svg id="icon-chat" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
   </svg>
   <span id="btn-label">Demande SAV</span>
-  <svg id="icon-close" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="display:none;width:20px;height:20px">
+  <svg id="icon-close" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="display:none">
     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
   </svg>
 </button>
 
 <script>
 let widgetOpen = false;
-// Masquer le badge après 5s
-setTimeout(() => { const b = document.getElementById('rsia-badge'); if(b) b.style.display='none'; }, 5000);
-
 let reactMounted = false;
+
+setTimeout(() => { const b = document.getElementById('rsia-badge'); if(b) b.style.display='none'; }, 5000);
 
 function toggleWidget() {
   widgetOpen = !widgetOpen;
@@ -126,32 +113,27 @@ function toggleWidget() {
   const badge = document.getElementById('rsia-badge');
   const iconChat = document.getElementById('icon-chat');
   const iconClose = document.getElementById('icon-close');
+  const btnLabel = document.getElementById('btn-label');
   if (widgetOpen) {
     panel.classList.add('open');
     if(badge) badge.style.display = 'none';
     iconChat.style.display = 'none';
-    document.getElementById('btn-label').style.display = 'none';
+    btnLabel.style.display = 'none';
     iconClose.style.display = 'block';
-    // Monter React seulement après que le panel est visible
     if (!reactMounted) {
       reactMounted = true;
-      setTimeout(() => { mountChatbot(); }, 50);
+      setTimeout(mountChatbot, 50);
     }
   } else {
     panel.classList.remove('open');
     iconChat.style.display = 'block';
-    document.getElementById('btn-label').style.display = 'inline';
+    btnLabel.style.display = 'inline';
     iconClose.style.display = 'none';
-    if (window.__rsiaReset) window.__rsiaReset();
   }
 }
 </script>
 
 <script type="text/babel">
-
-const AIRTABLE_TOKEN = 'patVv2Jmisci900TY.45d3f25095a992e5f8c3511eb913378e0513afa90f4c7afa3f83a786b8cf8d19';
-const AIRTABLE_BASE = 'appFqAT8WeX0UTudy';
-const AIRTABLE_TABLE = 'Tickets SAV';
 
 const F = {
   marine: "#111111", or: "#FF6B00", orClair: "#FFD4B3",
@@ -213,9 +195,7 @@ const PRODUITS = [
 
 async function envoyerAirtable(data) {
   const resp = await fetch('https://hook.eu1.make.com/bkoorc2nn457jgvmvtv6pjme5vrtz68g', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
   });
   if (!resp.ok) throw new Error('Erreur webhook');
   return true;
@@ -263,14 +243,10 @@ function App() {
         probleme: probleme.label, creneau, garantie, facture, urgent: probleme.urgent
       });
       setEnvoi('ok');
-    } catch(e) {
-      setEnvoi('err');
-    }
+    } catch(e) { setEnvoi('err'); }
     setSending(false);
     setEtape('merci');
   };
-
-  React.useEffect(() => { window.__rsiaReset = reset; }, []);
 
   const reset = () => {
     setEtape("agence"); setAgence(null); setTypeClient(null); setGarantie(null);
@@ -281,7 +257,6 @@ function App() {
 
   return (
     <div style={{fontFamily:"'Segoe UI',sans-serif",background:F.grisClair,height:"100%",display:"flex",flexDirection:"column",width:"100%"}}>
-      {/* Header */}
       <div style={{background:F.marine,padding:"12px 16px 8px",flexShrink:0}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
@@ -300,7 +275,7 @@ function App() {
             {etape !== "agence" && etape !== "merci" && (
               <button onClick={reset} style={{background:"rgba(255,107,0,0.15)",border:`1px solid ${F.or}`,color:F.or,borderRadius:"8px",padding:"4px 9px",fontSize:"10px",cursor:"pointer"}}>↩ Début</button>
             )}
-            <button onClick={() => toggleWidget()} style={{background:"rgba(255,255,255,0.1)",border:"1px solid rgba(255,255,255,0.2)",color:"rgba(255,255,255,0.7)",borderRadius:"8px",width:"28px",height:"28px",cursor:"pointer",fontSize:"14px",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+            <button onClick={() => window.toggleWidget()} style={{background:"rgba(255,255,255,0.1)",border:"1px solid rgba(255,255,255,0.2)",color:"rgba(255,255,255,0.7)",borderRadius:"8px",width:"28px",height:"28px",cursor:"pointer",fontSize:"14px",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
           </div>
         </div>
         <div style={{marginTop:"6px",display:"flex",alignItems:"center",gap:"6px"}}>
@@ -347,7 +322,6 @@ function App() {
                 ))}
               </div>
             </div>
-
             {typeClient === "existant" && (
               <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:`1px solid ${F.grisBord}`}}>
                 <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"8px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Produit sous garantie ?</div>
@@ -373,15 +347,13 @@ function App() {
                 )}
               </div>
             )}
-
             {(typeClient === "nouveau" || (typeClient === "existant" && garantie !== null)) && (
               <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:`1px solid ${F.grisBord}`}}>
                 <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Vos coordonnées</div>
                 {[{key:"nom",label:"Nom et prénom",ph:"Ex : Jean Dupont",type:"text"},{key:"adresse",label:"Adresse complète",ph:"Ex : 12 rue des Lilas, 65000 Tarbes",type:"text"},{key:"tel",label:"Téléphone",ph:"Ex : 06 12 34 56 78",type:"tel"},{key:"email",label:"Email",ph:"Ex : jean.dupont@gmail.com",type:"email"}].map(f => (
                   <div key={f.key} style={{marginBottom:"8px"}}>
                     <label style={{fontSize:"10px",fontWeight:"600",color:"#64748B",display:"block",marginBottom:"3px"}}>{f.label} *</label>
-                    <input type={f.type} placeholder={f.ph} value={client[f.key]}
-                      onChange={e => setClient({...client,[f.key]:e.target.value})}
+                    <input type={f.type} placeholder={f.ph} value={client[f.key]} onChange={e => setClient({...client,[f.key]:e.target.value})}
                       style={{width:"100%",padding:"8px 10px",border:`1.5px solid ${erreurs[f.key]?F.rouge:F.grisBord}`,borderRadius:"8px",fontSize:"12px",boxSizing:"border-box",outline:"none"}} />
                     {erreurs[f.key] && <span style={{fontSize:"10px",color:F.rouge}}>Champ obligatoire</span>}
                   </div>
@@ -553,6 +525,33 @@ function App() {
 
 function mountChatbot() {
   ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+}
+
+window.toggleWidget = function() {
+  let widgetOpen = window._widgetOpen || false;
+  widgetOpen = !widgetOpen;
+  window._widgetOpen = widgetOpen;
+  const panel = document.getElementById('rsia-widget-panel');
+  const badge = document.getElementById('rsia-badge');
+  const iconChat = document.getElementById('icon-chat');
+  const iconClose = document.getElementById('icon-close');
+  const btnLabel = document.getElementById('btn-label');
+  if (widgetOpen) {
+    panel.classList.add('open');
+    if(badge) badge.style.display = 'none';
+    iconChat.style.display = 'none';
+    btnLabel.style.display = 'none';
+    iconClose.style.display = 'block';
+    if (!window._reactMounted) {
+      window._reactMounted = true;
+      setTimeout(mountChatbot, 50);
+    }
+  } else {
+    panel.classList.remove('open');
+    iconChat.style.display = 'block';
+    btnLabel.style.display = 'inline';
+    iconClose.style.display = 'none';
+  }
 }
 </script>
 </body>
