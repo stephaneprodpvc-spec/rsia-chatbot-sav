@@ -222,6 +222,22 @@ const PRODUITS = [
   { id: "autre", label: "❓ Autre produit", pb: [{ id: "autre", label: "Décrire mon problème" }] },
 ];
 
+const CLOUDINARY_CLOUD = 'dvbh3llqq';
+const CLOUDINARY_PRESET = 'rsia_sav_unsigned';
+
+async function uploadCloudinary(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_PRESET);
+  formData.append('folder', 'rsia-sav');
+  const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/auto/upload`, {
+    method: 'POST',
+    body: formData
+  });
+  const data = await resp.json();
+  return data.secure_url;
+}
+
 async function envoyerAirtable(data) {
   const resp = await fetch('https://hook.eu1.make.com/bkoorc2nn457jgvmvtv6pjme5vrtz68g', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
@@ -266,12 +282,18 @@ function App() {
     const num = `SAV-${new Date().getFullYear()}-${Math.floor(Math.random()*9000)+1000}`;
     setTicket(num);
     try {
+      // Upload photos vers Cloudinary
+      let photoUrls = '';
+      if (photos.length > 0) {
+        const urls = await Promise.all(photos.map(f => uploadCloudinary(f)));
+        photoUrls = urls.join(', ');
+      }
       await envoyerAirtable({
         ticket: num, agence: agence.ville, nom: client.nom, tel: client.tel,
         email: client.email, adresse: client.adresse,
         produit: produit.label.substring(2).trim() + (sousType ? ' — ' + sousType : ''),
         probleme: probleme.label, creneau, garantie, facture, urgent: probleme.urgent,
-        photos: photos.map(p => p.name).join(', ')
+        photos: photoUrls
       });
       setEnvoi('ok');
     } catch(e) { setEnvoi('err'); }
