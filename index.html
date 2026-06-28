@@ -6,9 +6,9 @@
 <title>RSIA Conseil — SAV Menuiserie</title>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.minA.js"></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }A
 body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; min-height: 100vh; }
 
 /* Widget flottant */
@@ -135,6 +135,8 @@ function toggleWidget() {
     iconChat.style.display = 'block';
     document.getElementById('btn-label').style.display = 'inline';
     iconClose.style.display = 'none';
+    // Reset du chatbot à la fermeture
+    if (window.__rsiaReset) window.__rsiaReset();
   }
 }
 </script>
@@ -261,6 +263,8 @@ function App() {
     setSending(false);
     setEtape('merci');
   };
+
+  React.useEffect(() => { window.__rsiaReset = reset; }, []);
 
   const reset = () => {
     setEtape("agence"); setAgence(null); setTypeClient(null); setGarantie(null);
