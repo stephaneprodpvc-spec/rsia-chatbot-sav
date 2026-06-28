@@ -286,42 +286,40 @@ function CreneauPicker({ agence, onSelect, F, AIRTABLE_TOKEN, AIRTABLE_BASE }) {
   ];
 
   const chargerDates = async (creneau) => {
+    if (!agence || !agence.ville) return;
     setLoading(true);
     setDates([]);
     setDateChoisie(null);
     try {
-      const filtre = encodeURIComponent(`AND({Agence}="${agence.ville}",{Créneau}="${creneau.valeur}",{Statut}="Libre")`);
-      const resp = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE}/Planning?filterByFormula=${filtre}&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=20`, {
-        headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
+      const filtre = encodeURIComponent('AND({Agence}="' + agence.ville + '",{Créneau}="' + creneau.valeur + '",{Statut}="Libre")');
+      const resp = await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + filtre + '&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=20', {
+        headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN }
       });
       const data = await resp.json();
-      // Grouper par date et compter les slots libres
       const parDate = {};
-      data.records.forEach(r => {
+      (data.records || []).forEach(r => {
         const d = r.fields.Date;
         if (!parDate[d]) parDate[d] = { date: d, slots: 0, ids: [] };
         parDate[d].slots++;
         parDate[d].ids.push(r.id);
       });
-      // Garder les 5 premières dates avec au moins 1 slot
       const datesUniques = Object.values(parDate).filter(d => d.slots > 0).slice(0, 5);
       setDates(datesUniques);
-    } catch(e) { console.error(e); }
+    } catch(e) { console.error('Erreur chargement dates:', e); }
     setLoading(false);
   };
 
   const choisirDate = async (dateInfo) => {
     setDateChoisie(dateInfo.date);
-    // Réserver le premier slot disponible
     try {
-      await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE}/Planning/${dateInfo.ids[0]}`, {
+      await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning/' + dateInfo.ids[0], {
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
         body: JSON.stringify({ fields: { Statut: 'Pris' } })
       });
-    } catch(e) { console.error(e); }
-    const dateFormatee = new Date(dateInfo.date).toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
-    onSelect(`${typeCreneauChoisi.label} (${typeCreneauChoisi.heure}) — ${dateFormatee}`);
+    } catch(e) { console.error('Erreur réservation:', e); }
+    const dateFormatee = new Date(dateInfo.date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
+    onSelect(typeCreneauChoisi.label + ' (' + typeCreneauChoisi.heure + ') — ' + dateFormatee);
   };
 
   return (
