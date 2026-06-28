@@ -9,11 +9,127 @@
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; display: flex; justify-content: center; padding: 20px; min-height: 100vh; }
+body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; min-height: 100vh; }
+
+/* Widget flottant */
+#rsia-widget-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 60px;
+  height: 60px;
+  background: #FF6B00;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(255,107,0,0.5);
+  z-index: 9999;
+  border: none;
+  transition: transform 0.2s;
+}
+#rsia-widget-btn:hover { transform: scale(1.08); }
+#rsia-widget-btn svg { width: 28px; height: 28px; }
+
+#rsia-widget-panel {
+  position: fixed;
+  bottom: 96px;
+  right: 24px;
+  width: 400px;
+  height: 620px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.22);
+  z-index: 9998;
+  display: none;
+  flex-direction: column;
+  background: #F5F5F5;
+  transition: opacity 0.2s;
+}
+#rsia-widget-panel.open { display: flex; }
+
+/* Badge bulle */
+#rsia-badge {
+  position: fixed;
+  bottom: 70px;
+  right: 18px;
+  background: #111111;
+  color: #FF6B00;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 20px;
+  z-index: 9997;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  border: 1px solid #FF6B00;
+  animation: fadeIn 0.5s ease;
+}
+@keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+
+/* Responsive mobile */
+@media (max-width: 480px) {
+  #rsia-widget-panel {
+    bottom: 0; right: 0;
+    width: 100vw; height: 100vh;
+    border-radius: 0;
+  }
+  #rsia-widget-btn { bottom: 16px; right: 16px; }
+  #rsia-badge { display: none; }
+}
 </style>
 </head>
 <body>
-<div id="root"></div>
+
+<!-- Contenu de la page hôte (exemple) -->
+<div style="padding: 40px; max-width: 800px; margin: 0 auto;">
+  <h1 style="color:#111; font-size:28px; margin-bottom:12px;">Bienvenue sur le site Falliero</h1>
+  <p style="color:#555; font-size:15px; line-height:1.7;">Votre spécialiste menuiserie dans les Hautes-Pyrénées. Pour toute demande SAV, cliquez sur le bouton orange en bas à droite.</p>
+</div>
+
+<!-- Badge d'invitation -->
+<div id="rsia-badge">💬 Besoin d'un SAV ?</div>
+
+<!-- Panel chatbot -->
+<div id="rsia-widget-panel">
+  <div id="root"></div>
+</div>
+
+<!-- Bouton flottant -->
+<button id="rsia-widget-btn" onclick="toggleWidget()" title="Ouvrir le SAV RSIA">
+  <svg id="icon-chat" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+  <svg id="icon-close" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="display:none">
+    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+</button>
+
+<script>
+let widgetOpen = false;
+// Masquer le badge après 5s
+setTimeout(() => { const b = document.getElementById('rsia-badge'); if(b) b.style.display='none'; }, 5000);
+
+function toggleWidget() {
+  widgetOpen = !widgetOpen;
+  const panel = document.getElementById('rsia-widget-panel');
+  const badge = document.getElementById('rsia-badge');
+  const iconChat = document.getElementById('icon-chat');
+  const iconClose = document.getElementById('icon-close');
+  if (widgetOpen) {
+    panel.classList.add('open');
+    if(badge) badge.style.display = 'none';
+    iconChat.style.display = 'none';
+    iconClose.style.display = 'block';
+  } else {
+    panel.classList.remove('open');
+    iconChat.style.display = 'block';
+    iconClose.style.display = 'none';
+  }
+}
+</script>
+
 <script type="text/babel">
 
 const AIRTABLE_TOKEN = 'patVv2Jmisci900TY.45d3f25095a992e5f8c3511eb913378e0513afa90f4c7afa3f83a786b8cf8d19';
@@ -144,51 +260,52 @@ function App() {
     setCreneau(null); setTicket(null); setEnvoi(null); setSending(false);
   };
 
-  const s = (obj) => Object.entries(obj).map(([k,v]) => `${k}:${v}`).join(';');
-
   return (
-    <div style={{fontFamily:"'Segoe UI',sans-serif",background:F.grisClair,minHeight:"100vh",display:"flex",flexDirection:"column",maxWidth:"500px",width:"100%"}}>
+    <div style={{fontFamily:"'Segoe UI',sans-serif",background:F.grisClair,height:"100%",display:"flex",flexDirection:"column",width:"100%"}}>
       {/* Header */}
-      <div style={{background:F.marine,padding:"14px 20px 10px"}}>
+      <div style={{background:F.marine,padding:"12px 16px 8px",flexShrink:0}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
-            <div style={{width:"40px",height:"40px",background:F.or,borderRadius:"8px",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-              <span style={{fontFamily:"Arial Black,Arial",fontSize:"20px",fontWeight:"900",color:"#111",display:"inline-block",transform:"scaleX(-1)",lineHeight:1}}>R</span>
+            <div style={{width:"34px",height:"34px",background:F.or,borderRadius:"8px",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              <span style={{fontFamily:"Arial Black,Arial",fontSize:"17px",fontWeight:"900",color:"#111",display:"inline-block",transform:"scaleX(-1)",lineHeight:1}}>R</span>
             </div>
             <div>
-              <div style={{color:F.blanc,fontWeight:"900",fontSize:"16px"}}>
+              <div style={{color:F.blanc,fontWeight:"900",fontSize:"15px"}}>
                 <span style={{display:"inline-block",transform:"scaleX(-1)",fontFamily:"Arial Black,Arial"}}>R</span>S<span style={{color:F.or}}>IA</span>
-                <span style={{fontSize:"12px",fontWeight:"600",marginLeft:"5px",color:"rgba(255,255,255,0.6)"}}>Conseil</span>
+                <span style={{fontSize:"11px",fontWeight:"600",marginLeft:"5px",color:"rgba(255,255,255,0.6)"}}>Conseil</span>
               </div>
-              <div style={{color:"rgba(255,255,255,0.4)",fontSize:"9px",letterSpacing:"2px",textTransform:"uppercase",marginTop:"3px"}}>Solutions IA · SAV Menuiserie</div>
+              <div style={{color:"rgba(255,255,255,0.4)",fontSize:"8px",letterSpacing:"2px",textTransform:"uppercase",marginTop:"2px"}}>Solutions IA · SAV Menuiserie</div>
             </div>
           </div>
-          {etape !== "agence" && etape !== "merci" && (
-            <button onClick={reset} style={{background:"rgba(201,168,76,0.2)",border:`1px solid ${F.or}`,color:F.or,borderRadius:"8px",padding:"5px 10px",fontSize:"11px",cursor:"pointer"}}>↩ Début</button>
-          )}
+          <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+            {etape !== "agence" && etape !== "merci" && (
+              <button onClick={reset} style={{background:"rgba(255,107,0,0.15)",border:`1px solid ${F.or}`,color:F.or,borderRadius:"8px",padding:"4px 9px",fontSize:"10px",cursor:"pointer"}}>↩ Début</button>
+            )}
+            <button onClick={() => toggleWidget()} style={{background:"rgba(255,255,255,0.1)",border:"1px solid rgba(255,255,255,0.2)",color:"rgba(255,255,255,0.7)",borderRadius:"8px",width:"28px",height:"28px",cursor:"pointer",fontSize:"14px",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+          </div>
         </div>
-        <div style={{marginTop:"8px",display:"flex",alignItems:"center",gap:"6px"}}>
-          <div style={{width:"8px",height:"8px",background:"#2ECC71",borderRadius:"50%"}}></div>
-          <span style={{color:F.orClair,fontSize:"12px",fontWeight:"500"}}>Alex — SAV en ligne</span>
+        <div style={{marginTop:"6px",display:"flex",alignItems:"center",gap:"6px"}}>
+          <div style={{width:"7px",height:"7px",background:"#2ECC71",borderRadius:"50%"}}></div>
+          <span style={{color:F.orClair,fontSize:"11px",fontWeight:"500"}}>Alex — SAV en ligne</span>
         </div>
       </div>
-      <div style={{height:"3px",background:`linear-gradient(90deg,${F.or},${F.orClair},${F.or})`}} />
+      <div style={{height:"3px",background:`linear-gradient(90deg,${F.or},${F.orClair},${F.or})`,flexShrink:0}} />
 
-      <div style={{flex:1,overflowY:"auto",padding:"16px",display:"flex",flexDirection:"column",gap:"12px"}}>
+      <div style={{flex:1,overflowY:"auto",padding:"14px",display:"flex",flexDirection:"column",gap:"10px"}}>
 
         {etape === "agence" && (
           <>
             <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
-              <div style={{width:"32px",height:"32px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"13px",fontWeight:"700",color:F.blanc,flexShrink:0,border:`2px solid ${F.or}`}}>A</div>
-              <div style={{background:F.blanc,borderRadius:"18px 18px 18px 4px",padding:"12px 16px",fontSize:"13px",lineHeight:"1.6",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:`1px solid ${F.grisBord}`}}>
+              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:`2px solid ${F.or}`}}>A</div>
+              <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",lineHeight:"1.6",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:`1px solid ${F.grisBord}`}}>
                 Bonjour ! Je suis <strong style={{color:F.marine}}>Alex</strong>, votre assistant SAV RSIA.<br/>Quelle est votre agence ?
               </div>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
               {AGENCES.map(a => (
                 <button key={a.id} onClick={() => { setAgence(a); setEtape("identification"); }}
-                  style={{background:F.blanc,border:`2px solid ${F.grisBord}`,borderRadius:"14px",padding:"16px 12px",fontSize:"14px",fontWeight:"700",color:F.marine,cursor:"pointer",textAlign:"center",lineHeight:"1.5"}}>
-                  {a.label}<br/><span style={{fontSize:"11px",fontWeight:"400",color:"#64748B"}}>{a.ville}</span>
+                  style={{background:F.blanc,border:`2px solid ${F.grisBord}`,borderRadius:"12px",padding:"14px 10px",fontSize:"13px",fontWeight:"700",color:F.marine,cursor:"pointer",textAlign:"center",lineHeight:"1.5"}}>
+                  {a.label}<br/><span style={{fontSize:"10px",fontWeight:"400",color:"#64748B"}}>{a.ville}</span>
                 </button>
               ))}
             </div>
@@ -197,15 +314,15 @@ function App() {
 
         {etape === "identification" && (
           <>
-            <div style={{background:"#EFF6FF",border:"1px solid #BFDBFE",borderRadius:"10px",padding:"10px 14px",fontSize:"12px"}}>
+            <div style={{background:"#EFF6FF",border:"1px solid #BFDBFE",borderRadius:"10px",padding:"8px 12px",fontSize:"11px"}}>
               📍 <strong>{agence?.ville}</strong>
             </div>
-            <div style={{background:F.blanc,borderRadius:"12px",padding:"14px 16px",border:`1px solid ${F.grisBord}`}}>
-              <div style={{fontSize:"12px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Êtes-vous déjà client RSIA ?</div>
+            <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:`1px solid ${F.grisBord}`}}>
+              <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"8px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Êtes-vous déjà client RSIA ?</div>
               <div style={{display:"flex",gap:"8px"}}>
                 {[{val:"existant",label:"✅ Oui, je suis client"},{val:"nouveau",label:"🆕 Première fois"}].map(opt => (
                   <button key={opt.val} onClick={() => { setTypeClient(opt.val); setGarantie(null); }}
-                    style={{flex:1,padding:"10px",border:`2px solid ${typeClient===opt.val?F.or:F.grisBord}`,borderRadius:"10px",background:typeClient===opt.val?F.marine:F.blanc,color:typeClient===opt.val?F.blanc:F.marine,fontSize:"12px",fontWeight:"600",cursor:"pointer"}}>
+                    style={{flex:1,padding:"9px",border:`2px solid ${typeClient===opt.val?F.or:F.grisBord}`,borderRadius:"10px",background:typeClient===opt.val?F.marine:F.blanc,color:typeClient===opt.val?F.blanc:F.marine,fontSize:"11px",fontWeight:"600",cursor:"pointer"}}>
                     {opt.label}
                   </button>
                 ))}
@@ -213,45 +330,45 @@ function App() {
             </div>
 
             {typeClient === "existant" && (
-              <div style={{background:F.blanc,borderRadius:"12px",padding:"14px 16px",border:`1px solid ${F.grisBord}`}}>
-                <div style={{fontSize:"12px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Produit sous garantie ?</div>
+              <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:`1px solid ${F.grisBord}`}}>
+                <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"8px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Produit sous garantie ?</div>
                 <div style={{display:"flex",gap:"8px"}}>
                   {[{val:true,label:"✅ Oui"},{val:false,label:"❌ Non / Je ne sais pas"}].map(opt => (
                     <button key={String(opt.val)} onClick={() => { setGarantie(opt.val); setFacture(""); }}
-                      style={{flex:1,padding:"10px",border:`2px solid ${garantie===opt.val?(opt.val?F.vert:F.rouge):F.grisBord}`,borderRadius:"10px",background:garantie===opt.val?(opt.val?F.vertClair:F.rougeClair):F.blanc,color:garantie===opt.val?(opt.val?F.vert:F.rouge):F.marine,fontSize:"12px",fontWeight:"600",cursor:"pointer"}}>
+                      style={{flex:1,padding:"9px",border:`2px solid ${garantie===opt.val?(opt.val?F.vert:F.rouge):F.grisBord}`,borderRadius:"10px",background:garantie===opt.val?(opt.val?F.vertClair:F.rougeClair):F.blanc,color:garantie===opt.val?(opt.val?F.vert:F.rouge):F.marine,fontSize:"11px",fontWeight:"600",cursor:"pointer"}}>
                       {opt.label}
                     </button>
                   ))}
                 </div>
                 {garantie === false && (
-                  <div style={{marginTop:"12px",background:"#FFF7ED",border:"1.5px solid #FED7AA",borderRadius:"10px",padding:"12px 14px",fontSize:"12px",color:"#78350F",lineHeight:"1.7"}}>
+                  <div style={{marginTop:"10px",background:"#FFF7ED",border:"1.5px solid #FED7AA",borderRadius:"10px",padding:"10px 12px",fontSize:"11px",color:"#78350F",lineHeight:"1.7"}}>
                     ⚠️ <strong>Diagnostic 65€</strong> si hors garantie. Avoir déduit à l'acceptation du devis.
                   </div>
                 )}
                 {garantie === true && (
-                  <div style={{marginTop:"12px"}}>
-                    <label style={{fontSize:"11px",fontWeight:"700",color:F.marine,display:"block",marginBottom:"4px"}}>N° de facture *</label>
+                  <div style={{marginTop:"10px"}}>
+                    <label style={{fontSize:"10px",fontWeight:"700",color:F.marine,display:"block",marginBottom:"4px"}}>N° de facture *</label>
                     <input type="text" placeholder="Ex : FAL-2024-00842" value={facture} onChange={e => setFacture(e.target.value)}
-                      style={{width:"100%",padding:"9px 12px",border:`1.5px solid ${erreurs.facture?F.rouge:F.or}`,borderRadius:"8px",fontSize:"13px",boxSizing:"border-box",outline:"none"}} />
+                      style={{width:"100%",padding:"8px 10px",border:`1.5px solid ${erreurs.facture?F.rouge:F.or}`,borderRadius:"8px",fontSize:"12px",boxSizing:"border-box",outline:"none"}} />
                   </div>
                 )}
               </div>
             )}
 
             {(typeClient === "nouveau" || (typeClient === "existant" && garantie !== null)) && (
-              <div style={{background:F.blanc,borderRadius:"12px",padding:"14px 16px",border:`1px solid ${F.grisBord}`}}>
-                <div style={{fontSize:"12px",fontWeight:"700",color:F.marine,marginBottom:"12px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Vos coordonnées</div>
+              <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:`1px solid ${F.grisBord}`}}>
+                <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Vos coordonnées</div>
                 {[{key:"nom",label:"Nom et prénom",ph:"Ex : Jean Dupont",type:"text"},{key:"adresse",label:"Adresse complète",ph:"Ex : 12 rue des Lilas, 65000 Tarbes",type:"text"},{key:"tel",label:"Téléphone",ph:"Ex : 06 12 34 56 78",type:"tel"},{key:"email",label:"Email",ph:"Ex : jean.dupont@gmail.com",type:"email"}].map(f => (
-                  <div key={f.key} style={{marginBottom:"10px"}}>
-                    <label style={{fontSize:"11px",fontWeight:"600",color:"#64748B",display:"block",marginBottom:"4px"}}>{f.label} *</label>
+                  <div key={f.key} style={{marginBottom:"8px"}}>
+                    <label style={{fontSize:"10px",fontWeight:"600",color:"#64748B",display:"block",marginBottom:"3px"}}>{f.label} *</label>
                     <input type={f.type} placeholder={f.ph} value={client[f.key]}
                       onChange={e => setClient({...client,[f.key]:e.target.value})}
-                      style={{width:"100%",padding:"9px 12px",border:`1.5px solid ${erreurs[f.key]?F.rouge:F.grisBord}`,borderRadius:"8px",fontSize:"13px",boxSizing:"border-box",outline:"none"}} />
-                    {erreurs[f.key] && <span style={{fontSize:"11px",color:F.rouge}}>Champ obligatoire</span>}
+                      style={{width:"100%",padding:"8px 10px",border:`1.5px solid ${erreurs[f.key]?F.rouge:F.grisBord}`,borderRadius:"8px",fontSize:"12px",boxSizing:"border-box",outline:"none"}} />
+                    {erreurs[f.key] && <span style={{fontSize:"10px",color:F.rouge}}>Champ obligatoire</span>}
                   </div>
                 ))}
                 <button onClick={() => { if (validerInfos()) setEtape("produit"); }}
-                  style={{width:"100%",padding:"13px",background:F.marine,color:F.blanc,border:`2px solid ${F.or}`,borderRadius:"10px",fontSize:"13px",fontWeight:"700",cursor:"pointer",marginTop:"4px"}}>
+                  style={{width:"100%",padding:"11px",background:F.marine,color:F.blanc,border:`2px solid ${F.or}`,borderRadius:"10px",fontSize:"12px",fontWeight:"700",cursor:"pointer",marginTop:"4px"}}>
                   Continuer →
                 </button>
               </div>
@@ -261,19 +378,19 @@ function App() {
 
         {etape === "produit" && (
           <>
-            <div style={{background:F.vertClair,border:"1px solid #86EFAC",borderRadius:"10px",padding:"10px 14px",fontSize:"12px"}}>
+            <div style={{background:F.vertClair,border:"1px solid #86EFAC",borderRadius:"10px",padding:"8px 12px",fontSize:"11px"}}>
               <div style={{fontWeight:"700",color:F.marine}}>👤 {client.nom}</div>
-              <div style={{color:"#475569",fontSize:"11px"}}>{agence?.ville}</div>
+              <div style={{color:"#475569",fontSize:"10px"}}>{agence?.ville}</div>
             </div>
             <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
-              <div style={{width:"32px",height:"32px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"13px",fontWeight:"700",color:F.blanc,flexShrink:0,border:`2px solid ${F.or}`}}>A</div>
-              <div style={{background:F.blanc,borderRadius:"18px 18px 18px 4px",padding:"12px 16px",fontSize:"13px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:`1px solid ${F.grisBord}`}}>
+              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:`2px solid ${F.or}`}}>A</div>
+              <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:`1px solid ${F.grisBord}`}}>
                 Quel produit est concerné, <strong style={{color:F.marine}}>{client.nom.split(" ")[0]}</strong> ?
               </div>
             </div>
             {PRODUITS.map(p => (
               <button key={p.id} onClick={() => { setProduit(p); setSousType(null); setEtape(p.sousTypes ? "sous_type" : "probleme"); }}
-                style={{background:F.blanc,border:`2px solid ${F.grisBord}`,borderRadius:"12px",padding:"14px 16px",fontSize:"13px",fontWeight:"600",color:F.marine,cursor:"pointer",textAlign:"left",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
+                style={{background:F.blanc,border:`2px solid ${F.grisBord}`,borderRadius:"10px",padding:"11px 14px",fontSize:"12px",fontWeight:"600",color:F.marine,cursor:"pointer",textAlign:"left",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
                 {p.label}
               </button>
             ))}
@@ -283,15 +400,15 @@ function App() {
         {etape === "sous_type" && (
           <>
             <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
-              <div style={{width:"32px",height:"32px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"13px",fontWeight:"700",color:F.blanc,flexShrink:0,border:`2px solid ${F.or}`}}>A</div>
-              <div style={{background:F.blanc,borderRadius:"18px 18px 18px 4px",padding:"12px 16px",fontSize:"13px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:`1px solid ${F.grisBord}`}}>
+              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:`2px solid ${F.or}`}}>A</div>
+              <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:`1px solid ${F.grisBord}`}}>
                 Quel type de porte de garage ?
               </div>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"10px"}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
               {produit?.sousTypes?.map(st => (
                 <button key={st} onClick={() => { setSousType(st); setEtape("probleme"); }}
-                  style={{background:F.blanc,border:`2px solid ${F.grisBord}`,borderRadius:"14px",padding:"20px 10px",fontSize:"13px",fontWeight:"700",color:F.marine,cursor:"pointer",textAlign:"center"}}>
+                  style={{background:F.blanc,border:`2px solid ${F.grisBord}`,borderRadius:"12px",padding:"16px 8px",fontSize:"12px",fontWeight:"700",color:F.marine,cursor:"pointer",textAlign:"center"}}>
                   {st}
                 </button>
               ))}
@@ -302,36 +419,36 @@ function App() {
         {etape === "probleme" && (
           <>
             <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
-              <div style={{width:"32px",height:"32px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"13px",fontWeight:"700",color:F.blanc,flexShrink:0,border:`2px solid ${F.or}`}}>A</div>
-              <div style={{background:F.blanc,borderRadius:"18px 18px 18px 4px",padding:"12px 16px",fontSize:"13px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:`1px solid ${F.grisBord}`}}>
+              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:`2px solid ${F.or}`}}>A</div>
+              <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:`1px solid ${F.grisBord}`}}>
                 Quel est le problème avec votre <strong style={{color:F.marine}}>{produit?.label.substring(2).trim()}</strong> ?
               </div>
             </div>
             {produit?.pb.map(p => (
               <button key={p.id} onClick={() => { setProbleme(p); setEtape("creneau"); }}
-                style={{background:F.blanc,border:`2px solid ${p.urgent?"#FCA5A5":F.grisBord}`,borderRadius:"12px",padding:"12px 16px",fontSize:"13px",fontWeight:"600",color:F.marine,cursor:"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
+                style={{background:F.blanc,border:`2px solid ${p.urgent?"#FCA5A5":F.grisBord}`,borderRadius:"10px",padding:"10px 14px",fontSize:"12px",fontWeight:"600",color:F.marine,cursor:"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
                 <span>{p.label}</span>
-                {p.urgent && <span style={{background:F.rougeClair,color:F.rouge,fontSize:"10px",fontWeight:"700",padding:"2px 8px",borderRadius:"20px",marginLeft:"8px",flexShrink:0}}>URGENT</span>}
+                {p.urgent && <span style={{background:F.rougeClair,color:F.rouge,fontSize:"9px",fontWeight:"700",padding:"2px 7px",borderRadius:"20px",marginLeft:"8px",flexShrink:0}}>URGENT</span>}
               </button>
             ))}
           </>
         )}
 
         {etape === "creneau" && (
-          <div style={{background:F.blanc,borderRadius:"12px",padding:"14px 16px",border:`1px solid ${F.grisBord}`}}>
-            <div style={{fontSize:"13px",fontWeight:"700",color:F.marine,marginBottom:"12px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Quel créneau vous convient ?</div>
-            <div style={{fontSize:"11px",color:"#64748B",marginBottom:"12px",paddingLeft:"11px"}}>Jour exact confirmé sous 24h par votre agence</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+          <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:`1px solid ${F.grisBord}`}}>
+            <div style={{fontSize:"12px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Quel créneau vous convient ?</div>
+            <div style={{fontSize:"10px",color:"#64748B",marginBottom:"10px",paddingLeft:"11px"}}>Jour exact confirmé sous 24h par votre agence</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
               {[{id:"matin",label:"🌅 Matin",heure:"8h30 — 12h00"},{id:"apres_midi",label:"🌇 Après-midi",heure:"13h00 — 17h00"}].map(c => (
                 <button key={c.id} onClick={() => setCreneau(c.label+" ("+c.heure+")")}
-                  style={{padding:"16px 12px",border:`2px solid ${creneau&&creneau.includes(c.id==="matin"?"Matin":"Après")?F.or:F.grisBord}`,borderRadius:"12px",background:creneau&&creneau.includes(c.id==="matin"?"Matin":"Après")?"#FFFDF5":F.blanc,cursor:"pointer",textAlign:"center"}}>
-                  <div style={{fontSize:"13px",fontWeight:"700",color:F.marine}}>{c.label}</div>
-                  <div style={{fontSize:"12px",color:"#64748B",marginTop:"3px"}}>{c.heure}</div>
+                  style={{padding:"14px 10px",border:`2px solid ${creneau&&creneau.includes(c.id==="matin"?"Matin":"Après")?F.or:F.grisBord}`,borderRadius:"12px",background:creneau&&creneau.includes(c.id==="matin"?"Matin":"Après")?"#FFFDF5":F.blanc,cursor:"pointer",textAlign:"center"}}>
+                  <div style={{fontSize:"12px",fontWeight:"700",color:F.marine}}>{c.label}</div>
+                  <div style={{fontSize:"11px",color:"#64748B",marginTop:"2px"}}>{c.heure}</div>
                 </button>
               ))}
             </div>
             <button onClick={() => { if (creneau) setEtape("recapitulatif"); }} disabled={!creneau}
-              style={{width:"100%",marginTop:"14px",padding:"13px",background:!creneau?F.grisBord:F.marine,color:!creneau?"#94A3B8":F.blanc,border:`2px solid ${!creneau?F.grisBord:F.or}`,borderRadius:"10px",fontSize:"13px",fontWeight:"700",cursor:!creneau?"not-allowed":"pointer"}}>
+              style={{width:"100%",marginTop:"12px",padding:"11px",background:!creneau?F.grisBord:F.marine,color:!creneau?"#94A3B8":F.blanc,border:`2px solid ${!creneau?F.grisBord:F.or}`,borderRadius:"10px",fontSize:"12px",fontWeight:"700",cursor:!creneau?"not-allowed":"pointer"}}>
               Continuer →
             </button>
           </div>
@@ -340,11 +457,11 @@ function App() {
         {etape === "recapitulatif" && (
           <>
             <div style={{background:F.blanc,borderRadius:"12px",border:`2px solid ${F.or}`,overflow:"hidden"}}>
-              <div style={{background:F.marine,padding:"12px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <span style={{color:F.blanc,fontWeight:"700",fontSize:"13px"}}>Récapitulatif de votre demande SAV</span>
-                {probleme?.urgent && <span style={{background:F.rouge,color:F.blanc,fontSize:"10px",fontWeight:"700",padding:"3px 8px",borderRadius:"10px"}}>URGENT</span>}
+              <div style={{background:F.marine,padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{color:F.blanc,fontWeight:"700",fontSize:"12px"}}>Récapitulatif de votre demande SAV</span>
+                {probleme?.urgent && <span style={{background:F.rouge,color:F.blanc,fontSize:"9px",fontWeight:"700",padding:"2px 7px",borderRadius:"10px"}}>URGENT</span>}
               </div>
-              <div style={{padding:"14px 16px"}}>
+              <div style={{padding:"12px 14px"}}>
                 {[
                   ["Agence", agence?.ville],
                   ["Client", client.nom],
@@ -356,15 +473,15 @@ function App() {
                   ["Problème", probleme?.label],
                   ["Créneau", creneau],
                 ].map(([lbl,val],i) => (
-                  <div key={i} style={{display:"flex",gap:"10px",padding:"7px 0",borderBottom:`1px solid ${F.grisBord}`}}>
-                    <span style={{fontSize:"11px",fontWeight:"700",color:"#64748B",minWidth:"100px",flexShrink:0}}>{lbl}</span>
-                    <span style={{fontSize:"12px",color:F.marine}}>{val}</span>
+                  <div key={i} style={{display:"flex",gap:"8px",padding:"6px 0",borderBottom:`1px solid ${F.grisBord}`}}>
+                    <span style={{fontSize:"10px",fontWeight:"700",color:"#64748B",minWidth:"80px",flexShrink:0}}>{lbl}</span>
+                    <span style={{fontSize:"11px",color:F.marine}}>{val}</span>
                   </div>
                 ))}
               </div>
             </div>
             <button onClick={confirmer} disabled={sending}
-              style={{width:"100%",padding:"15px",background:sending?"#64748B":F.marine,color:F.blanc,border:`2px solid ${F.or}`,borderRadius:"10px",fontSize:"14px",fontWeight:"700",cursor:sending?"not-allowed":"pointer"}}>
+              style={{width:"100%",padding:"13px",background:sending?"#64748B":F.marine,color:F.blanc,border:`2px solid ${F.or}`,borderRadius:"10px",fontSize:"13px",fontWeight:"700",cursor:sending?"not-allowed":"pointer"}}>
               {sending ? "⏳ Envoi en cours..." : "✅ Confirmer et envoyer ma demande"}
             </button>
           </>
@@ -372,43 +489,34 @@ function App() {
 
         {etape === "merci" && (
           <>
-            <div style={{textAlign:"center",padding:"20px 0"}}>
-              <div style={{fontSize:"40px",marginBottom:"12px"}}>✅</div>
-              <div style={{fontSize:"20px",fontWeight:"900",color:F.marine,marginBottom:"6px"}}>Demande envoyée !</div>
-              <div style={{fontSize:"13px",color:"#64748B"}}>Votre demande SAV a bien été prise en compte.</div>
+            <div style={{textAlign:"center",padding:"16px 0"}}>
+              <div style={{fontSize:"36px",marginBottom:"10px"}}>✅</div>
+              <div style={{fontSize:"18px",fontWeight:"900",color:F.marine,marginBottom:"4px"}}>Demande envoyée !</div>
+              <div style={{fontSize:"12px",color:"#64748B"}}>Votre demande SAV a bien été prise en compte.</div>
             </div>
-            <div style={{background:F.marine,borderRadius:"12px",padding:"16px",textAlign:"center",border:`2px solid ${F.or}`}}>
-              <div style={{color:F.orClair,fontSize:"11px",fontWeight:"600",marginBottom:"6px",letterSpacing:"2px"}}>VOTRE NUMÉRO DE TICKET</div>
-              <div style={{color:F.or,fontSize:"28px",fontWeight:"900",letterSpacing:"2px",fontFamily:"monospace"}}>{ticket}</div>
-              <div style={{color:"rgba(255,255,255,0.4)",fontSize:"11px",marginTop:"6px"}}>Conservez ce numéro pour le suivi</div>
+            <div style={{background:F.marine,borderRadius:"12px",padding:"14px",textAlign:"center",border:`2px solid ${F.or}`}}>
+              <div style={{color:F.orClair,fontSize:"10px",fontWeight:"600",marginBottom:"6px",letterSpacing:"2px"}}>VOTRE NUMÉRO DE TICKET</div>
+              <div style={{color:F.or,fontSize:"24px",fontWeight:"900",letterSpacing:"2px",fontFamily:"monospace"}}>{ticket}</div>
+              <div style={{color:"rgba(255,255,255,0.4)",fontSize:"10px",marginTop:"4px"}}>Conservez ce numéro pour le suivi</div>
             </div>
             {envoi === 'ok' && (
-              <div style={{background:F.vertClair,border:"1px solid #86EFAC",borderRadius:"9px",padding:"10px 14px",fontSize:"12px",color:F.vert,fontWeight:"600"}}>
-                ✅ Ticket enregistré dans Airtable — notification envoyée à l'agence
+              <div style={{background:F.vertClair,border:"1px solid #86EFAC",borderRadius:"9px",padding:"8px 12px",fontSize:"11px",color:F.vert,fontWeight:"600"}}>
+                ✅ Ticket enregistré — notification envoyée à l'agence
               </div>
             )}
             {envoi === 'err' && (
-              <div style={{background:F.rougeClair,border:"1px solid #FCA5A5",borderRadius:"9px",padding:"10px 14px",fontSize:"12px",color:F.rouge,fontWeight:"600"}}>
-                ⚠️ Ticket créé — erreur d'envoi Airtable, veuillez contacter l'agence directement
+              <div style={{background:F.rougeClair,border:"1px solid #FCA5A5",borderRadius:"9px",padding:"8px 12px",fontSize:"11px",color:F.rouge,fontWeight:"600"}}>
+                ⚠️ Ticket créé — erreur d'envoi, contactez l'agence directement
               </div>
             )}
-            <div style={{background:probleme?.urgent?F.rougeClair:F.vertClair,border:`1px solid ${probleme?.urgent?"#FCA5A5":"#86EFAC"}`,borderRadius:"10px",padding:"12px 16px"}}>
-              <div style={{fontWeight:"700",fontSize:"13px",color:F.marine}}>
+            <div style={{background:probleme?.urgent?F.rougeClair:F.vertClair,border:`1px solid ${probleme?.urgent?"#FCA5A5":"#86EFAC"}`,borderRadius:"10px",padding:"10px 14px"}}>
+              <div style={{fontWeight:"700",fontSize:"12px",color:F.marine}}>
                 {probleme?.urgent?"⚡ Intervention sous 24-48h":"🕐 Intervention sous 5-10 jours ouvrés"}
               </div>
-              <div style={{fontSize:"12px",color:"#475569",marginTop:"2px"}}>Créneau : {creneau}</div>
-            </div>
-            <div style={{background:F.blanc,borderRadius:"12px",padding:"14px 16px",border:`1px solid ${F.grisBord}`}}>
-              <div style={{fontSize:"12px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>
-                📍 Votre agence RSIA — {agence?.ville}
-              </div>
-              <div style={{fontSize:"12px",color:"#475569",lineHeight:"2"}}>
-                <div>Lun–Ven : 8h00–12h00 / 13h30–17h30</div>
-                <div>sav@rsia-conseil.fr</div>
-              </div>
+              <div style={{fontSize:"11px",color:"#475569",marginTop:"2px"}}>Créneau : {creneau}</div>
             </div>
             <button onClick={reset}
-              style={{width:"100%",padding:"13px",background:F.blanc,color:F.marine,border:`2px solid ${F.grisBord}`,borderRadius:"10px",fontSize:"13px",fontWeight:"600",cursor:"pointer"}}>
+              style={{width:"100%",padding:"11px",background:F.blanc,color:F.marine,border:`2px solid ${F.grisBord}`,borderRadius:"10px",fontSize:"12px",fontWeight:"600",cursor:"pointer"}}>
               Faire une nouvelle demande SAV
             </button>
           </>
@@ -417,8 +525,8 @@ function App() {
         <div ref={bottomRef} />
       </div>
 
-      <div style={{background:F.marine,padding:"8px 16px",textAlign:"center"}}>
-        <span style={{color:F.or,fontSize:"10px",opacity:0.8}}>© RSIA Conseil — Solutions IA pour les PME du bâtiment</span>
+      <div style={{background:F.marine,padding:"6px 14px",textAlign:"center",flexShrink:0}}>
+        <span style={{color:F.or,fontSize:"9px",opacity:0.8}}>© RSIA Conseil — Solutions IA pour les PME du bâtiment</span>
       </div>
     </div>
   );
