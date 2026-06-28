@@ -238,15 +238,15 @@ function CreneauPicker({ agenceVille, onSelect }) {
   const [loading, setLoading] = React.useState(false);
 
   const CRENEAUX = [
-    { id: "matin", label: "🌅 Matin", heure: "8h30 — 12h00", valeur: "Matin (8h30 \u2014 12h00)" },
-    { id: "apres_midi", label: "🌇 Après-midi", heure: "13h00 — 17h00", valeur: "Apr\u00e8s-midi (13h00 \u2014 17h00)" },
+    { id: "matin", label: "🌅 Matin", heure: "8h30 — 12h00", valeur: "Matin (8h30 — 12h00)" },
+    { id: "apres_midi", label: "🌇 Après-midi", heure: "13h00 — 17h00", valeur: "Après-midi (13h00 — 17h00)" },
   ];
 
   const charger = async (c) => {
     setLoading(true);
     setDates([]);
     try {
-      const f = encodeURIComponent('AND({Agence}="' + agenceVille + '",{Cr\u00e9neau}="' + c.valeur + '",{Statut}="Libre")');
+      const f = encodeURIComponent('AND({Agence}="' + agenceVille + '",{Créneau}="' + c.valeur + '",{Statut}="Libre")');
       const url = 'https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + f + '&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=20';
       const r = await fetch(url, { headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN } });
       const json = await r.json();
