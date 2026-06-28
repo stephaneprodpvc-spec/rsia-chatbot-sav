@@ -742,30 +742,6 @@ function App() {
   );
 }
 
-window.toggleWidget = function() {
-  let widgetOpen = window._widgetOpen || false;
-  widgetOpen = !widgetOpen;
-  window._widgetOpen = widgetOpen;
-  const panel = document.getElementById('rsia-widget-panel');
-  const iconChat = document.getElementById('icon-chat');
-  const iconClose = document.getElementById('icon-close');
-  const btnLabel = document.getElementById('btn-label');
-  if (widgetOpen) {
-    panel.classList.add('open');
-    iconChat.style.display = 'none';
-    btnLabel.style.display = 'none';
-    iconClose.style.display = 'block';
-    if (!window._reactMounted) {
-      window._reactMounted = true;
-      setTimeout(mountChatbot, 50);
-    }
-  } else {
-    panel.classList.remove('open');
-    iconChat.style.display = 'block';
-    btnLabel.style.display = 'inline';
-    iconClose.style.display = 'none';
-  }
-}
 </script>
 <script>
 function mountChatbot() {
