@@ -274,6 +274,118 @@ async function envoyerAirtable(data) {
   return true;
 }
 
+function CreneauPicker({ agence, onSelect, F, AIRTABLE_TOKEN, AIRTABLE_BASE }) {
+  const [typeCreneauChoisi, setTypeCreneauChoisi] = React.useState(null);
+  const [dates, setDates] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+  const [dateChoisie, setDateChoisie] = React.useState(null);
+
+  const CRENEAUX = [
+    { id: "matin", label: "🌅 Matin", heure: "8h30 — 12h00", valeur: "Matin (8h30 — 12h00)" },
+    { id: "apres_midi", label: "🌇 Après-midi", heure: "13h00 — 17h00", valeur: "Après-midi (13h00 — 17h00)" },
+  ];
+
+  const chargerDates = async (creneau) => {
+    setLoading(true);
+    setDates([]);
+    setDateChoisie(null);
+    try {
+      const filtre = encodeURIComponent(`AND({Agence}="${agence.ville}",{Créneau}="${creneau.valeur}",{Statut}="Libre")`);
+      const resp = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE}/Planning?filterByFormula=${filtre}&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=20`, {
+        headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
+      });
+      const data = await resp.json();
+      // Grouper par date et compter les slots libres
+      const parDate = {};
+      data.records.forEach(r => {
+        const d = r.fields.Date;
+        if (!parDate[d]) parDate[d] = { date: d, slots: 0, ids: [] };
+        parDate[d].slots++;
+        parDate[d].ids.push(r.id);
+      });
+      // Garder les 5 premières dates avec au moins 1 slot
+      const datesUniques = Object.values(parDate).filter(d => d.slots > 0).slice(0, 5);
+      setDates(datesUniques);
+    } catch(e) { console.error(e); }
+    setLoading(false);
+  };
+
+  const choisirDate = async (dateInfo) => {
+    setDateChoisie(dateInfo.date);
+    // Réserver le premier slot disponible
+    try {
+      await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE}/Planning/${dateInfo.ids[0]}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: { Statut: 'Pris' } })
+      });
+    } catch(e) { console.error(e); }
+    const dateFormatee = new Date(dateInfo.date).toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
+    onSelect(`${typeCreneauChoisi.label} (${typeCreneauChoisi.heure}) — ${dateFormatee}`);
+  };
+
+  return (
+    <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:`1px solid ${F.grisBord}`}}>
+      <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Choisissez votre créneau</div>
+
+      {!typeCreneauChoisi && (
+        <>
+          <div style={{fontSize:"10px",color:"#64748B",marginBottom:"10px"}}>Matin ou après-midi ?</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
+            {CRENEAUX.map(c => (
+              <button key={c.id} onClick={() => { setTypeCreneauChoisi(c); chargerDates(c); }}
+                style={{padding:"14px 10px",border:`2px solid ${F.grisBord}`,borderRadius:"12px",background:F.blanc,cursor:"pointer",textAlign:"center"}}>
+                <div style={{fontSize:"12px",fontWeight:"700",color:F.marine}}>{c.label}</div>
+                <div style={{fontSize:"11px",color:"#64748B",marginTop:"2px"}}>{c.heure}</div>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      {typeCreneauChoisi && (
+        <>
+          <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"10px"}}>
+            <span style={{fontSize:"11px",color:F.or,fontWeight:"700"}}>{typeCreneauChoisi.label}</span>
+            <button onClick={() => { setTypeCreneauChoisi(null); setDates([]); }}
+              style={{fontSize:"10px",color:"#94A3B8",background:"none",border:"none",cursor:"pointer"}}>← Changer</button>
+          </div>
+
+          {loading && <div style={{textAlign:"center",padding:"20px",color:"#64748B",fontSize:"12px"}}>⏳ Chargement des disponibilités...</div>}
+
+          {!loading && dates.length === 0 && (
+            <div style={{textAlign:"center",padding:"20px",color:F.rouge,fontSize:"12px"}}>
+              Aucune disponibilité pour ce créneau. Essayez l'autre créneau.
+            </div>
+          )}
+
+          {!loading && dates.length > 0 && (
+            <>
+              <div style={{fontSize:"10px",color:"#64748B",marginBottom:"8px"}}>Prochaines dates disponibles pour <strong>{agence.ville}</strong> :</div>
+              <div style={{display:"flex",flexDirection:"column",gap:"6px"}}>
+                {dates.map((d,i) => {
+                  const dateObj = new Date(d.date);
+                  const label = dateObj.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
+                  return (
+                    <button key={i} onClick={() => choisirDate(d)}
+                      style={{padding:"12px 14px",border:`2px solid ${F.grisBord}`,borderRadius:"10px",background:F.blanc,cursor:"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                      <div>
+                        <div style={{fontSize:"12px",fontWeight:"700",color:F.marine,textTransform:"capitalize"}}>{label}</div>
+                        <div style={{fontSize:"10px",color:"#64748B",marginTop:"2px"}}>{d.slots} place{d.slots>1?'s':''} disponible{d.slots>1?'s':''}</div>
+                      </div>
+                      <span style={{color:F.or,fontSize:"16px"}}>→</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 function App() {
   const [etape, setEtape] = React.useState("agence");
   const [agence, setAgence] = React.useState(null);
@@ -551,23 +663,7 @@ function App() {
         )}
 
         {etape === "creneau" && (
-          <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:`1px solid ${F.grisBord}`}}>
-            <div style={{fontSize:"12px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:`3px solid ${F.or}`,paddingLeft:"8px"}}>Quel créneau vous convient ?</div>
-            <div style={{fontSize:"10px",color:"#64748B",marginBottom:"10px",paddingLeft:"11px"}}>Jour exact confirmé sous 24h par votre agence</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
-              {[{id:"matin",label:"🌅 Matin",heure:"8h30 — 12h00"},{id:"apres_midi",label:"🌇 Après-midi",heure:"13h00 — 17h00"}].map(c => (
-                <button key={c.id} onClick={() => setCreneau(c.label+" ("+c.heure+")")}
-                  style={{padding:"14px 10px",border:`2px solid ${creneau&&creneau.includes(c.id==="matin"?"Matin":"Après")?F.or:F.grisBord}`,borderRadius:"12px",background:creneau&&creneau.includes(c.id==="matin"?"Matin":"Après")?"#FFFDF5":F.blanc,cursor:"pointer",textAlign:"center"}}>
-                  <div style={{fontSize:"12px",fontWeight:"700",color:F.marine}}>{c.label}</div>
-                  <div style={{fontSize:"11px",color:"#64748B",marginTop:"2px"}}>{c.heure}</div>
-                </button>
-              ))}
-            </div>
-            <button onClick={() => { if (creneau) setEtape("recapitulatif"); }} disabled={!creneau}
-              style={{width:"100%",marginTop:"12px",padding:"11px",background:!creneau?F.grisBord:F.marine,color:!creneau?"#94A3B8":F.blanc,border:`2px solid ${!creneau?F.grisBord:F.or}`,borderRadius:"10px",fontSize:"12px",fontWeight:"700",cursor:!creneau?"not-allowed":"pointer"}}>
-              Continuer →
-            </button>
-          </div>
+          <CreneauPicker agence={agence} onSelect={(c) => { setCreneau(c); setEtape("recapitulatif"); }} F={F} AIRTABLE_TOKEN={AIRTABLE_TOKEN} AIRTABLE_BASE={AIRTABLE_BASE} />
         )}
 
         {etape === "recapitulatif" && (
