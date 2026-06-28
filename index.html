@@ -654,9 +654,9 @@ function App() {
             )}
 
             <div style={{display:"flex",gap:"8px",marginTop:"12px"}}>
-              <button onClick={() => setEtape("creneau")}
+              <button onClick={() => { setEtape("creneau"); }}
                 style={{flex:1,padding:"11px",background:F.marine,color:F.blanc,border:`2px solid ${F.or}`,borderRadius:"10px",fontSize:"12px",fontWeight:"700",cursor:"pointer"}}>
-                {photos.length > 0 ? `Continuer (${photos.length} fichier${photos.length>1?'s':''})` : "Passer cette étape →"}
+                {photos.length > 0 ? `Continuer (${photos.length} fichier${photos.length>1?'s':''}) →` : "Passer cette étape →"}
               </button>
             </div>
           </div>
