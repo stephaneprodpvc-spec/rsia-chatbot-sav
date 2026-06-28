@@ -16,21 +16,27 @@ body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; min-height: 100
   position: fixed;
   bottom: 24px;
   right: 24px;
-  width: 60px;
-  height: 60px;
+  height: 48px;
+  padding: 0 20px;
   background: #FF6B00;
-  border-radius: 50%;
+  border-radius: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(255,107,0,0.5);
   z-index: 9999;
   border: none;
   transition: transform 0.2s;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  white-space: nowrap;
 }
-#rsia-widget-btn:hover { transform: scale(1.08); }
-#rsia-widget-btn svg { width: 28px; height: 28px; }
+#rsia-widget-btn:hover { transform: scale(1.04); }
+#rsia-widget-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
 
 #rsia-widget-panel {
   position: fixed;
@@ -98,10 +104,11 @@ body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; min-height: 100
 
 <!-- Bouton flottant -->
 <button id="rsia-widget-btn" onclick="toggleWidget()" title="Ouvrir le SAV RSIA">
-  <svg id="icon-chat" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block">
+  <svg id="icon-chat" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px">
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
   </svg>
-  <svg id="icon-close" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="display:none">
+  <span id="btn-label">Demande SAV</span>
+  <svg id="icon-close" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="display:none;width:20px;height:20px">
     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
   </svg>
 </button>
@@ -121,10 +128,12 @@ function toggleWidget() {
     panel.classList.add('open');
     if(badge) badge.style.display = 'none';
     iconChat.style.display = 'none';
+    document.getElementById('btn-label').style.display = 'none';
     iconClose.style.display = 'block';
   } else {
     panel.classList.remove('open');
     iconChat.style.display = 'block';
+    document.getElementById('btn-label').style.display = 'inline';
     iconClose.style.display = 'none';
   }
 }
