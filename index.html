@@ -365,10 +365,18 @@ function App() {
         photoUrls = urls.join(', ');
       }
       await envoyerWebhook({
-        ticket: num, agence: agence.ville, nom: client.nom, tel: client.tel,
-        email: client.email, adresse: client.adresse,
+        ticket: num,
+        agence: agence.ville,
+        nom: client.nom,
+        tel: client.tel,
+        "e-mail": client.email,
+        adresse: client.adresse,
         produit: produit.label.substring(2).trim() + (sousType ? ' — ' + sousType : ''),
-        probleme: probleme.label, creneau, garantie, facture, urgent: probleme.urgent,
+        probleme: probleme.label,
+        creneau,
+        garantie,
+        facture,
+        urgent: probleme.urgent,
         photos: photoUrls
       });
       setEnvoi('ok');
