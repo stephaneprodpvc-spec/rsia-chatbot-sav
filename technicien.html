@@ -64,6 +64,14 @@ function ModalAction({ ticket, onClose, onDone }) {
       } else if (mode === "annuler") {
         fields.Statut = "Annule";
         fields.Commentaire = "Annule : " + commentaire;
+        const planningId = ticket.fields?.PlanningID;
+        if (planningId) {
+          await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Planning/'+planningId, {
+            method:'PATCH',
+            headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
+            body:JSON.stringify({fields:{Statut:'Libre'}})
+          });
+        }
       } else {
         fields.Statut = "En cours";
         const dateLabel = new Date(newDate+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
