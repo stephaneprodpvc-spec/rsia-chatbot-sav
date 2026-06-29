@@ -271,7 +271,7 @@ function CreneauPicker({ agenceVille, onSelect }) {
     } catch(e) { console.error(e); }
     const d = new Date(dateInfo.date + 'T12:00:00');
     const label = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-    onSelect(typeCreneau.label + ' (' + typeCreneau.heure + ') \u2014 ' + label);
+    onSelect(typeCreneau.label + ' (' + typeCreneau.heure + ') \u2014 ' + label, dateInfo.ids[0]);
   };
 
   if (!typeCreneau) {
@@ -334,6 +334,7 @@ function App() {
   const [sousType, setSousType] = React.useState(null);
   const [probleme, setProbleme] = React.useState(null);
   const [creneau, setCreneau] = React.useState(null);
+  const [planningId, setPlanningId] = React.useState(null);
   const [ticket, setTicket] = React.useState(null);
   const [envoi, setEnvoi] = React.useState(null);
   const [sending, setSending] = React.useState(false);
@@ -377,7 +378,8 @@ function App() {
         garantie,
         facture,
         urgent: probleme.urgent,
-        photos: photoUrls
+        photos: photoUrls,
+        planningId: planningId || ''
       });
       setEnvoi('ok');
     } catch(e) { setEnvoi('err'); }
@@ -389,7 +391,7 @@ function App() {
     setEtape("agence"); setAgence(null); setTypeClient(null); setGarantie(null);
     setFacture(""); setClient({ nom: "", adresse: "", tel: "", email: "" });
     setErreurs({}); setProduit(null); setSousType(null); setProbleme(null);
-    setCreneau(null); setTicket(null); setEnvoi(null); setSending(false); setPhotos([]);
+    setCreneau(null); setPlanningId(null); setTicket(null); setEnvoi(null); setSending(false); setPhotos([]);
   };
 
   return (
@@ -599,7 +601,7 @@ function App() {
         )}
 
         {etape === "creneau" && agence && (
-          <CreneauPicker agenceVille={agence.ville} onSelect={(c) => { setCreneau(c); setEtape("recapitulatif"); }} />
+          <CreneauPicker agenceVille={agence.ville} onSelect={(c, pid) => { setCreneau(c); setPlanningId(pid); setEtape("recapitulatif"); }} />
         )}
 
         {etape === "recapitulatif" && (
