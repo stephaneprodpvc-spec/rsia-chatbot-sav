@@ -41,13 +41,11 @@ const C = {
   text: "#E5E5E5", muted: "#555", white: "#fff",
   rouge: "#DC2626", rougeDim: "rgba(220,38,38,0.12)",
   vert: "#16a34a", vertDim: "rgba(22,163,74,0.15)",
-  bleu: "#2563eb", bleuDim: "rgba(37,99,235,0.12)",
   jaune: "#d97706", jauneDim: "rgba(217,119,6,0.12)",
 };
 
-// ---- MODAL ACTION ----
 function ModalAction({ ticket, onClose, onDone }) {
-  const [mode, setMode] = React.useState(null); // "terminer" | "replanifier"
+  const [mode, setMode] = React.useState(null);
   const [commentaire, setCommentaire] = React.useState("");
   const [newDate, setNewDate] = React.useState("");
   const [newCreneau, setNewCreneau] = React.useState("Matin (8h30 — 12h00)");
@@ -56,22 +54,23 @@ function ModalAction({ ticket, onClose, onDone }) {
 
   const confirmer = async () => {
     if (mode === "replanifier" && !newDate) return;
+    if (mode === "annuler" && !commentaire.trim()) return;
     setSaving(true);
     try {
       const fields = {};
       if (mode === "terminer") {
-        fields.Statut = "Terminé";
+        fields.Statut = "Termine";
         if (commentaire) fields.Commentaire = commentaire;
       } else if (mode === "annuler") {
-        fields.Statut = "Annulé";
-        fields.Commentaire = "Annulé : " + commentaire;
+        fields.Statut = "Annule";
+        fields.Commentaire = "Annule : " + commentaire;
       } else {
         fields.Statut = "En cours";
         const dateLabel = new Date(newDate+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
-        fields.Créneau = newCreneau + ' — ' + dateLabel;
-        if (commentaire) fields.Commentaire = "Replanifié : " + commentaire;
+        fields.Creneau = newCreneau + ' — ' + dateLabel;
+        if (commentaire) fields.Commentaire = "Replanifie : " + commentaire;
       }
-      await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets SAV/'+ticket.id, {
+      await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets%20SAV/'+ticket.id, {
         method:'PATCH',
         headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
         body:JSON.stringify({fields})
@@ -84,21 +83,20 @@ function ModalAction({ ticket, onClose, onDone }) {
   return (
     <div className="modal-overlay" onClick={e => e.target===e.currentTarget && onClose()}>
       <div className="modal-box">
-        {/* Handle */}
         <div style={{width:"36px",height:"4px",background:"#333",borderRadius:"2px",margin:"0 auto 20px"}}/>
-
         <div style={{marginBottom:"20px"}}>
           <div style={{fontSize:"11px",color:C.or,fontWeight:"700",fontFamily:"monospace",marginBottom:"4px"}}>{ticket.fields?.Name}</div>
           <div style={{fontSize:"16px",fontWeight:"900",color:C.white}}>{ticket.fields?.Client}</div>
-          <div style={{fontSize:"12px",color:C.muted,marginTop:"3px"}}>{ticket.fields?.Produit} · {ticket.fields?.Problème}</div>
-          <div style={{fontSize:"12px",color:C.text,marginTop:"6px"}}>📅 {ticket.fields?.Créneau}</div>
+          <div style={{fontSize:"12px",color:C.muted,marginTop:"3px"}}>{ticket.fields?.Produit} · {ticket.fields?.["Problème"]}</div>
+          <div style={{fontSize:"12px",color:C.text,marginTop:"6px"}}>📅 {ticket.fields?.["Créneau"]}</div>
           {ticket.fields?.Adresse && <div style={{fontSize:"12px",color:C.muted,marginTop:"2px"}}>📍 {ticket.fields?.Adresse}</div>}
         </div>
 
         {!mode && (
           <>
             <div style={{fontSize:"12px",color:C.muted,marginBottom:"12px",textAlign:"center"}}>Que souhaitez-vous faire ?</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+            
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"10px"}}>
               <button onClick={() => setMode("terminer")}
                 style={{padding:"20px 16px",background:C.vertDim,border:"2px solid rgba(22,163,74,0.4)",borderRadius:"14px",color:C.vert,cursor:"pointer",textAlign:"center"}}>
                 <div style={{fontSize:"28px",marginBottom:"6px"}}>✅</div>
@@ -112,8 +110,19 @@ function ModalAction({ ticket, onClose, onDone }) {
                 <div style={{fontSize:"10px",color:"rgba(217,119,6,0.7)",marginTop:"3px"}}>Choisir une autre date</div>
               </button>
             </div>
-            <button onClick={onClose} style={{width:"100%",marginTop:"12px",padding:"11px",background:"transparent",color:C.muted,border:"1px solid "+C.border,borderRadius:"10px",fontSize:"12px",cursor:"pointer"}}>
-              Annuler
+
+            <button onClick={() => setMode("annuler")}
+              style={{width:"100%",padding:"14px",background:C.rougeDim,border:"2px solid rgba(220,38,38,0.4)",borderRadius:"14px",color:C.rouge,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"10px",marginBottom:"10px"}}>
+              <span style={{fontSize:"20px"}}>❌</span>
+              <div style={{textAlign:"left"}}>
+                <div style={{fontSize:"13px",fontWeight:"900"}}>Annuler le RDV</div>
+                <div style={{fontSize:"10px",color:"rgba(220,38,38,0.7)"}}>Client absent / annulation</div>
+              </div>
+            </button>
+
+            <button onClick={onClose}
+              style={{width:"100%",padding:"11px",background:"transparent",color:C.muted,border:"1px solid "+C.border,borderRadius:"10px",fontSize:"12px",cursor:"pointer"}}>
+              Fermer
             </button>
           </>
         )}
@@ -127,8 +136,7 @@ function ModalAction({ ticket, onClose, onDone }) {
             <div style={{marginBottom:"14px"}}>
               <label style={{fontSize:"11px",color:C.muted,display:"block",marginBottom:"6px",fontWeight:"700"}}>Commentaire (facultatif)</label>
               <textarea rows={3} placeholder="Ex : Joint remplacé, fenêtre fonctionnelle. Client satisfait."
-                value={commentaire} onChange={e => setCommentaire(e.target.value)}
-                style={{resize:"none"}}/>
+                value={commentaire} onChange={e => setCommentaire(e.target.value)} style={{resize:"none"}}/>
             </div>
             <button onClick={confirmer} disabled={saving}
               style={{width:"100%",padding:"14px",background:saving?"#333":C.vert,color:C.white,border:"none",borderRadius:"12px",fontSize:"14px",fontWeight:"900",cursor:saving?"not-allowed":"pointer"}}>
@@ -144,13 +152,12 @@ function ModalAction({ ticket, onClose, onDone }) {
               <span style={{fontSize:"14px",fontWeight:"700",color:C.white}}>❌ Annuler le RDV</span>
             </div>
             <div style={{background:C.rougeDim,border:"1px solid rgba(220,38,38,0.3)",borderRadius:"10px",padding:"10px 14px",marginBottom:"14px",fontSize:"12px",color:C.rouge}}>
-              ⚠️ Le créneau sera libéré et le ticket marqué comme annulé.
+              ⚠️ Le ticket sera marqué comme annulé.
             </div>
             <div style={{marginBottom:"14px"}}>
               <label style={{fontSize:"11px",color:C.muted,display:"block",marginBottom:"6px",fontWeight:"700"}}>Motif d'annulation *</label>
-              <textarea rows={3} placeholder="Ex : Client absent, annulation à la demande du client, doublon..."
-                value={commentaire} onChange={e => setCommentaire(e.target.value)}
-                style={{resize:"none"}}/>
+              <textarea rows={3} placeholder="Ex : Client absent, annulation à la demande du client..."
+                value={commentaire} onChange={e => setCommentaire(e.target.value)} style={{resize:"none"}}/>
             </div>
             <button onClick={confirmer} disabled={saving||!commentaire.trim()}
               style={{width:"100%",padding:"14px",background:saving||!commentaire.trim()?"#333":C.rouge,color:C.white,border:"none",borderRadius:"12px",fontSize:"14px",fontWeight:"900",cursor:saving||!commentaire.trim()?"not-allowed":"pointer"}}>
@@ -179,10 +186,9 @@ function ModalAction({ ticket, onClose, onDone }) {
               </div>
             </div>
             <div style={{marginBottom:"14px"}}>
-              <label style={{fontSize:"11px",color:C.muted,display:"block",marginBottom:"6px",fontWeight:"700"}}>Motif de replanification *</label>
-              <textarea rows={2} placeholder="Ex : Client absent, pièce à commander, accès impossible..."
-                value={commentaire} onChange={e => setCommentaire(e.target.value)}
-                style={{resize:"none"}}/>
+              <label style={{fontSize:"11px",color:C.muted,display:"block",marginBottom:"6px",fontWeight:"700"}}>Motif *</label>
+              <textarea rows={2} placeholder="Ex : Client absent, pièce à commander..."
+                value={commentaire} onChange={e => setCommentaire(e.target.value)} style={{resize:"none"}}/>
             </div>
             <button onClick={confirmer} disabled={saving||!newDate}
               style={{width:"100%",padding:"14px",background:saving||!newDate?"#333":C.jaune,color:"#111",border:"none",borderRadius:"12px",fontSize:"14px",fontWeight:"900",cursor:saving||!newDate?"not-allowed":"pointer"}}>
@@ -199,35 +205,32 @@ function TicketCard({ ticket, onAction }) {
   const urgent = ticket.fields?.Urgent===true||ticket.fields?.Urgent==="true";
   const statut = ticket.fields?.Statut || "Nouveau";
   const commentaire = ticket.fields?.Commentaire;
-  const isTermine = statut === "Terminé";
-  const isReplanifie = commentaire?.startsWith("Replanifié");
+  const isTermine = statut === "Terminé" || statut === "Termine";
+  const isAnnule = statut === "Annulé" || statut === "Annule";
+  const isReplanifie = commentaire?.startsWith("Replanifie") || commentaire?.startsWith("Replanifié");
 
   return (
-    <div style={{background:C.card,border:"2px solid "+(urgent?"rgba(220,38,38,0.35)":isTermine?"rgba(22,163,74,0.25)":C.border),borderRadius:"14px",overflow:"hidden",opacity:isTermine?0.6:1}}>
-      {/* Header carte */}
-      <div style={{background:urgent?"rgba(220,38,38,0.08)":isTermine?C.vertDim:C.orDim,padding:"12px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+    <div style={{background:C.card,border:"2px solid "+(urgent?"rgba(220,38,38,0.35)":isTermine?"rgba(22,163,74,0.25)":isAnnule?"rgba(220,38,38,0.2)":C.border),borderRadius:"14px",overflow:"hidden",opacity:(isTermine||isAnnule)?0.6:1}}>
+      <div style={{background:urgent?"rgba(220,38,38,0.08)":isTermine?C.vertDim:isAnnule?C.rougeDim:C.orDim,padding:"12px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
           <span style={{fontSize:"11px",fontWeight:"900",color:C.or,fontFamily:"monospace"}}>{ticket.fields?.Name}</span>
           {urgent && <span style={{background:C.rougeDim,color:C.rouge,fontSize:"9px",fontWeight:"700",padding:"2px 7px",borderRadius:"20px"}}>URGENT</span>}
           {isTermine && <span style={{background:C.vertDim,color:C.vert,fontSize:"9px",fontWeight:"700",padding:"2px 7px",borderRadius:"20px"}}>✅ TERMINÉ</span>}
+          {isAnnule && <span style={{background:C.rougeDim,color:C.rouge,fontSize:"9px",fontWeight:"700",padding:"2px 7px",borderRadius:"20px"}}>❌ ANNULÉ</span>}
           {isReplanifie && <span style={{background:C.jauneDim,color:C.jaune,fontSize:"9px",fontWeight:"700",padding:"2px 7px",borderRadius:"20px"}}>🔄 REPLANIFIÉ</span>}
         </div>
         <span style={{fontSize:"10px",color:C.muted}}>{ticket.fields?.Agence}</span>
       </div>
-
-      {/* Corps */}
       <div style={{padding:"14px 16px"}}>
         <div style={{fontSize:"16px",fontWeight:"900",color:C.white,marginBottom:"4px"}}>{ticket.fields?.Client}</div>
-
         <div style={{display:"flex",gap:"6px",flexWrap:"wrap",marginBottom:"12px"}}>
           <span style={{fontSize:"11px",background:C.card2,border:"1px solid "+C.border,borderRadius:"6px",padding:"3px 8px",color:C.text}}>{ticket.fields?.Produit}</span>
-          <span style={{fontSize:"11px",background:C.card2,border:"1px solid "+C.border,borderRadius:"6px",padding:"3px 8px",color:C.muted}}>{ticket.fields?.Problème}</span>
+          <span style={{fontSize:"11px",background:C.card2,border:"1px solid "+C.border,borderRadius:"6px",padding:"3px 8px",color:C.muted}}>{ticket.fields?.["Problème"]}</span>
         </div>
-
         <div style={{display:"flex",flexDirection:"column",gap:"6px",marginBottom:"14px"}}>
           <div style={{display:"flex",gap:"8px",alignItems:"center"}}>
             <span style={{fontSize:"14px"}}>📅</span>
-            <span style={{fontSize:"12px",color:C.text,fontWeight:"600"}}>{ticket.fields?.Créneau}</span>
+            <span style={{fontSize:"12px",color:C.text,fontWeight:"600"}}>{ticket.fields?.["Créneau"]}</span>
           </div>
           {ticket.fields?.Adresse && (
             <div style={{display:"flex",gap:"8px",alignItems:"center"}}>
@@ -235,29 +238,21 @@ function TicketCard({ ticket, onAction }) {
               <span style={{fontSize:"12px",color:C.muted}}>{ticket.fields?.Adresse}</span>
             </div>
           )}
-          {ticket.fields?.Téléphone && (
-            <a href={"tel:"+ticket.fields.Téléphone} style={{display:"flex",gap:"8px",alignItems:"center",textDecoration:"none"}}>
+          {ticket.fields?.["Téléphone"] && (
+            <a href={"tel:"+ticket.fields["Téléphone"]} style={{display:"flex",gap:"8px",alignItems:"center",textDecoration:"none"}}>
               <span style={{fontSize:"14px"}}>📞</span>
-              <span style={{fontSize:"12px",color:C.or,fontWeight:"700"}}>{ticket.fields?.Téléphone}</span>
+              <span style={{fontSize:"12px",color:C.or,fontWeight:"700"}}>{ticket.fields?.["Téléphone"]}</span>
             </a>
           )}
-          {ticket.fields?.Garantie===true && (
-            <div style={{display:"flex",gap:"8px",alignItems:"center"}}>
-              <span style={{fontSize:"14px"}}>🛡️</span>
-              <span style={{fontSize:"12px",color:C.vert}}>Sous garantie {ticket.fields?.["N° Facture"]?"— Facture "+ticket.fields["N° Facture"]:""}</span>
-            </div>
-          )}
         </div>
-
         {commentaire && (
           <div style={{background:C.card2,border:"1px solid "+C.border,borderRadius:"8px",padding:"8px 12px",marginBottom:"12px",fontSize:"11px",color:C.muted,fontStyle:"italic"}}>
             💬 {commentaire}
           </div>
         )}
-
-        {!isTermine && (
+        {!isTermine && !isAnnule && (
           <button onClick={() => onAction(ticket)}
-            style={{width:"100%",padding:"13px",background:C.or,color:"#111",border:"none",borderRadius:"10px",fontSize:"13px",fontWeight:"900",cursor:"pointer",letterSpacing:"0.3px"}}>
+            style={{width:"100%",padding:"13px",background:C.or,color:"#111",border:"none",borderRadius:"10px",fontSize:"13px",fontWeight:"900",cursor:"pointer"}}>
             Gérer cette intervention →
           </button>
         )}
@@ -277,7 +272,7 @@ function Technicien({ agence }) {
     setLoading(true);
     try {
       const filter = encodeURIComponent('{Agence}="'+agence+'"');
-      const url = 'https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets SAV?filterByFormula='+filter+'&sort[0][field]=Name&sort[0][direction]=desc&maxRecords=100';
+      const url = 'https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets%20SAV?filterByFormula='+filter+'&sort[0][field]=Name&sort[0][direction]=desc&maxRecords=100';
       const r = await fetch(url, { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
       const json = await r.json();
       setTickets(json.records||[]);
@@ -288,41 +283,29 @@ function Technicien({ agence }) {
 
   React.useEffect(() => { charger(); }, [agence]);
 
-  const today = new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
   const todayStr = new Date().toLocaleDateString('fr-FR');
+  const todayLong = new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
 
   const filtrer = (t) => {
-    const creneau = t.fields?.Créneau || "";
+    const creneau = (t.fields?.["Créneau"] || "").toLowerCase();
     const statut = t.fields?.Statut || "Nouveau";
-    if (onglet === "aujourd_hui") {
-      return creneau.toLowerCase().includes(todayStr) || creneau.toLowerCase().includes(today.toLowerCase());
-    }
-    if (onglet === "a_venir") return statut !== "Terminé" && statut !== "Annulé";
-    if (onglet === "termines") return statut === "Terminé";
+    if (onglet === "aujourd_hui") return creneau.includes(todayStr) || creneau.includes(todayLong.toLowerCase());
+    if (onglet === "a_venir") return statut !== "Terminé" && statut !== "Termine" && statut !== "Annulé" && statut !== "Annule";
+    if (onglet === "termines") return statut === "Terminé" || statut === "Termine";
     return true;
   };
 
   const filtered = tickets.filter(filtrer);
-  const nbAujourdhui = tickets.filter(t => {
-    const c = t.fields?.Créneau || "";
-    return c.toLowerCase().includes(todayStr) || c.toLowerCase().includes(today.toLowerCase());
-  }).length;
-  const nbAVenir = tickets.filter(t => { const s = t.fields?.Statut||"Nouveau"; return s!=="Terminé"&&s!=="Annulé"; }).length;
-  const nbTermines = tickets.filter(t => t.fields?.Statut==="Terminé").length;
-
-  const agenceShort = agence.replace(" (65)","").replace(" (40)","").replace(" (64)","").replace(" (31)","");
+  const nbAujourdhui = tickets.filter(t => { const c=(t.fields?.["Créneau"]||"").toLowerCase(); return c.includes(todayStr)||c.includes(todayLong.toLowerCase()); }).length;
+  const nbAVenir = tickets.filter(t => { const s=t.fields?.Statut||"Nouveau"; return s!=="Terminé"&&s!=="Termine"&&s!=="Annulé"&&s!=="Annule"; }).length;
+  const nbTermines = tickets.filter(t => t.fields?.Statut==="Terminé"||t.fields?.Statut==="Termine").length;
+  const agenceShort = agence.replace(/ \(\d+\)/,"");
 
   return (
     <div style={{minHeight:"100vh",background:C.bg,maxWidth:"600px",margin:"0 auto"}}>
       {selectedTicket && (
-        <ModalAction
-          ticket={selectedTicket}
-          onClose={() => setSelectedTicket(null)}
-          onDone={(mode) => { setSelectedTicket(null); charger(); }}
-        />
+        <ModalAction ticket={selectedTicket} onClose={() => setSelectedTicket(null)} onDone={() => { setSelectedTicket(null); charger(); }}/>
       )}
-
-      {/* Header */}
       <div style={{background:C.card,borderBottom:"1px solid "+C.border,padding:"14px 20px",position:"sticky",top:0,zIndex:100}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
@@ -342,42 +325,28 @@ function Technicien({ agence }) {
             <button onClick={charger} style={{background:C.orDim,border:"1px solid "+C.orBord,color:C.or,borderRadius:"8px",padding:"5px 10px",fontSize:"11px",fontWeight:"700",cursor:"pointer",marginTop:"3px"}}>↺</button>
           </div>
         </div>
-
-        {/* Onglets */}
         <div style={{display:"flex",gap:"4px",marginTop:"12px",background:"#111",borderRadius:"10px",padding:"3px"}}>
-          {[
-            ["aujourd_hui", `Aujourd'hui`, nbAujourdhui],
-            ["a_venir", "À venir", nbAVenir],
-            ["termines", "Terminés", nbTermines],
-          ].map(([id,label,count]) => (
+          {[["aujourd_hui","Aujourd'hui",nbAujourdhui],["a_venir","À venir",nbAVenir],["termines","Terminés",nbTermines]].map(([id,label,count]) => (
             <button key={id} onClick={() => setOnglet(id)}
               style={{flex:1,padding:"7px 4px",borderRadius:"8px",border:"none",background:onglet===id?C.or:"transparent",color:onglet===id?"#111":C.muted,fontSize:"11px",fontWeight:"700",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>
               {label}
-              {count > 0 && <span style={{background:onglet===id?"rgba(0,0,0,0.2)":C.orDim,color:onglet===id?"#111":C.or,borderRadius:"10px",padding:"0 5px",fontSize:"10px"}}>{count}</span>}
+              {count>0 && <span style={{background:onglet===id?"rgba(0,0,0,0.2)":C.orDim,color:onglet===id?"#111":C.or,borderRadius:"10px",padding:"0 5px",fontSize:"10px"}}>{count}</span>}
             </button>
           ))}
         </div>
       </div>
-
-      {/* Contenu */}
       <div style={{padding:"16px"}}>
         {loading && <div style={{textAlign:"center",padding:"60px",color:C.muted}}>Chargement...</div>}
-
-        {!loading && filtered.length === 0 && (
+        {!loading && filtered.length===0 && (
           <div style={{textAlign:"center",padding:"60px 20px",color:C.muted}}>
-            <div style={{fontSize:"40px",marginBottom:"12px"}}>
-              {onglet==="aujourd_hui"?"🎉":onglet==="termines"?"📋":"📭"}
-            </div>
+            <div style={{fontSize:"40px",marginBottom:"12px"}}>{onglet==="aujourd_hui"?"🎉":onglet==="termines"?"📋":"📭"}</div>
             <div style={{fontSize:"14px",fontWeight:"700",color:C.text}}>
               {onglet==="aujourd_hui"?"Aucune intervention aujourd'hui":onglet==="termines"?"Aucune intervention terminée":"Aucune intervention à venir"}
             </div>
           </div>
         )}
-
         <div style={{display:"flex",flexDirection:"column",gap:"12px"}}>
-          {filtered.map(t => (
-            <TicketCard key={t.id} ticket={t} onAction={setSelectedTicket}/>
-          ))}
+          {filtered.map(t => <TicketCard key={t.id} ticket={t} onAction={setSelectedTicket}/>)}
         </div>
       </div>
     </div>
@@ -388,13 +357,11 @@ function Login({ onLogin }) {
   const [pwd, setPwd] = React.useState("");
   const [error, setError] = React.useState(false);
   const [show, setShow] = React.useState(false);
-
   const tenter = () => {
     const agence = PASSWORDS[pwd.trim()];
     if (agence) { onLogin(agence); }
     else { setError(true); setTimeout(() => setError(false), 2000); }
   };
-
   return (
     <div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:"24px"}}>
       <div style={{width:"100%",maxWidth:"340px"}}>
@@ -407,31 +374,26 @@ function Login({ onLogin }) {
           </div>
           <div style={{fontSize:"11px",color:C.muted,marginTop:"6px",letterSpacing:"2px",textTransform:"uppercase"}}>Espace Technicien</div>
         </div>
-
-        <div style={{background:C.card,border:"1px solid "+(error?"rgba(220,38,38,0.4)":C.orBord),borderRadius:"16px",padding:"24px",transition:"border-color 0.2s"}}>
+        <div style={{background:C.card,border:"1px solid "+(error?"rgba(220,38,38,0.4)":C.orBord),borderRadius:"16px",padding:"24px"}}>
           <div style={{position:"relative",marginBottom:"14px"}}>
             <input type={show?"text":"password"} placeholder="Code agence" value={pwd}
               onChange={e => setPwd(e.target.value)} onKeyDown={e => e.key==="Enter"&&tenter()}
               style={{paddingRight:"40px",fontSize:"16px",textAlign:"center",letterSpacing:"2px"}}/>
-            <button onClick={() => setShow(!show)}
-              style={{position:"absolute",right:"12px",top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:C.muted,cursor:"pointer",fontSize:"16px",width:"auto",padding:"0"}}>
+            <button onClick={() => setShow(!show)} style={{position:"absolute",right:"12px",top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:C.muted,cursor:"pointer",fontSize:"16px",width:"auto",padding:"0"}}>
               {show?"🙈":"👁️"}
             </button>
           </div>
           {error && <div style={{fontSize:"11px",color:C.rouge,marginBottom:"10px",textAlign:"center"}}>Code incorrect</div>}
-          <button onClick={tenter}
-            style={{width:"100%",padding:"14px",background:C.or,color:"#111",border:"none",borderRadius:"10px",fontSize:"14px",fontWeight:"900",cursor:"pointer"}}>
+          <button onClick={tenter} style={{width:"100%",padding:"14px",background:C.or,color:"#111",border:"none",borderRadius:"10px",fontSize:"14px",fontWeight:"900",cursor:"pointer"}}>
             Accéder →
           </button>
         </div>
-
         <div style={{marginTop:"20px",background:C.card,border:"1px solid "+C.border,borderRadius:"12px",padding:"16px"}}>
           <div style={{fontSize:"10px",color:C.muted,marginBottom:"10px",fontWeight:"700",textTransform:"uppercase",letterSpacing:"1px",textAlign:"center"}}>Codes d'accès</div>
           {[["ibos65","Ibos (65)"],["tarnos40","Tarnos (40)"],["lescar64","Lescar (64)"],["stgaudens31","Saint-Gaudens (31)"]].map(([p,l]) => (
             <div key={p} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:"1px solid "+C.border}}>
               <span style={{fontSize:"12px",color:C.muted}}>{l}</span>
-              <code style={{fontSize:"12px",color:C.or,background:C.orDim,padding:"2px 8px",borderRadius:"6px",cursor:"pointer"}}
-                onClick={() => setPwd(p)}>{p}</code>
+              <code style={{fontSize:"12px",color:C.or,background:C.orDim,padding:"2px 8px",borderRadius:"6px",cursor:"pointer"}} onClick={() => setPwd(p)}>{p}</code>
             </div>
           ))}
         </div>
