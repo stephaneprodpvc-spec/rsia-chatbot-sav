@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSIA — Dashboard Agences</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', sans-serif; background: #0D0D0D; color: #E5E5E5; min-height: 100vh; }
+::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #1a1a1a; } ::-webkit-scrollbar-thumb { background: #FF6B00; border-radius: 3px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const AIRTABLE_TOKEN = 'patXNwO908NNfQcQZ.6d0f58479c753d1bb828a26eccbfc4b1e10ece70b8c71e381d304ecb62990375';
+const AIRTABLE_BASE = 'appFqAT8WeX0UTudy';
+
+const PASSWORDS = {
+  "rsia2026": "global",
+  "ibos65": "Ibos (65)",
+  "tarnos40": "Tarnos (40)",
+  "lescar64": "Lescar (64)",
+  "stgaudens31": "Saint-Gaudens (31)",
+};
+
+const AGENCES = ["Ibos (65)", "Tarnos (40)", "Lescar (64)", "Saint-Gaudens (31)"];
+
+const C = {
+  bg: "#0D0D0D", card: "#161616", border: "#2a2a2a",
+  or: "#FF6B00", orDim: "rgba(255,107,0,0.12)", orBord: "rgba(255,107,0,0.3)",
+  text: "#E5E5E5", muted: "#666", white: "#fff",
+  rouge: "#DC2626", rougeDim: "rgba(220,38,38,0.12)",
+  vert: "#16a34a", vertDim: "rgba(22,163,74,0.12)",
+  bleu: "#2563eb", bleuDim: "rgba(37,99,235,0.12)",
+  jaune: "#d97706", jauneDim: "rgba(217,119,6,0.12)",
+};
+
+function Badge({ label, color, bg }) {
+  return <span style={{display:"inline-block",padding:"2px 8px",borderRadius:"20px",fontSize:"10px",fontWeight:"700",color,background:bg,letterSpacing:"0.5px"}}>{label}</span>;
+}
+
+function StatCard({ label, value, sub, accent }) {
+  return (
+    <div style={{background:C.card,border:"1px solid " + (accent ? C.orBord : C.border),borderRadius:"12px",padding:"16px 20px",flex:1,minWidth:"120px"}}>
+      <div style={{fontSize:"28px",fontWeight:"900",color:accent?C.or:C.white,fontFamily:"monospace"}}>{value}</div>
+      <div style={{fontSize:"12px",fontWeight:"700",color:C.text,marginTop:"4px"}}>{label}</div>
+      {sub && <div style={{fontSize:"10px",color:C.muted,marginTop:"2px"}}>{sub}</div>}
+    </div>
+  );
+}
+
+function TicketRow({ t, onStatusChange }) {
+  const urgent = t.fields?.Urgent === true || t.fields?.Urgent === "true";
+  const statut = t.fields?.Statut || "Nouveau";
+  const statusColors = {
+    "Nouveau": { color: C.bleu, bg: C.bleuDim },
+    "En cours": { color: C.jaune, bg: C.jauneDim },
+    "Terminé": { color: C.vert, bg: C.vertDim },
+    "Annulé": { color: C.muted, bg: "#1a1a1a" },
+  };
+  const sc = statusColors[statut] || statusColors["Nouveau"];
+
+  return (
+    <div style={{background:C.card,border:"1px solid " + (urgent ? "rgba(220,38,38,0.3)" : C.border),borderRadius:"10px",padding:"12px 16px",display:"flex",gap:"12px",alignItems:"flex-start",transition:"border-color 0.2s"}}>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginBottom:"6px"}}>
+          <span style={{fontSize:"12px",fontWeight:"900",color:C.or,fontFamily:"monospace"}}>{t.fields?.Name || "—"}</span>
+          {urgent && <Badge label="URGENT" color={C.rouge} bg={C.rougeDim} />}
+          <Badge label={statut} color={sc.color} bg={sc.bg} />
+          <span style={{fontSize:"10px",color:C.muted,marginLeft:"auto"}}>{t.fields?.Agence}</span>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"4px 16px"}}>
+          {[
+            ["👤", t.fields?.Client],
+            ["📦", t.fields?.Produit],
+            ["🔧", t.fields?.Problème],
+            ["📅", t.fields?.Créneau],
+            ["📍", t.fields?.Adresse],
+            ["📞", t.fields?.Téléphone],
+          ].map(([icon, val], i) => val ? (
+            <div key={i} style={{fontSize:"11px",color:C.muted,display:"flex",gap:"5px",alignItems:"flex-start"}}>
+              <span style={{flexShrink:0}}>{icon}</span>
+              <span style={{color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{val}</span>
+            </div>
+          ) : null)}
+        </div>
+        {t.fields?.Garantie && (
+          <div style={{marginTop:"6px",fontSize:"10px",color:C.muted}}>
+            Garantie : <span style={{color:t.fields.Garantie===true||t.fields.Garantie==="true"?C.vert:C.muted}}>{t.fields.Garantie===true||t.fields.Garantie==="true"?"Oui":"Non"}</span>
+            {t.fields?.["N° Facture"] && <span style={{marginLeft:"8px"}}>— Facture : <span style={{color:C.text}}>{t.fields["N° Facture"]}</span></span>}
+          </div>
+        )}
+      </div>
+      <div style={{flexShrink:0}}>
+        <select value={statut} onChange={e => onStatusChange(t.id, e.target.value)}
+          style={{background:"#1f1f1f",border:"1px solid " + C.border,color:C.text,borderRadius:"8px",padding:"5px 8px",fontSize:"11px",cursor:"pointer",outline:"none"}}>
+          <option>Nouveau</option>
+          <option>En cours</option>
+          <option>Terminé</option>
+          <option>Annulé</option>
+        </select>
+      </div>
+    </div>
+  );
+}
+
+function PlanningView({ agenceFilter }) {
+  const [slots, setSlots] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+
+  const charger = async () => {
+    setLoading(true);
+    try {
+      let filter = agenceFilter !== "global"
+        ? encodeURIComponent('AND({Agence}="' + agenceFilter + '",{Statut}="Pris")')
+        : encodeURIComponent('{Statut}="Pris"');
+      const url = 'https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + filter + '&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=50';
+      const r = await fetch(url, { headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN } });
+      const json = await r.json();
+      setSlots(json.records || []);
+    } catch(e) { console.error(e); }
+    setLoading(false);
+  };
+
+  React.useEffect(() => { charger(); }, [agenceFilter]);
+
+  const byDate = {};
+  slots.forEach(s => {
+    const d = s.fields?.Date;
+    if (!byDate[d]) byDate[d] = [];
+    byDate[d].push(s);
+  });
+
+  const today = new Date().toISOString().split('T')[0];
+
+  return (
+    <div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px"}}>
+        <h2 style={{fontSize:"16px",fontWeight:"700",color:C.white}}>📅 Planning interventions</h2>
+        <button onClick={charger} style={{background:C.orDim,border:"1px solid " + C.orBord,color:C.or,borderRadius:"8px",padding:"5px 12px",fontSize:"11px",cursor:"pointer"}}>↺ Rafraîchir</button>
+      </div>
+      {loading && <div style={{textAlign:"center",padding:"40px",color:C.muted}}>Chargement...</div>}
+      {!loading && Object.keys(byDate).length === 0 && (
+        <div style={{textAlign:"center",padding:"40px",color:C.muted,border:"1px dashed " + C.border,borderRadius:"12px"}}>Aucune intervention planifiée</div>
+      )}
+      {!loading && Object.keys(byDate).sort().map(date => {
+        const dateObj = new Date(date + 'T12:00:00');
+        const label = dateObj.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
+        const isPast = date < today;
+        const isToday = date === today;
+        return (
+          <div key={date} style={{marginBottom:"16px",opacity:isPast?0.5:1}}>
+            <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"8px"}}>
+              <div style={{height:"1px",flex:1,background:C.border}}/>
+              <span style={{fontSize:"12px",fontWeight:"700",color:isToday?C.or:C.muted,textTransform:"capitalize",whiteSpace:"nowrap"}}>
+                {isToday ? "⚡ Aujourd'hui — " : ""}{label}
+              </span>
+              <div style={{height:"1px",flex:1,background:C.border}}/>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:"6px"}}>
+              {byDate[date].map((s, i) => (
+                <div key={i} style={{background:C.card,border:"1px solid " + C.border,borderRadius:"8px",padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <div>
+                    <span style={{fontSize:"12px",fontWeight:"700",color:C.white}}>{s.fields?.Créneau?.replace("Matin (8h30 — 12h00)","🌅 Matin").replace("Après-midi (13h00 — 17h00)","🌇 Après-midi")}</span>
+                    <span style={{fontSize:"10px",color:C.muted,marginLeft:"10px"}}>{s.fields?.Agence}</span>
+                  </div>
+                  <button onClick={async () => {
+                    await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning/' + s.id, {
+                      method: 'PATCH',
+                      headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ fields: { Statut: 'Libre' } })
+                    });
+                    charger();
+                  }} style={{background:"rgba(220,38,38,0.1)",border:"1px solid rgba(220,38,38,0.3)",color:C.rouge,borderRadius:"6px",padding:"3px 8px",fontSize:"10px",cursor:"pointer"}}>
+                    Libérer
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function Dashboard({ agenceAccess }) {
+  const [tickets, setTickets] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [agenceFilter, setAgenceFilter] = React.useState(agenceAccess === "global" ? "global" : agenceAccess);
+  const [vue, setVue] = React.useState("tickets");
+  const [search, setSearch] = React.useState("");
+  const [statutFilter, setStatutFilter] = React.useState("tous");
+  const [lastRefresh, setLastRefresh] = React.useState(null);
+
+  const charger = async () => {
+    setLoading(true);
+    try {
+      let filter = agenceFilter !== "global"
+        ? encodeURIComponent('{Agence}="' + agenceFilter + '"')
+        : "";
+      const url = 'https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Tickets SAV?'
+        + (filter ? 'filterByFormula=' + filter + '&' : '')
+        + 'sort[0][field]=Name&sort[0][direction]=desc&maxRecords=200';
+      const r = await fetch(url, { headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN } });
+      const json = await r.json();
+      setTickets(json.records || []);
+      setLastRefresh(new Date().toLocaleTimeString('fr-FR'));
+    } catch(e) { console.error(e); }
+    setLoading(false);
+  };
+
+  React.useEffect(() => { charger(); }, [agenceFilter]);
+
+  const updateStatus = async (id, newStatus) => {
+    setTickets(prev => prev.map(t => t.id === id ? {...t, fields: {...t.fields, Statut: newStatus}} : t));
+    await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Tickets SAV/' + id, {
+      method: 'PATCH',
+      headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: { Statut: newStatus } })
+    });
+  };
+
+  const filtered = tickets.filter(t => {
+    const matchAgence = agenceFilter === "global" || t.fields?.Agence === agenceFilter;
+    const matchStatut = statutFilter === "tous" || t.fields?.Statut === statutFilter || (!t.fields?.Statut && statutFilter === "Nouveau");
+    const q = search.toLowerCase();
+    const matchSearch = !q || (t.fields?.Client||"").toLowerCase().includes(q) || (t.fields?.Name||"").toLowerCase().includes(q) || (t.fields?.Produit||"").toLowerCase().includes(q);
+    return matchAgence && matchStatut && matchSearch;
+  });
+
+  const stats = {
+    total: tickets.length,
+    urgent: tickets.filter(t => t.fields?.Urgent === true || t.fields?.Urgent === "true").length,
+    nouveau: tickets.filter(t => !t.fields?.Statut || t.fields?.Statut === "Nouveau").length,
+    encours: tickets.filter(t => t.fields?.Statut === "En cours").length,
+    termine: tickets.filter(t => t.fields?.Statut === "Terminé").length,
+  };
+
+  const byAgence = {};
+  AGENCES.forEach(a => { byAgence[a] = tickets.filter(t => t.fields?.Agence === a).length; });
+
+  return (
+    <div style={{minHeight:"100vh",background:C.bg}}>
+      {/* Header */}
+      <div style={{background:C.card,borderBottom:"1px solid " + C.border,padding:"12px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100}}>
+        <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
+          <div style={{width:"36px",height:"36px",background:C.or,borderRadius:"8px",display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <span style={{fontFamily:"Arial Black",fontSize:"18px",fontWeight:"900",color:"#111",transform:"scaleX(-1)",display:"inline-block"}}>R</span>
+          </div>
+          <div>
+            <div style={{fontSize:"15px",fontWeight:"900",color:C.white}}>
+              <span style={{display:"inline-block",transform:"scaleX(-1)",fontFamily:"Arial Black"}}>R</span>S<span style={{color:C.or}}>IA</span>
+              <span style={{fontSize:"11px",fontWeight:"500",marginLeft:"6px",color:C.muted}}>Dashboard SAV</span>
+            </div>
+          </div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
+          {lastRefresh && <span style={{fontSize:"10px",color:C.muted}}>Mis à jour {lastRefresh}</span>}
+          <button onClick={charger} style={{background:C.orDim,border:"1px solid " + C.orBord,color:C.or,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",fontWeight:"700",cursor:"pointer"}}>↺ Actualiser</button>
+        </div>
+      </div>
+
+      <div style={{padding:"24px",maxWidth:"1200px",margin:"0 auto"}}>
+
+        {/* Filtres agence */}
+        {agenceAccess === "global" && (
+          <div style={{display:"flex",gap:"8px",marginBottom:"20px",flexWrap:"wrap"}}>
+            {["global", ...AGENCES].map(a => (
+              <button key={a} onClick={() => setAgenceFilter(a)}
+                style={{padding:"7px 16px",borderRadius:"20px",border:"1px solid " + (agenceFilter===a?C.or:C.border),background:agenceFilter===a?C.or:"transparent",color:agenceFilter===a?"#111":C.muted,fontSize:"12px",fontWeight:"700",cursor:"pointer",transition:"all 0.15s"}}>
+                {a === "global" ? "🌐 Toutes agences" : a}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Stats globales */}
+        <div style={{display:"flex",gap:"12px",marginBottom:"20px",flexWrap:"wrap"}}>
+          <StatCard label="Total tickets" value={stats.total} accent />
+          <StatCard label="Urgents" value={stats.urgent} sub="à traiter en priorité" />
+          <StatCard label="Nouveaux" value={stats.nouveau} />
+          <StatCard label="En cours" value={stats.encours} />
+          <StatCard label="Terminés" value={stats.termine} />
+        </div>
+
+        {/* Répartition par agence (vue globale) */}
+        {agenceFilter === "global" && (
+          <div style={{background:C.card,border:"1px solid " + C.border,borderRadius:"12px",padding:"16px 20px",marginBottom:"20px"}}>
+            <div style={{fontSize:"13px",fontWeight:"700",color:C.white,marginBottom:"12px"}}>Répartition par agence</div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"12px"}}>
+              {AGENCES.map(a => (
+                <button key={a} onClick={() => setAgenceFilter(a)}
+                  style={{background:"#1a1a1a",border:"1px solid " + C.border,borderRadius:"10px",padding:"12px",textAlign:"center",cursor:"pointer",transition:"border-color 0.15s"}}>
+                  <div style={{fontSize:"22px",fontWeight:"900",color:C.or,fontFamily:"monospace"}}>{byAgence[a]}</div>
+                  <div style={{fontSize:"11px",color:C.muted,marginTop:"4px"}}>{a}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Onglets */}
+        <div style={{display:"flex",gap:"4px",marginBottom:"16px",background:C.card,borderRadius:"10px",padding:"4px",border:"1px solid " + C.border,width:"fit-content"}}>
+          {[["tickets","🎫 Tickets"],["planning","📅 Planning"]].map(([v,l]) => (
+            <button key={v} onClick={() => setVue(v)}
+              style={{padding:"7px 18px",borderRadius:"7px",border:"none",background:vue===v?C.or:"transparent",color:vue===v?"#111":C.muted,fontSize:"12px",fontWeight:"700",cursor:"pointer",transition:"all 0.15s"}}>
+              {l}
+            </button>
+          ))}
+        </div>
+
+        {vue === "tickets" && (
+          <>
+            {/* Filtres tickets */}
+            <div style={{display:"flex",gap:"10px",marginBottom:"16px",flexWrap:"wrap",alignItems:"center"}}>
+              <input placeholder="🔍 Rechercher client, ticket, produit..." value={search} onChange={e => setSearch(e.target.value)}
+                style={{background:C.card,border:"1px solid " + C.border,color:C.text,borderRadius:"8px",padding:"8px 14px",fontSize:"12px",width:"280px",outline:"none"}} />
+              <div style={{display:"flex",gap:"6px",flexWrap:"wrap"}}>
+                {["tous","Nouveau","En cours","Terminé","Annulé"].map(s => (
+                  <button key={s} onClick={() => setStatutFilter(s)}
+                    style={{padding:"6px 12px",borderRadius:"20px",border:"1px solid " + (statutFilter===s?C.or:C.border),background:statutFilter===s?C.orDim:"transparent",color:statutFilter===s?C.or:C.muted,fontSize:"11px",fontWeight:"600",cursor:"pointer"}}>
+                    {s === "tous" ? "Tous" : s}
+                  </button>
+                ))}
+              </div>
+              <span style={{fontSize:"11px",color:C.muted,marginLeft:"auto"}}>{filtered.length} ticket{filtered.length>1?"s":""}</span>
+            </div>
+
+            {loading && <div style={{textAlign:"center",padding:"60px",color:C.muted}}>Chargement des tickets...</div>}
+            {!loading && filtered.length === 0 && (
+              <div style={{textAlign:"center",padding:"60px",color:C.muted,border:"1px dashed " + C.border,borderRadius:"12px"}}>
+                Aucun ticket trouvé
+              </div>
+            )}
+            <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+              {filtered.map(t => <TicketRow key={t.id} t={t} onStatusChange={updateStatus} />)}
+            </div>
+          </>
+        )}
+
+        {vue === "planning" && <PlanningView agenceFilter={agenceFilter} />}
+
+      </div>
+    </div>
+  );
+}
+
+function Login({ onLogin }) {
+  const [pwd, setPwd] = React.useState("");
+  const [error, setError] = React.useState(false);
+  const [show, setShow] = React.useState(false);
+
+  const tenter = () => {
+    const access = PASSWORDS[pwd.trim()];
+    if (access) { onLogin(access); }
+    else { setError(true); setTimeout(() => setError(false), 2000); }
+  };
+
+  return (
+    <div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:"24px"}}>
+      <div style={{width:"100%",maxWidth:"380px"}}>
+        <div style={{textAlign:"center",marginBottom:"40px"}}>
+          <div style={{width:"60px",height:"60px",background:C.or,borderRadius:"14px",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px"}}>
+            <span style={{fontFamily:"Arial Black",fontSize:"30px",fontWeight:"900",color:"#111",transform:"scaleX(-1)",display:"inline-block"}}>R</span>
+          </div>
+          <div style={{fontSize:"24px",fontWeight:"900",color:C.white}}>
+            <span style={{display:"inline-block",transform:"scaleX(-1)",fontFamily:"Arial Black"}}>R</span>S<span style={{color:C.or}}>IA</span> Conseil
+          </div>
+          <div style={{fontSize:"12px",color:C.muted,marginTop:"6px",letterSpacing:"2px",textTransform:"uppercase"}}>Dashboard SAV</div>
+        </div>
+
+        <div style={{background:C.card,border:"1px solid " + (error?"rgba(220,38,38,0.4)":C.orBord),borderRadius:"16px",padding:"28px",transition:"border-color 0.2s"}}>
+          <div style={{fontSize:"13px",fontWeight:"700",color:C.white,marginBottom:"16px"}}>Accès sécurisé</div>
+          <div style={{position:"relative",marginBottom:"16px"}}>
+            <input
+              type={show?"text":"password"}
+              placeholder="Mot de passe agence"
+              value={pwd}
+              onChange={e => setPwd(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && tenter()}
+              style={{width:"100%",background:"#1a1a1a",border:"1px solid " + (error?"rgba(220,38,38,0.5)":C.border),color:C.white,borderRadius:"10px",padding:"12px 40px 12px 14px",fontSize:"13px",outline:"none",transition:"border-color 0.2s"}}
+            />
+            <button onClick={() => setShow(!show)}
+              style={{position:"absolute",right:"12px",top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:C.muted,cursor:"pointer",fontSize:"14px"}}>
+              {show?"🙈":"👁️"}
+            </button>
+          </div>
+          {error && <div style={{fontSize:"11px",color:C.rouge,marginBottom:"12px",textAlign:"center"}}>Mot de passe incorrect</div>}
+          <button onClick={tenter}
+            style={{width:"100%",padding:"12px",background:C.or,color:"#111",border:"none",borderRadius:"10px",fontSize:"13px",fontWeight:"900",cursor:"pointer",letterSpacing:"0.5px"}}>
+            Accéder au dashboard →
+          </button>
+          <div style={{marginTop:"20px",borderTop:"1px solid " + C.border,paddingTop:"16px"}}>
+            <div style={{fontSize:"10px",color:C.muted,marginBottom:"8px",fontWeight:"700",textTransform:"uppercase",letterSpacing:"1px"}}>Accès disponibles</div>
+            {[["rsia2026","Toutes agences (global)"],["ibos65","Agence Ibos"],["tarnos40","Agence Tarnos"],["lescar64","Agence Lescar"],["stgaudens31","Agence Saint-Gaudens"]].map(([p,l]) => (
+              <div key={p} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:"1px solid " + C.border}}>
+                <span style={{fontSize:"11px",color:C.muted}}>{l}</span>
+                <code style={{fontSize:"11px",color:C.or,background:C.orDim,padding:"1px 6px",borderRadius:"4px"}}>{p}</code>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [access, setAccess] = React.useState(null);
+  return access ? <Dashboard agenceAccess={access} /> : <Login onLogin={setAccess} />;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
