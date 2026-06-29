@@ -62,6 +62,9 @@ function ModalAction({ ticket, onClose, onDone }) {
       if (mode === "terminer") {
         fields.Statut = "Terminé";
         if (commentaire) fields.Commentaire = commentaire;
+      } else if (mode === "annuler") {
+        fields.Statut = "Annulé";
+        fields.Commentaire = "Annulé : " + commentaire;
       } else {
         fields.Statut = "En cours";
         const dateLabel = new Date(newDate+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
@@ -130,6 +133,28 @@ function ModalAction({ ticket, onClose, onDone }) {
             <button onClick={confirmer} disabled={saving}
               style={{width:"100%",padding:"14px",background:saving?"#333":C.vert,color:C.white,border:"none",borderRadius:"12px",fontSize:"14px",fontWeight:"900",cursor:saving?"not-allowed":"pointer"}}>
               {saving ? "⏳ Enregistrement..." : "✅ Confirmer — SAV terminé"}
+            </button>
+          </>
+        )}
+
+        {mode === "annuler" && (
+          <>
+            <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"16px"}}>
+              <button onClick={() => setMode(null)} style={{background:"none",border:"none",color:C.muted,cursor:"pointer",fontSize:"18px"}}>←</button>
+              <span style={{fontSize:"14px",fontWeight:"700",color:C.white}}>❌ Annuler le RDV</span>
+            </div>
+            <div style={{background:C.rougeDim,border:"1px solid rgba(220,38,38,0.3)",borderRadius:"10px",padding:"10px 14px",marginBottom:"14px",fontSize:"12px",color:C.rouge}}>
+              ⚠️ Le créneau sera libéré et le ticket marqué comme annulé.
+            </div>
+            <div style={{marginBottom:"14px"}}>
+              <label style={{fontSize:"11px",color:C.muted,display:"block",marginBottom:"6px",fontWeight:"700"}}>Motif d'annulation *</label>
+              <textarea rows={3} placeholder="Ex : Client absent, annulation à la demande du client, doublon..."
+                value={commentaire} onChange={e => setCommentaire(e.target.value)}
+                style={{resize:"none"}}/>
+            </div>
+            <button onClick={confirmer} disabled={saving||!commentaire.trim()}
+              style={{width:"100%",padding:"14px",background:saving||!commentaire.trim()?"#333":C.rouge,color:C.white,border:"none",borderRadius:"12px",fontSize:"14px",fontWeight:"900",cursor:saving||!commentaire.trim()?"not-allowed":"pointer"}}>
+              {saving ? "⏳ Enregistrement..." : "❌ Confirmer l'annulation"}
             </button>
           </>
         )}
