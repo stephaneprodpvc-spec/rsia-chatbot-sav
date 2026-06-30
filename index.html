@@ -365,6 +365,10 @@ function App() {
         const urls = await Promise.all(photos.map(f => uploadCloudinary(f)));
         photoUrls = urls.join(', ');
       }
+      const garantieTexte = garantie === true
+        ? "Oui — Facture " + facture
+        : (garantie === false ? "Non / Hors garantie" : "N/A");
+      const urgentTexte = probleme.urgent ? "Oui" : "Non";
       await envoyerWebhook({
         ticket: num,
         agence: agence.ville,
@@ -375,9 +379,9 @@ function App() {
         produit: produit.label.substring(2).trim() + (sousType ? ' — ' + sousType : ''),
         probleme: probleme.label,
         creneau,
-        garantie,
+        garantie: garantieTexte,
         facture,
-        urgent: probleme.urgent,
+        urgent: urgentTexte,
         photos: photoUrls,
         planningId: planningId || ''
       });
@@ -618,7 +622,7 @@ function App() {
                   ["Téléphone", client.tel],
                   ["Email", client.email],
                   ["Adresse", client.adresse],
-                  ["Garantie", garantie===true?"Oui — Facture " + facture:"Non / Hors garantie"],
+                  ["Garantie", garantie===true?"Oui — Facture " + facture:(garantie===false?"Non / Hors garantie":"N/A")],
                   ["Produit", produit?.label+(sousType?" — "+sousType:"")],
                   ["Problème", probleme?.label],
                   ["Créneau", creneau],
