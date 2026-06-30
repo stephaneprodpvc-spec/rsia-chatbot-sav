@@ -98,7 +98,11 @@ function TicketRow({ t, onStatusChange }) {
               <span style={{color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{val}</span>
             </div>
           ):null)}
-        </div>
+        </div>{t.fields?.Photos && (
+  <a href={t.fields.Photos.split(',')[0].trim()} target="_blank" style={{fontSize:"11px",color:C.or,fontWeight:"700",textDecoration:"none",display:"flex",alignItems:"center",gap:"5px",marginTop:"6px"}}>
+    📎 Voir la/les photo(s)
+  </a>
+)}
       </div>
       <div style={{flexShrink:0}}>
         <select value={statut} onChange={e => onStatusChange(t.id, e.target.value)}
