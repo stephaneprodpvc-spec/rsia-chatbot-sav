@@ -92,7 +92,7 @@ function TicketRow({ t, onStatusChange }) {
           <span style={{fontSize:"10px",color:C.muted,marginLeft:"auto"}}>{t.fields?.Agence}</span>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"4px 16px"}}>
-          {[["👤",t.fields?.Client],["📦",t.fields?.Produit],["🔧",t.fields?.Problème],["📅",t.fields?.Créneau],["📍",t.fields?.Adresse],["📞",t.fields?.Téléphone]].map(([icon,val],i) => val?(
+          {[["👤",t.fields?.Client],["📦",t.fields?.Produit],["🔧",t.fields?.Problème],["📅",t.fields?.Créneau],["📍",t.fields?.Adresse],["📞",t.fields?.Téléphone],["📎",t.fields?.Photos?"Photo(s) jointe(s)":null]].map(([icon,val],i) => val?(
             <div key={i} style={{fontSize:"11px",color:C.muted,display:"flex",gap:"5px",alignItems:"flex-start"}}>
               <span style={{flexShrink:0}}>{icon}</span>
               <span style={{color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{val}</span>
