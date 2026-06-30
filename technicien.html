@@ -244,14 +244,19 @@ function TicketCard({ ticket, onAction }) {
             <div style={{display:"flex",gap:"8px",alignItems:"center"}}>
               <span style={{fontSize:"14px"}}>📍</span>
               <span style={{fontSize:"12px",color:C.muted}}>{ticket.fields?.Adresse}</span>
-            </div>
+            </div>{ticket.fields?.["Téléphone"] && (
+  <a href={"tel:"+ticket.fields["Téléphone"]} style={{display:"flex",gap:"8px",alignItems:"center",textDecoration:"none"}}>
+    <span style={{fontSize:"14px"}}>📞</span>
+    <span style={{fontSize:"12px",color:C.or,fontWeight:"700"}}>{ticket.fields?.["Téléphone"]}</span>
+  </a>
+)}
           )}
-          {ticket.fields?.["Téléphone"] && (
-            <a href={"tel:"+ticket.fields["Téléphone"]} style={{display:"flex",gap:"8px",alignItems:"center",textDecoration:"none"}}>
-              <span style={{fontSize:"14px"}}>📞</span>
-              <span style={{fontSize:"12px",color:C.or,fontWeight:"700"}}>{ticket.fields?.["Téléphone"]}</span>
-            </a>
-          )}
+          {ticket.fields?.Photos && (
+  <div style={{display:"flex",gap:"8px",alignItems:"center"}}>
+    <span style={{fontSize:"14px"}}>📎</span>
+    <span style={{fontSize:"12px",color:C.or,fontWeight:"700"}}>Photo(s) jointe(s)</span>
+  </div>
+)}
         </div>
         {commentaire && (
           <div style={{background:C.card2,border:"1px solid "+C.border,borderRadius:"8px",padding:"8px 12px",marginBottom:"12px",fontSize:"11px",color:C.muted,fontStyle:"italic"}}>
