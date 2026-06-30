@@ -246,11 +246,11 @@ function TicketCard({ ticket, onAction }) {
             </a>
           )}
           {ticket.fields?.Photos && (
-            <div style={{display:"flex",gap:"8px",alignItems:"center"}}>
-              <span style={{fontSize:"14px"}}>📎</span>
-              <span style={{fontSize:"12px",color:C.or,fontWeight:"700"}}>Photo(s) jointe(s)</span>
-            </div>
-          )}
+  <a href={ticket.fields.Photos.split(',')[0].trim()} target="_blank" style={{display:"flex",gap:"8px",alignItems:"center",textDecoration:"none"}}>
+    <span style={{fontSize:"14px"}}>📎</span>
+    <span style={{fontSize:"12px",color:C.or,fontWeight:"700"}}>Voir la/les photo(s)</span>
+  </a>
+)}
         </div>
         {commentaire && (
           <div style={{background:C.card2,border:"1px solid "+C.border,borderRadius:"8px",padding:"8px 12px",marginBottom:"12px",fontSize:"11px",color:C.muted,fontStyle:"italic"}}>
