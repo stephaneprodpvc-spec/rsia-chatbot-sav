@@ -99,11 +99,9 @@ function ModalAction({ ticket, onClose, onDone }) {
           <div style={{fontSize:"12px",color:C.text,marginTop:"6px"}}>📅 {ticket.fields?.["Créneau"]}</div>
           {ticket.fields?.Adresse && <div style={{fontSize:"12px",color:C.muted,marginTop:"2px"}}>📍 {ticket.fields?.Adresse}</div>}
         </div>
-
         {!mode && (
           <>
             <div style={{fontSize:"12px",color:C.muted,marginBottom:"12px",textAlign:"center"}}>Que souhaitez-vous faire ?</div>
-            
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"10px"}}>
               <button onClick={() => setMode("terminer")}
                 style={{padding:"20px 16px",background:C.vertDim,border:"2px solid rgba(22,163,74,0.4)",borderRadius:"14px",color:C.vert,cursor:"pointer",textAlign:"center"}}>
@@ -118,7 +116,6 @@ function ModalAction({ ticket, onClose, onDone }) {
                 <div style={{fontSize:"10px",color:"rgba(217,119,6,0.7)",marginTop:"3px"}}>Choisir une autre date</div>
               </button>
             </div>
-
             <button onClick={() => setMode("annuler")}
               style={{width:"100%",padding:"14px",background:C.rougeDim,border:"2px solid rgba(220,38,38,0.4)",borderRadius:"14px",color:C.rouge,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"10px",marginBottom:"10px"}}>
               <span style={{fontSize:"20px"}}>❌</span>
@@ -127,14 +124,12 @@ function ModalAction({ ticket, onClose, onDone }) {
                 <div style={{fontSize:"10px",color:"rgba(220,38,38,0.7)"}}>Client absent / annulation</div>
               </div>
             </button>
-
             <button onClick={onClose}
               style={{width:"100%",padding:"11px",background:"transparent",color:C.muted,border:"1px solid "+C.border,borderRadius:"10px",fontSize:"12px",cursor:"pointer"}}>
               Fermer
             </button>
           </>
         )}
-
         {mode === "terminer" && (
           <>
             <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"16px"}}>
@@ -152,7 +147,6 @@ function ModalAction({ ticket, onClose, onDone }) {
             </button>
           </>
         )}
-
         {mode === "annuler" && (
           <>
             <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"16px"}}>
@@ -173,7 +167,6 @@ function ModalAction({ ticket, onClose, onDone }) {
             </button>
           </>
         )}
-
         {mode === "replanifier" && (
           <>
             <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"16px"}}>
@@ -244,19 +237,20 @@ function TicketCard({ ticket, onAction }) {
             <div style={{display:"flex",gap:"8px",alignItems:"center"}}>
               <span style={{fontSize:"14px"}}>📍</span>
               <span style={{fontSize:"12px",color:C.muted}}>{ticket.fields?.Adresse}</span>
-            </div>{ticket.fields?.["Téléphone"] && (
-  <a href={"tel:"+ticket.fields["Téléphone"]} style={{display:"flex",gap:"8px",alignItems:"center",textDecoration:"none"}}>
-    <span style={{fontSize:"14px"}}>📞</span>
-    <span style={{fontSize:"12px",color:C.or,fontWeight:"700"}}>{ticket.fields?.["Téléphone"]}</span>
-  </a>
-)}
+            </div>
+          )}
+          {ticket.fields?.["Téléphone"] && (
+            <a href={"tel:"+ticket.fields["Téléphone"]} style={{display:"flex",gap:"8px",alignItems:"center",textDecoration:"none"}}>
+              <span style={{fontSize:"14px"}}>📞</span>
+              <span style={{fontSize:"12px",color:C.or,fontWeight:"700"}}>{ticket.fields?.["Téléphone"]}</span>
+            </a>
           )}
           {ticket.fields?.Photos && (
-  <div style={{display:"flex",gap:"8px",alignItems:"center"}}>
-    <span style={{fontSize:"14px"}}>📎</span>
-    <span style={{fontSize:"12px",color:C.or,fontWeight:"700"}}>Photo(s) jointe(s)</span>
-  </div>
-)}
+            <div style={{display:"flex",gap:"8px",alignItems:"center"}}>
+              <span style={{fontSize:"14px"}}>📎</span>
+              <span style={{fontSize:"12px",color:C.or,fontWeight:"700"}}>Photo(s) jointe(s)</span>
+            </div>
+          )}
         </div>
         {commentaire && (
           <div style={{background:C.card2,border:"1px solid "+C.border,borderRadius:"8px",padding:"8px 12px",marginBottom:"12px",fontSize:"11px",color:C.muted,fontStyle:"italic"}}>
@@ -370,11 +364,13 @@ function Login({ onLogin }) {
   const [pwd, setPwd] = React.useState("");
   const [error, setError] = React.useState(false);
   const [show, setShow] = React.useState(false);
+
   const tenter = () => {
     const agence = PASSWORDS[pwd.trim()];
     if (agence) { onLogin(agence); }
     else { setError(true); setTimeout(() => setError(false), 2000); }
   };
+
   return (
     <div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:"24px"}}>
       <div style={{width:"100%",maxWidth:"340px"}}>
