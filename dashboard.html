@@ -102,6 +102,7 @@ function TicketRow({ t, onStatusChange }) {
   <a href={t.fields.Photos.split(',')[0].trim()} target="_blank" style={{fontSize:"11px",color:C.or,fontWeight:"700",textDecoration:"none",display:"flex",alignItems:"center",gap:"5px",marginTop:"6px"}}>
     📎 Voir la/les photo(s)
   </a>
+      <button onclick="renvoyerMailTechnicien('${t.fields?.Name}')" style="margin-top:8px;background:#FF6B00;color:#111;border:none;border-radius:8px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;width:100%">📧 Renvoyer au technicien</button>
 )}
       </div>
       <div style={{flexShrink:0}}>
@@ -420,6 +421,12 @@ function Dashboard({ agenceAccess }) {
 
   React.useEffect(() => { charger(); }, [agenceFilter]);
 
+  const renvoyerMailTechnicien = (ticketId) => {
+  if (!confirm('Renvoyer le mail au technicien pour le ticket ' + ticketId + ' ?')) return;
+  fetch('https://hook.eu1.make.com/8idy6ft9mhf2nkr6janhjmvtjfvj6c7f?ticketId=' + encodeURIComponent(ticketId))
+    .then(() => alert('✅ Mail renvoyé au technicien !'))
+    .catch(() => alert('❌ Erreur lors de l\'envoi'));
+};
   const updateStatus = async (id, newStatus) => {
     setTickets(prev => prev.map(t => t.id===id?{...t,fields:{...t.fields,Statut:newStatus}}:t));
     await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets SAV/'+id, {
