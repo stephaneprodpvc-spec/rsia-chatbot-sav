@@ -102,8 +102,7 @@ function TicketRow({ t, onStatusChange }) {
   <a href={t.fields.Photos.split(',')[0].trim()} target="_blank" style={{fontSize:"11px",color:C.or,fontWeight:"700",textDecoration:"none",display:"flex",alignItems:"center",gap:"5px",marginTop:"6px"}}>
     📎 Voir la/les photo(s)
   </a>
-      <button onclick="renvoyerMailTechnicien('${t.fields?.Name}')" style="margin-top:8px;background:#FF6B00;color:#111;border:none;border-radius:8px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;width:100%">📧 Renvoyer au technicien</button>
-)}
+      <button onClick={() => renvoyerMailTechnicien(t.fields?.Name)} style={{marginTop:"8px",background:"#FF6B00",color:"#111",border:"none",borderRadius:"8px",padding:"8px 14px",fontWeight:"700",fontSize:"13px",cursor:"pointer",width:"100%"}}>📧 Renvoyer au technicien</button>
       </div>
       <div style={{flexShrink:0}}>
         <select value={statut} onChange={e => onStatusChange(t.id, e.target.value)}
