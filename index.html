@@ -339,6 +339,7 @@ function App() {
   const [envoi, setEnvoi] = React.useState(null);
   const [sending, setSending] = React.useState(false);
   const [photos, setPhotos] = React.useState([]);
+  const [factureFichier, setFactureFichier] = React.useState(null);
   const bottomRef = React.useRef(null);
 
   React.useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [etape]);
@@ -399,6 +400,10 @@ function App() {
         const urls = await Promise.all(photos.map(f => uploadCloudinary(f)));
         photoUrls = urls.join(', ');
       }
+      let factureUrl = '';
+      if (factureFichier) {
+        factureUrl = await uploadCloudinary(factureFichier);
+      }
       const garantieTexte = garantie === true
         ? "Oui — Facture " + facture
         : (garantie === false ? "Non / Hors garantie" : "N/A");
@@ -417,6 +422,7 @@ function App() {
         facture,
         urgent: urgentTexte,
         photos: photoUrls,
+        facture_photo: factureUrl,
         planningId: planningId || ''
       });
       setEnvoi('ok');
@@ -429,7 +435,7 @@ function App() {
     setEtape("agence"); setAgence(null); setTypeClient(null); setGarantie(null);
     setFacture(""); setClient({ nom: "", adresse: "", tel: "", email: "" });
     setErreurs({}); setProduit(null); setSousType(null); setProbleme(null);
-    setCreneau(null); setPlanningId(null); setTicket(null); setEnvoi(null); setSending(false); setPhotos([]);
+    setCreneau(null); setPlanningId(null); setTicket(null); setEnvoi(null); setSending(false); setPhotos([]); setFactureFichier(null);
   };
 
   return (
@@ -523,6 +529,22 @@ function App() {
                     <label style={{fontSize:"10px",fontWeight:"700",color:F.marine,display:"block",marginBottom:"4px"}}>N° de facture *</label>
                     <input type="text" placeholder="Ex : FAL-2024-00842" value={facture} onChange={e => setFacture(e.target.value)}
                       style={{width:"100%",padding:"8px 10px",border:"1.5px solid " + (erreurs.facture?F.rouge:F.or),borderRadius:"8px",fontSize:"12px",boxSizing:"border-box",outline:"none"}} />
+                    <label style={{display:"block",marginTop:"10px",border:"2px dashed " + F.or,borderRadius:"10px",padding:"12px",textAlign:"center",cursor:"pointer",background:"#FFFDF5"}}>
+                      <input type="file" accept="image/*,.pdf,.jpg,.jpeg,.png" style={{display:"none"}}
+                        onChange={e => setFactureFichier(e.target.files[0] || null)}/>
+                      {factureFichier ? (
+                        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}}>
+                          <span style={{fontSize:"16px"}}>{factureFichier.type.includes('pdf') ? '📄' : '🖼️'}</span>
+                          <span style={{fontSize:"11px",fontWeight:"700",color:F.marine}}>{factureFichier.name}</span>
+                          <button onClick={(e) => { e.preventDefault(); setFactureFichier(null); }} style={{background:"none",border:"none",color:"#94A3B8",cursor:"pointer",fontSize:"14px",padding:"0"}}>✕</button>
+                        </div>
+                      ) : (
+                        <>
+                          <div style={{fontSize:"11px",fontWeight:"700",color:F.or}}>📎 Joindre la facture (facultatif)</div>
+                          <div style={{fontSize:"10px",color:"#94A3B8",marginTop:"2px"}}>Photo ou PDF</div>
+                        </>
+                      )}
+                    </label>
                   </div>
                 )}
               </div>
@@ -660,6 +682,7 @@ function App() {
                   ["Email", client.email],
                   ["Adresse", client.adresse],
                   ["Garantie", garantie===true?"Oui — Facture " + facture:(garantie===false?"Non / Hors garantie":"N/A")],
+                  ...(factureFichier ? [["Facture jointe", "📎 " + factureFichier.name]] : []),
                   ["Produit", produit?.label+(sousType?" — "+sousType:"")],
                   ["Problème", probleme?.label],
                   ["Créneau", creneau],
