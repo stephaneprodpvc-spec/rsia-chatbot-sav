@@ -268,7 +268,7 @@ function TicketCard({ ticket, onAction }) {
   );
 }
 
-function Technicien({ agence }) {
+function Technicien({ agence, onClose }) {
   const [tickets, setTickets] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [onglet, setOnglet] = React.useState("aujourd_hui");
@@ -327,9 +327,12 @@ function Technicien({ agence }) {
               <div style={{fontSize:"11px",color:C.or,marginTop:"1px",fontWeight:"700"}}>📍 {agenceShort}</div>
             </div>
           </div>
-          <div style={{textAlign:"right"}}>
-            {lastRefresh && <div style={{fontSize:"9px",color:C.muted}}>MAJ {lastRefresh}</div>}
-            <button onClick={charger} style={{background:C.orDim,border:"1px solid "+C.orBord,color:C.or,borderRadius:"8px",padding:"5px 10px",fontSize:"11px",fontWeight:"700",cursor:"pointer",marginTop:"3px"}}>↺</button>
+          <div style={{display:"flex",alignItems:"flex-start",gap:"8px"}}>
+            <div style={{textAlign:"right"}}>
+              {lastRefresh && <div style={{fontSize:"9px",color:C.muted}}>MAJ {lastRefresh}</div>}
+              <button onClick={charger} style={{background:C.orDim,border:"1px solid "+C.orBord,color:C.or,borderRadius:"8px",padding:"5px 10px",fontSize:"11px",fontWeight:"700",cursor:"pointer",marginTop:"3px"}}>↺</button>
+            </div>
+            <button onClick={onClose} title="Fermer la session" style={{background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)",color:"rgba(255,255,255,0.6)",borderRadius:"8px",width:"28px",height:"28px",cursor:"pointer",fontSize:"14px",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>✕</button>
           </div>
         </div>
         <div style={{display:"flex",gap:"4px",marginTop:"12px",background:"#111",borderRadius:"10px",padding:"3px"}}>
@@ -413,7 +416,7 @@ function Login({ onLogin }) {
 
 function App() {
   const [agence, setAgence] = React.useState(null);
-  return agence ? <Technicien agence={agence}/> : <Login onLogin={setAgence}/>;
+  return agence ? <Technicien agence={agence} onClose={() => setAgence(null)}/> : <Login onLogin={setAgence}/>;
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
