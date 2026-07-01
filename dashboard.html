@@ -24,6 +24,7 @@ input:focus, select:focus, textarea:focus { border-color:rgba(255,107,0,0.5); }
 const AIRTABLE_TOKEN = 'patXNwO908NNfQcQZ.6d0f58479c753d1bb828a26eccbfc4b1e10ece70b8c71e381d304ecb62990375';
 const AIRTABLE_BASE = 'appFqAT8WeX0UTudy';
 const WEBHOOK = 'https://hook.eu1.make.com/bkoorc2nn457jgvmvtv6pjme5vrtz68g';
+const WEBHOOK_TECHNICIEN = 'https://hook.eu1.make.com/8idy6ft9mhf2nkr6janhjmvtjfvj6c7f';
 
 const PASSWORDS = {
   "rsia2026": "global",
@@ -34,9 +35,7 @@ const PASSWORDS = {
 };
 
 const AGENCES = ["Ibos (65)", "Tarnos (40)", "Lescar (64)", "Saint-Gaudens (31)"];
-
 const PRODUITS = ["Fenêtre","Coulissant","Volet roulant","Portail","Porte de garage","Véranda","Autre"];
-
 const PROBLEMES = {
   "Fenêtre": ["Fermeture difficile","Infiltration d'eau","Courant d'air / joint usé","Vitrage fissuré","Fenêtre bloquée ouverte","Autre"],
   "Coulissant": ["Rail bloqué","Infiltration d'eau","Serrure défaillante","Autre"],
@@ -71,7 +70,7 @@ function StatCard({ label, value, sub, accent }) {
   );
 }
 
-function TicketRow({ t, onStatusChange }) {
+function TicketRow({ t, onStatusChange, onRenvoyerMail }) {
   const urgent = t.fields?.Urgent === true || t.fields?.Urgent === "true";
   const statut = t.fields?.Statut || "Nouveau";
   const statusColors = {
@@ -98,12 +97,16 @@ function TicketRow({ t, onStatusChange }) {
               <span style={{color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{val}</span>
             </div>
           ):null)}
-       {t.fields?.Photos && (
-  <a href={t.fields.Photos.split(',')[0].trim()} target="_blank" style={{fontSize:"11px",color:C.or,fontWeight:"700",textDecoration:"none",display:"flex",alignItems:"center",gap:"5px",marginTop:"6px"}}>
-    📎 Voir la/les photo(s)
-  </a>
-)}
-<button onClick={() => renvoyerMailTechnicien(t.fields?.Name)} style={{marginTop:"8px",background:"#FF6B00",color:"#111",border:"none",borderRadius:"8px",padding:"8px 14px",fontWeight:"700",fontSize:"13px",cursor:"pointer",width:"100%"}}>📧 Renvoyer au technicien</button>
+        </div>
+        {t.fields?.Photos && (
+          <a href={t.fields.Photos.split(',')[0].trim()} target="_blank" style={{fontSize:"11px",color:C.or,fontWeight:"700",textDecoration:"none",display:"flex",alignItems:"center",gap:"5px",marginTop:"6px"}}>
+            📎 Voir la/les photo(s)
+          </a>
+        )}
+        <button onClick={() => onRenvoyerMail(t.fields?.Name)} style={{marginTop:"8px",background:"#FF6B00",color:"#111",border:"none",borderRadius:"8px",padding:"8px 14px",fontWeight:"700",fontSize:"13px",cursor:"pointer",width:"100%"}}>
+          📧 Renvoyer au technicien
+        </button>
+      </div>
       <div style={{flexShrink:0}}>
         <select value={statut} onChange={e => onStatusChange(t.id, e.target.value)}
           style={{background:"#1f1f1f",border:"1px solid "+C.border,color:C.text,borderRadius:"8px",padding:"5px 8px",fontSize:"11px",cursor:"pointer"}}>
@@ -140,34 +143,20 @@ function ModalRdv({ agenceAccess, onClose, onSuccess }) {
     }
     setSaving(true); setError("");
     try {
-      // 1. Générer numéro ticket
       const num = 'SAV-' + new Date().getFullYear() + '-' + (Math.floor(Math.random()*9000)+1000);
-
-      // 2. Créer ticket Airtable
       await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Tickets SAV', {
         method: 'POST',
         headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
         body: JSON.stringify({ fields: {
-          Name: num,
-          Agence: form.agence,
-          Client: form.nom,
-          Téléphone: form.tel,
-          Email: form.email,
-          Adresse: form.adresse,
-          Produit: form.produit,
-          Problème: form.probleme,
+          Name: num, Agence: form.agence, Client: form.nom, Téléphone: form.tel,
+          Email: form.email, Adresse: form.adresse, Produit: form.produit, Problème: form.probleme,
           Créneau: form.creneau + ' — ' + new Date(form.date + 'T12:00:00').toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long'}),
-          Garantie: form.garantie,
-          "N° Facture": form.facture,
-          Source: "telephone",
+          Garantie: form.garantie, "N° Facture": form.facture, Source: "telephone",
         }})
       });
-
-      // 3. Bloquer créneau Planning
       const dateLabel = form.creneau === "Matin (8h30 — 12h00)" ? "Matin (8h30 — 12h00)" : "Après-midi (13h00 — 17h00)";
       const filterPlanning = encodeURIComponent('AND({Agence}="'+form.agence+'",{Créneau}="'+dateLabel+'",{Date}="'+form.date+'",{Statut}="Libre")');
-      const planningUrl = 'https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + filterPlanning + '&maxRecords=1';
-      const planResp = await fetch(planningUrl, { headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN } });
+      const planResp = await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + filterPlanning + '&maxRecords=1', { headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN } });
       const planJson = await planResp.json();
       if (planJson.records?.length > 0) {
         await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning/' + planJson.records[0].id, {
@@ -176,8 +165,6 @@ function ModalRdv({ agenceAccess, onClose, onSuccess }) {
           body: JSON.stringify({ fields: { Statut: 'Pris' } })
         });
       }
-
-      // 4. Envoyer webhook Make (mail technicien + agence)
       await fetch(WEBHOOK, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -186,11 +173,9 @@ function ModalRdv({ agenceAccess, onClose, onSuccess }) {
           "e-mail": form.email || "aucun@rsia.fr",
           adresse: form.adresse, produit: form.produit, probleme: form.probleme,
           creneau: dateLabel + ' — ' + new Date(form.date + 'T12:00:00').toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long'}),
-          garantie: form.garantie, facture: form.facture, urgent: false, photos: '',
-          source: 'telephone'
+          garantie: form.garantie, facture: form.facture, urgent: false, photos: '', source: 'telephone'
         })
       });
-
       onSuccess(num);
     } catch(e) {
       setError("Erreur lors de l'enregistrement. Vérifiez la connexion.");
@@ -211,59 +196,32 @@ function ModalRdv({ agenceAccess, onClose, onSuccess }) {
           </div>
           <button onClick={onClose} style={{background:"rgba(255,255,255,0.05)",border:"1px solid "+C.border,color:C.muted,borderRadius:"8px",width:"30px",height:"30px",cursor:"pointer",fontSize:"16px"}}>✕</button>
         </div>
-
-        {/* Agence */}
         <div style={groupStyle}>
           <label style={labelStyle}>Agence *</label>
           <select value={form.agence} onChange={e => set("agence", e.target.value)} disabled={agenceAccess !== "global"}>
             {AGENCES.map(a => <option key={a}>{a}</option>)}
           </select>
         </div>
-
-        {/* Client */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"14px"}}>
-          <div>
-            <label style={labelStyle}>Nom et prénom *</label>
-            <input placeholder="Jean Dupont" value={form.nom} onChange={e => set("nom",e.target.value)}/>
-          </div>
-          <div>
-            <label style={labelStyle}>Téléphone *</label>
-            <input placeholder="06 12 34 56 78" value={form.tel} onChange={e => set("tel",e.target.value)}/>
-          </div>
+          <div><label style={labelStyle}>Nom et prénom *</label><input placeholder="Jean Dupont" value={form.nom} onChange={e => set("nom",e.target.value)}/></div>
+          <div><label style={labelStyle}>Téléphone *</label><input placeholder="06 12 34 56 78" value={form.tel} onChange={e => set("tel",e.target.value)}/></div>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"14px"}}>
-          <div>
-            <label style={labelStyle}>Email</label>
-            <input placeholder="jean@gmail.com" value={form.email} onChange={e => set("email",e.target.value)}/>
-          </div>
-          <div>
-            <label style={labelStyle}>Adresse</label>
-            <input placeholder="12 rue des Lilas, 65000" value={form.adresse} onChange={e => set("adresse",e.target.value)}/>
-          </div>
+          <div><label style={labelStyle}>Email</label><input placeholder="jean@gmail.com" value={form.email} onChange={e => set("email",e.target.value)}/></div>
+          <div><label style={labelStyle}>Adresse</label><input placeholder="12 rue des Lilas, 65000" value={form.adresse} onChange={e => set("adresse",e.target.value)}/></div>
         </div>
-
-        {/* Produit / Problème */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"14px"}}>
           <div>
             <label style={labelStyle}>Produit *</label>
-            <select value={form.produit} onChange={e => handleProduit(e.target.value)}>
-              {PRODUITS.map(p => <option key={p}>{p}</option>)}
-            </select>
+            <select value={form.produit} onChange={e => handleProduit(e.target.value)}>{PRODUITS.map(p => <option key={p}>{p}</option>)}</select>
           </div>
           <div>
             <label style={labelStyle}>Problème *</label>
-            <select value={form.probleme} onChange={e => set("probleme",e.target.value)}>
-              {(PROBLEMES[form.produit]||["Autre"]).map(p => <option key={p}>{p}</option>)}
-            </select>
+            <select value={form.probleme} onChange={e => set("probleme",e.target.value)}>{(PROBLEMES[form.produit]||["Autre"]).map(p => <option key={p}>{p}</option>)}</select>
           </div>
         </div>
-
-        {/* Date / Créneau */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"14px"}}>
-          <div>
-            <label style={labelStyle}>Date d'intervention *</label>
-            <input type="date" value={form.date} min={today} onChange={e => set("date",e.target.value)}/>
-          </div>
+          <div><label style={labelStyle}>Date d'intervention *</label><input type="date" value={form.date} min={today} onChange={e => set("date",e.target.value)}/></div>
           <div>
             <label style={labelStyle}>Créneau *</label>
             <select value={form.creneau} onChange={e => set("creneau",e.target.value)}>
@@ -272,24 +230,15 @@ function ModalRdv({ agenceAccess, onClose, onSuccess }) {
             </select>
           </div>
         </div>
-
-        {/* Garantie */}
         <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"14px",background:"#1a1a1a",borderRadius:"8px",padding:"10px 14px"}}>
           <input type="checkbox" id="garantie" checked={form.garantie} onChange={e => set("garantie",e.target.checked)} style={{width:"16px",cursor:"pointer"}}/>
           <label htmlFor="garantie" style={{fontSize:"12px",color:C.text,cursor:"pointer"}}>Produit sous garantie</label>
-          {form.garantie && (
-            <input placeholder="N° facture" value={form.facture} onChange={e => set("facture",e.target.value)} style={{flex:1,marginLeft:"8px"}}/>
-          )}
+          {form.garantie && <input placeholder="N° facture" value={form.facture} onChange={e => set("facture",e.target.value)} style={{flex:1,marginLeft:"8px"}}/>}
         </div>
-
         {error && <div style={{background:C.rougeDim,border:"1px solid rgba(220,38,38,0.3)",borderRadius:"8px",padding:"8px 12px",fontSize:"11px",color:C.rouge,marginBottom:"14px"}}>{error}</div>}
-
         <div style={{display:"flex",gap:"10px"}}>
-          <button onClick={onClose} style={{flex:1,padding:"11px",background:"transparent",color:C.muted,border:"1px solid "+C.border,borderRadius:"10px",fontSize:"12px",cursor:"pointer"}}>
-            Annuler
-          </button>
-          <button onClick={sauvegarder} disabled={saving}
-            style={{flex:2,padding:"11px",background:saving?"#333":C.or,color:saving?C.muted:"#111",border:"none",borderRadius:"10px",fontSize:"13px",fontWeight:"900",cursor:saving?"not-allowed":"pointer"}}>
+          <button onClick={onClose} style={{flex:1,padding:"11px",background:"transparent",color:C.muted,border:"1px solid "+C.border,borderRadius:"10px",fontSize:"12px",cursor:"pointer"}}>Annuler</button>
+          <button onClick={sauvegarder} disabled={saving} style={{flex:2,padding:"11px",background:saving?"#333":C.or,color:saving?C.muted:"#111",border:"none",borderRadius:"10px",fontSize:"13px",fontWeight:"900",cursor:saving?"not-allowed":"pointer"}}>
             {saving ? "⏳ Enregistrement..." : "✅ Confirmer le RDV"}
           </button>
         </div>
@@ -309,9 +258,7 @@ function ModalSuccess({ ticket, onClose }) {
           <div style={{fontSize:"22px",fontWeight:"900",color:C.or,fontFamily:"monospace"}}>{ticket}</div>
         </div>
         <div style={{fontSize:"11px",color:C.muted,marginBottom:"20px"}}>Créneau bloqué · Notification agence envoyée</div>
-        <button onClick={onClose} style={{width:"100%",padding:"11px",background:C.or,color:"#111",border:"none",borderRadius:"10px",fontSize:"13px",fontWeight:"900",cursor:"pointer"}}>
-          Fermer
-        </button>
+        <button onClick={onClose} style={{width:"100%",padding:"11px",background:C.or,color:"#111",border:"none",borderRadius:"10px",fontSize:"13px",fontWeight:"900",cursor:"pointer"}}>Fermer</button>
       </div>
     </div>
   );
@@ -320,31 +267,22 @@ function ModalSuccess({ ticket, onClose }) {
 function PlanningView({ agenceFilter }) {
   const [slots, setSlots] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
-
   const charger = async () => {
     setLoading(true);
     try {
       let filter = agenceFilter !== "global"
         ? encodeURIComponent('AND({Agence}="'+agenceFilter+'",{Statut}="Pris")')
         : encodeURIComponent('{Statut}="Pris"');
-      const url = 'https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Planning?filterByFormula='+filter+'&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=50';
-      const r = await fetch(url, { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
+      const r = await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Planning?filterByFormula='+filter+'&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=50', { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
       const json = await r.json();
       setSlots(json.records||[]);
     } catch(e) { console.error(e); }
     setLoading(false);
   };
-
   React.useEffect(() => { charger(); }, [agenceFilter]);
-
   const byDate = {};
-  slots.forEach(s => {
-    const d = s.fields?.Date;
-    if (!byDate[d]) byDate[d] = [];
-    byDate[d].push(s);
-  });
+  slots.forEach(s => { const d = s.fields?.Date; if (!byDate[d]) byDate[d] = []; byDate[d].push(s); });
   const today = new Date().toISOString().split('T')[0];
-
   return (
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px"}}>
@@ -364,9 +302,7 @@ function PlanningView({ agenceFilter }) {
           <div key={date} style={{marginBottom:"16px",opacity:isPast?0.5:1}}>
             <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"8px"}}>
               <div style={{height:"1px",flex:1,background:C.border}}/>
-              <span style={{fontSize:"12px",fontWeight:"700",color:isToday?C.or:C.muted,textTransform:"capitalize",whiteSpace:"nowrap"}}>
-                {isToday?"⚡ Aujourd'hui — ":""}{label}
-              </span>
+              <span style={{fontSize:"12px",fontWeight:"700",color:isToday?C.or:C.muted,textTransform:"capitalize",whiteSpace:"nowrap"}}>{isToday?"⚡ Aujourd'hui — ":""}{label}</span>
               <div style={{height:"1px",flex:1,background:C.border}}/>
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:"6px"}}>
@@ -421,11 +357,12 @@ function Dashboard({ agenceAccess }) {
   React.useEffect(() => { charger(); }, [agenceFilter]);
 
   const renvoyerMailTechnicien = (ticketId) => {
-  if (!confirm('Renvoyer le mail au technicien pour le ticket ' + ticketId + ' ?')) return;
-  fetch('https://hook.eu1.make.com/8idy6ft9mhf2nkr6janhjmvtjfvj6c7f?ticketId=' + encodeURIComponent(ticketId))
-    .then(() => alert('✅ Mail renvoyé au technicien !'))
-    .catch(() => alert('❌ Erreur lors de l\'envoi'));
-};
+    if (!confirm('Renvoyer le mail au technicien pour le ticket ' + ticketId + ' ?')) return;
+    fetch(WEBHOOK_TECHNICIEN + '?ticketId=' + encodeURIComponent(ticketId))
+      .then(() => alert('✅ Mail renvoyé au technicien !'))
+      .catch(() => alert('❌ Erreur lors de l\'envoi'));
+  };
+
   const updateStatus = async (id, newStatus) => {
     setTickets(prev => prev.map(t => t.id===id?{...t,fields:{...t.fields,Statut:newStatus}}:t));
     await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets SAV/'+id, {
@@ -464,7 +401,6 @@ function Dashboard({ agenceAccess }) {
       )}
       {successTicket && <ModalSuccess ticket={successTicket} onClose={() => setSuccessTicket(null)} />}
 
-      {/* Header */}
       <div style={{background:C.card,borderBottom:"1px solid "+C.border,padding:"12px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100}}>
         <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
           <div style={{width:"36px",height:"36px",background:C.or,borderRadius:"8px",display:"flex",alignItems:"center",justifyContent:"center"}}>
@@ -479,16 +415,12 @@ function Dashboard({ agenceAccess }) {
         </div>
         <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
           {lastRefresh && <span style={{fontSize:"10px",color:C.muted}}>MAJ {lastRefresh}</span>}
-          <button onClick={() => setShowModalRdv(true)}
-            style={{background:C.or,border:"none",color:"#111",borderRadius:"8px",padding:"8px 16px",fontSize:"12px",fontWeight:"900",cursor:"pointer",display:"flex",alignItems:"center",gap:"6px"}}>
-            📞 + Nouveau RDV
-          </button>
+          <button onClick={() => setShowModalRdv(true)} style={{background:C.or,border:"none",color:"#111",borderRadius:"8px",padding:"8px 16px",fontSize:"12px",fontWeight:"900",cursor:"pointer",display:"flex",alignItems:"center",gap:"6px"}}>📞 + Nouveau RDV</button>
           <button onClick={charger} style={{background:C.orDim,border:"1px solid "+C.orBord,color:C.or,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",fontWeight:"700",cursor:"pointer"}}>↺</button>
         </div>
       </div>
 
       <div style={{padding:"24px",maxWidth:"1200px",margin:"0 auto"}}>
-
         {agenceAccess === "global" && (
           <div style={{display:"flex",gap:"8px",marginBottom:"20px",flexWrap:"wrap"}}>
             {["global",...AGENCES].map(a => (
@@ -513,8 +445,7 @@ function Dashboard({ agenceAccess }) {
             <div style={{fontSize:"13px",fontWeight:"700",color:C.white,marginBottom:"12px"}}>Répartition par agence</div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"12px"}}>
               {AGENCES.map(a => (
-                <button key={a} onClick={() => setAgenceFilter(a)}
-                  style={{background:"#1a1a1a",border:"1px solid "+C.border,borderRadius:"10px",padding:"12px",textAlign:"center",cursor:"pointer"}}>
+                <button key={a} onClick={() => setAgenceFilter(a)} style={{background:"#1a1a1a",border:"1px solid "+C.border,borderRadius:"10px",padding:"12px",textAlign:"center",cursor:"pointer"}}>
                   <div style={{fontSize:"22px",fontWeight:"900",color:C.or,fontFamily:"monospace"}}>{byAgence[a]}</div>
                   <div style={{fontSize:"11px",color:C.muted,marginTop:"4px"}}>{a}</div>
                 </button>
@@ -535,8 +466,7 @@ function Dashboard({ agenceAccess }) {
         {vue === "tickets" && (
           <>
             <div style={{display:"flex",gap:"10px",marginBottom:"16px",flexWrap:"wrap",alignItems:"center"}}>
-              <input placeholder="🔍 Rechercher client, ticket, produit..." value={search} onChange={e => setSearch(e.target.value)}
-                style={{width:"280px"}}/>
+              <input placeholder="🔍 Rechercher client, ticket, produit..." value={search} onChange={e => setSearch(e.target.value)} style={{width:"280px"}}/>
               <div style={{display:"flex",gap:"6px",flexWrap:"wrap"}}>
                 {["tous","Nouveau","En cours","Terminé","Annulé"].map(s => (
                   <button key={s} onClick={() => setStatutFilter(s)}
@@ -552,7 +482,7 @@ function Dashboard({ agenceAccess }) {
               <div style={{textAlign:"center",padding:"60px",color:C.muted,border:"1px dashed "+C.border,borderRadius:"12px"}}>Aucun ticket trouvé</div>
             )}
             <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
-              {filtered.map(t => <TicketRow key={t.id} t={t} onStatusChange={updateStatus}/>)}
+              {filtered.map(t => <TicketRow key={t.id} t={t} onStatusChange={updateStatus} onRenvoyerMail={renvoyerMailTechnicien}/>)}
             </div>
           </>
         )}
@@ -594,9 +524,7 @@ function Login({ onLogin }) {
             </button>
           </div>
           {error && <div style={{fontSize:"11px",color:C.rouge,marginBottom:"12px",textAlign:"center"}}>Mot de passe incorrect</div>}
-          <button onClick={tenter} style={{width:"100%",padding:"12px",background:C.or,color:"#111",border:"none",borderRadius:"10px",fontSize:"13px",fontWeight:"900",cursor:"pointer"}}>
-            Accéder →
-          </button>
+          <button onClick={tenter} style={{width:"100%",padding:"12px",background:C.or,color:"#111",border:"none",borderRadius:"10px",fontSize:"13px",fontWeight:"900",cursor:"pointer"}}>Accéder →</button>
           <div style={{marginTop:"20px",borderTop:"1px solid "+C.border,paddingTop:"16px"}}>
             <div style={{fontSize:"10px",color:C.muted,marginBottom:"8px",fontWeight:"700",textTransform:"uppercase",letterSpacing:"1px"}}>Accès disponibles</div>
             {[["rsia2026","Toutes agences"],["ibos65","Ibos"],["tarnos40","Tarnos"],["lescar64","Lescar"],["stgaudens31","Saint-Gaudens"]].map(([p,l]) => (
