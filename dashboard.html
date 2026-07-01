@@ -56,6 +56,21 @@ const C = {
   jaune: "#d97706", jauneDim: "rgba(217,119,6,0.12)",
 };
 
+// ---- TRI PAR DATE ----
+const MOIS = {janvier:1,février:2,mars:3,avril:4,mai:5,juin:6,juillet:7,août:8,septembre:9,octobre:10,novembre:11,décembre:12};
+const parseDateCreneau = (creneau) => {
+  if (!creneau) return new Date(9999,0,1);
+  const match = creneau.match(/(\d+)\s+(\w+)(?:\s+(\d{4}))?/g);
+  if (!match) return new Date(9999,0,1);
+  const last = match[match.length-1];
+  const parts = last.match(/(\d+)\s+(\w+)(?:\s+(\d{4}))?/);
+  if (!parts) return new Date(9999,0,1);
+  const day = parseInt(parts[1]);
+  const month = MOIS[parts[2].toLowerCase()] || 1;
+  const year = parts[3] ? parseInt(parts[3]) : new Date().getFullYear();
+  return new Date(year, month-1, day);
+};
+
 function Badge({ label, color, bg }) {
   return <span style={{display:"inline-block",padding:"2px 8px",borderRadius:"20px",fontSize:"10px",fontWeight:"700",color,background:bg,letterSpacing:"0.5px"}}>{label}</span>;
 }
@@ -337,6 +352,7 @@ function Dashboard({ agenceAccess }) {
   const [vue, setVue] = React.useState("tickets");
   const [search, setSearch] = React.useState("");
   const [statutFilter, setStatutFilter] = React.useState("tous");
+  const [sortBy, setSortBy] = React.useState("date");
   const [lastRefresh, setLastRefresh] = React.useState(null);
   const [showModalRdv, setShowModalRdv] = React.useState(false);
   const [successTicket, setSuccessTicket] = React.useState(null);
@@ -377,6 +393,12 @@ function Dashboard({ agenceAccess }) {
     const q = search.toLowerCase();
     const matchSearch = !q || (t.fields?.Client||"").toLowerCase().includes(q) || (t.fields?.Name||"").toLowerCase().includes(q) || (t.fields?.Produit||"").toLowerCase().includes(q);
     return matchAgence && matchStatut && matchSearch;
+  });
+
+  const sorted = [...filtered].sort((a,b) => {
+    if (sortBy === "date") return parseDateCreneau(a.fields?.Créneau) - parseDateCreneau(b.fields?.Créneau);
+    if (sortBy === "ticket") return (b.fields?.Name||"").localeCompare(a.fields?.Name||"");
+    return 0;
   });
 
   const stats = {
@@ -475,14 +497,23 @@ function Dashboard({ agenceAccess }) {
                   </button>
                 ))}
               </div>
-              <span style={{fontSize:"11px",color:C.muted,marginLeft:"auto"}}>{filtered.length} ticket{filtered.length>1?"s":""}</span>
+              <div style={{display:"flex",gap:"6px",marginLeft:"auto",alignItems:"center"}}>
+                <span style={{fontSize:"11px",color:C.muted}}>Trier :</span>
+                {[["date","📅 Date"],["ticket","🔢 N° Ticket"]].map(([v,l]) => (
+                  <button key={v} onClick={() => setSortBy(v)}
+                    style={{padding:"5px 10px",borderRadius:"20px",border:"1px solid "+(sortBy===v?C.or:C.border),background:sortBy===v?C.orDim:"transparent",color:sortBy===v?C.or:C.muted,fontSize:"11px",fontWeight:"600",cursor:"pointer"}}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+              <span style={{fontSize:"11px",color:C.muted}}>{sorted.length} ticket{sorted.length>1?"s":""}</span>
             </div>
             {loading && <div style={{textAlign:"center",padding:"60px",color:C.muted}}>Chargement...</div>}
-            {!loading && filtered.length===0 && (
+            {!loading && sorted.length===0 && (
               <div style={{textAlign:"center",padding:"60px",color:C.muted,border:"1px dashed "+C.border,borderRadius:"12px"}}>Aucun ticket trouvé</div>
             )}
             <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
-              {filtered.map(t => <TicketRow key={t.id} t={t} onStatusChange={updateStatus} onRenvoyerMail={renvoyerMailTechnicien}/>)}
+              {sorted.map(t => <TicketRow key={t.id} t={t} onStatusChange={updateStatus} onRenvoyerMail={renvoyerMailTechnicien}/>)}
             </div>
           </>
         )}
