@@ -71,6 +71,9 @@ const parseDateCreneau = (creneau) => {
   return new Date(year, month-1, day);
 };
 
+// ---- STATUTS "CLOS" (Terminé / Annulé) ----
+const isStatutClos = (statut) => statut === "Terminé" || statut === "Annulé";
+
 function Badge({ label, color, bg }) {
   return <span style={{display:"inline-block",padding:"2px 8px",borderRadius:"20px",fontSize:"10px",fontWeight:"700",color,background:bg,letterSpacing:"0.5px"}}>{label}</span>;
 }
@@ -95,8 +98,9 @@ function TicketRow({ t, onStatusChange, onRenvoyerMail }) {
     "Annulé": { color: C.muted, bg: "#1a1a1a" },
   };
   const sc = statusColors[statut] || statusColors["Nouveau"];
+  const clos = isStatutClos(statut);
   return (
-    <div style={{background:C.card,border:"1px solid "+(urgent?"rgba(220,38,38,0.3)":C.border),borderRadius:"10px",padding:"12px 16px",display:"flex",gap:"12px",alignItems:"flex-start"}}>
+    <div style={{background:C.card,border:"1px solid "+(urgent?"rgba(220,38,38,0.3)":C.border),borderRadius:"10px",padding:"12px 16px",display:"flex",gap:"12px",alignItems:"flex-start",opacity:clos?0.6:1}}>
       <div style={{flex:1,minWidth:0}}>
         <div style={{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginBottom:"6px"}}>
           <span style={{fontSize:"12px",fontWeight:"900",color:C.or,fontFamily:"monospace"}}>{t.fields?.Name||"—"}</span>
@@ -281,6 +285,7 @@ function ModalSuccess({ ticket, onClose }) {
 
 function PlanningView({ agenceFilter }) {
   const [slots, setSlots] = React.useState([]);
+  const [ticketsByPlanning, setTicketsByPlanning] = React.useState({});
   const [loading, setLoading] = React.useState(true);
   const charger = async () => {
     setLoading(true);
@@ -290,7 +295,18 @@ function PlanningView({ agenceFilter }) {
         : encodeURIComponent('{Statut}="Pris"');
       const r = await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Planning?filterByFormula='+filter+'&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=50', { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
       const json = await r.json();
-      setSlots(json.records||[]);
+      const slotsData = json.records||[];
+      setSlots(slotsData);
+
+      // Charger les tickets SAV liés à un créneau (champ PlanningID = ID du record Planning)
+      const filterTickets = encodeURIComponent('NOT({PlanningID}="")');
+      const rt = await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets SAV?filterByFormula='+filterTickets+'&maxRecords=300', { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
+      const jt = await rt.json();
+      const map = {};
+      (jt.records||[]).forEach(t => {
+        if (t.fields?.PlanningID) map[t.fields.PlanningID] = t.fields;
+      });
+      setTicketsByPlanning(map);
     } catch(e) { console.error(e); }
     setLoading(false);
   };
@@ -321,22 +337,36 @@ function PlanningView({ agenceFilter }) {
               <div style={{height:"1px",flex:1,background:C.border}}/>
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:"6px"}}>
-              {byDate[date].map((s,i) => (
-                <div key={i} style={{background:C.card,border:"1px solid "+C.border,borderRadius:"8px",padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <div>
-                    <span style={{fontSize:"12px",fontWeight:"700",color:C.white}}>{s.fields?.Créneau?.replace("Matin (8h30 — 12h00)","🌅 Matin").replace("Après-midi (13h00 — 17h00)","🌇 Après-midi")}</span>
-                    <span style={{fontSize:"10px",color:C.muted,marginLeft:"10px"}}>{s.fields?.Agence}</span>
+              {byDate[date].map((s,i) => {
+                const ticket = ticketsByPlanning[s.id];
+                return (
+                <div key={i} style={{background:C.card,border:"1px solid "+C.border,borderRadius:"8px",padding:"10px 14px"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div>
+                      <span style={{fontSize:"12px",fontWeight:"700",color:C.white}}>{s.fields?.Créneau?.replace("Matin (8h30 — 12h00)","🌅 Matin").replace("Après-midi (13h00 — 17h00)","🌇 Après-midi")}</span>
+                      <span style={{fontSize:"10px",color:C.muted,marginLeft:"10px"}}>{s.fields?.Agence}</span>
+                    </div>
+                    <button onClick={async () => {
+                      await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Planning/'+s.id, {
+                        method:'PATCH', headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
+                        body:JSON.stringify({fields:{Statut:'Libre'}})
+                      }); charger();
+                    }} style={{background:"rgba(220,38,38,0.1)",border:"1px solid rgba(220,38,38,0.3)",color:C.rouge,borderRadius:"6px",padding:"3px 8px",fontSize:"10px",cursor:"pointer"}}>
+                      Libérer
+                    </button>
                   </div>
-                  <button onClick={async () => {
-                    await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Planning/'+s.id, {
-                      method:'PATCH', headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
-                      body:JSON.stringify({fields:{Statut:'Libre'}})
-                    }); charger();
-                  }} style={{background:"rgba(220,38,38,0.1)",border:"1px solid rgba(220,38,38,0.3)",color:C.rouge,borderRadius:"6px",padding:"3px 8px",fontSize:"10px",cursor:"pointer"}}>
-                    Libérer
-                  </button>
+                  {ticket ? (
+                    <div style={{marginTop:"8px",paddingTop:"8px",borderTop:"1px solid "+C.border,display:"grid",gridTemplateColumns:"1fr 1fr",gap:"4px 14px"}}>
+                      <div style={{fontSize:"11px",color:C.muted,display:"flex",gap:"5px"}}><span>👤</span><span style={{color:C.text}}>{ticket.Client||"—"}</span></div>
+                      <div style={{fontSize:"11px",color:C.muted,display:"flex",gap:"5px"}}><span>📦</span><span style={{color:C.text}}>{ticket.Produit||"—"}</span></div>
+                      <div style={{fontSize:"11px",color:C.muted,display:"flex",gap:"5px",gridColumn:"1 / -1"}}><span>🔧</span><span style={{color:C.text}}>{ticket.Problème||"—"}</span></div>
+                      {ticket.Name && <div style={{fontSize:"10px",color:C.or,fontFamily:"monospace",gridColumn:"1 / -1",marginTop:"2px"}}>{ticket.Name}</div>}
+                    </div>
+                  ) : (
+                    <div style={{marginTop:"6px",fontSize:"10px",color:C.muted,fontStyle:"italic"}}>Aucun ticket lié à ce créneau</div>
+                  )}
                 </div>
-              ))}
+              );})}
             </div>
           </div>
         );
@@ -395,11 +425,21 @@ function Dashboard({ agenceAccess }) {
     return matchAgence && matchStatut && matchSearch;
   });
 
-  const sorted = [...filtered].sort((a,b) => {
+  const sortFn = (a,b) => {
     if (sortBy === "date") return parseDateCreneau(a.fields?.Créneau) - parseDateCreneau(b.fields?.Créneau);
     if (sortBy === "ticket") return (b.fields?.Name||"").localeCompare(a.fields?.Name||"");
     return 0;
-  });
+  };
+
+  // Vue "Tous" : actifs triés en haut, terminés/annulés triés séparément en bas
+  let sorted;
+  if (statutFilter === "tous") {
+    const actifs = filtered.filter(t => !isStatutClos(t.fields?.Statut));
+    const clos = filtered.filter(t => isStatutClos(t.fields?.Statut));
+    sorted = [...actifs.sort(sortFn), ...clos.sort(sortFn)];
+  } else {
+    sorted = [...filtered].sort(sortFn);
+  }
 
   const stats = {
     total: tickets.length,
@@ -487,26 +527,31 @@ function Dashboard({ agenceAccess }) {
 
         {vue === "tickets" && (
           <>
-            <div style={{display:"flex",gap:"10px",marginBottom:"16px",flexWrap:"wrap",alignItems:"center"}}>
-              <input placeholder="🔍 Rechercher client, ticket, produit..." value={search} onChange={e => setSearch(e.target.value)} style={{width:"280px"}}/>
-              <div style={{display:"flex",gap:"6px",flexWrap:"wrap"}}>
-                {["tous","Nouveau","En cours","Terminé","Annulé"].map(s => (
-                  <button key={s} onClick={() => setStatutFilter(s)}
-                    style={{padding:"6px 12px",borderRadius:"20px",border:"1px solid "+(statutFilter===s?C.or:C.border),background:statutFilter===s?C.orDim:"transparent",color:statutFilter===s?C.or:C.muted,fontSize:"11px",fontWeight:"600",cursor:"pointer"}}>
-                    {s==="tous"?"Tous":s}
-                  </button>
-                ))}
+            <div style={{display:"flex",flexDirection:"column",gap:"10px",marginBottom:"16px"}}>
+              <div style={{display:"flex",gap:"10px",flexWrap:"wrap",alignItems:"center"}}>
+                <input placeholder="🔍 Rechercher client, ticket, produit..." value={search} onChange={e => setSearch(e.target.value)} style={{width:"280px"}}/>
+                <div style={{display:"flex",gap:"6px",flexWrap:"wrap"}}>
+                  {["tous","Nouveau","En cours","Terminé","Annulé"].map(s => (
+                    <button key={s} onClick={() => setStatutFilter(s)}
+                      style={{padding:"6px 12px",borderRadius:"20px",border:"1px solid "+(statutFilter===s?C.or:C.border),background:statutFilter===s?C.orDim:"transparent",color:statutFilter===s?C.or:C.muted,fontSize:"11px",fontWeight:"600",cursor:"pointer"}}>
+                      {s==="tous"?"Tous":s}
+                    </button>
+                  ))}
+                </div>
+                <span style={{fontSize:"11px",color:C.muted,marginLeft:"auto"}}>{sorted.length} ticket{sorted.length>1?"s":""}</span>
               </div>
-              <div style={{display:"flex",gap:"6px",marginLeft:"auto",alignItems:"center"}}>
-                <span style={{fontSize:"11px",color:C.muted}}>Trier :</span>
+              <div style={{display:"flex",gap:"6px",flexWrap:"wrap",alignItems:"center",background:"#151515",border:"1px solid "+C.border,borderRadius:"10px",padding:"8px 12px"}}>
+                <span style={{fontSize:"11px",color:C.muted,fontWeight:"700",marginRight:"2px"}}>Trier :</span>
                 {[["date","📅 Date"],["ticket","🔢 N° Ticket"]].map(([v,l]) => (
                   <button key={v} onClick={() => setSortBy(v)}
-                    style={{padding:"5px 10px",borderRadius:"20px",border:"1px solid "+(sortBy===v?C.or:C.border),background:sortBy===v?C.orDim:"transparent",color:sortBy===v?C.or:C.muted,fontSize:"11px",fontWeight:"600",cursor:"pointer"}}>
+                    style={{padding:"6px 14px",borderRadius:"20px",border:"1px solid "+(sortBy===v?C.or:C.border),background:sortBy===v?C.orDim:"transparent",color:sortBy===v?C.or:C.muted,fontSize:"11px",fontWeight:"700",cursor:"pointer"}}>
                     {l}
                   </button>
                 ))}
+                {statutFilter === "tous" && (
+                  <span style={{fontSize:"10px",color:C.muted,marginLeft:"auto"}}>Terminés / Annulés repoussés en bas</span>
+                )}
               </div>
-              <span style={{fontSize:"11px",color:C.muted}}>{sorted.length} ticket{sorted.length>1?"s":""}</span>
             </div>
             {loading && <div style={{textAlign:"center",padding:"60px",color:C.muted}}>Chargement...</div>}
             {!loading && sorted.length===0 && (
