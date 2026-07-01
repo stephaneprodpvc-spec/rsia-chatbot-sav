@@ -59,11 +59,11 @@ function ModalAction({ ticket, onClose, onDone }) {
     try {
       const fields = {};
       if (mode === "terminer") {
-        fields.Statut = "Termine";
+        fields.Statut = "Terminé";
         if (commentaire) fields.Commentaire = commentaire;
       } else if (mode === "annuler") {
-        fields.Statut = "Annule";
-        fields.Commentaire = "Annule : " + commentaire;
+        fields.Statut = "Annulé";
+        fields.Commentaire = "Annulé : " + commentaire;
         const planningId = ticket.fields?.PlanningID;
         if (planningId) {
           await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Planning/'+planningId, {
@@ -75,8 +75,8 @@ function ModalAction({ ticket, onClose, onDone }) {
       } else {
         fields.Statut = "En cours";
         const dateLabel = new Date(newDate+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
-        fields.Creneau = newCreneau + ' — ' + dateLabel;
-        if (commentaire) fields.Commentaire = "Replanifie : " + commentaire;
+        fields["Créneau"] = newCreneau + ' — ' + dateLabel;
+        if (commentaire) fields.Commentaire = "Replanifié : " + commentaire;
       }
       await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets%20SAV/'+ticket.id, {
         method:'PATCH',
@@ -206,9 +206,9 @@ function TicketCard({ ticket, onAction }) {
   const urgent = ticket.fields?.Urgent===true||ticket.fields?.Urgent==="true";
   const statut = ticket.fields?.Statut || "Nouveau";
   const commentaire = ticket.fields?.Commentaire;
-  const isTermine = statut === "Terminé" || statut === "Termine";
-  const isAnnule = statut === "Annulé" || statut === "Annule";
-  const isReplanifie = commentaire?.startsWith("Replanifie") || commentaire?.startsWith("Replanifié");
+  const isTermine = statut === "Terminé";
+  const isAnnule = statut === "Annulé";
+  const isReplanifie = commentaire?.startsWith("Replanifié") || commentaire?.startsWith("Replanifie");
 
   return (
     <div style={{background:C.card,border:"2px solid "+(urgent?"rgba(220,38,38,0.35)":isTermine?"rgba(22,163,74,0.25)":isAnnule?"rgba(220,38,38,0.2)":C.border),borderRadius:"14px",overflow:"hidden",opacity:(isTermine||isAnnule)?0.6:1}}>
@@ -246,11 +246,11 @@ function TicketCard({ ticket, onAction }) {
             </a>
           )}
           {ticket.fields?.Photos && (
-  <a href={ticket.fields.Photos.split(',')[0].trim()} target="_blank" style={{display:"flex",gap:"8px",alignItems:"center",textDecoration:"none"}}>
-    <span style={{fontSize:"14px"}}>📎</span>
-    <span style={{fontSize:"12px",color:C.or,fontWeight:"700"}}>Voir la/les photo(s)</span>
-  </a>
-)}
+            <a href={ticket.fields.Photos.split(',')[0].trim()} target="_blank" style={{display:"flex",gap:"8px",alignItems:"center",textDecoration:"none"}}>
+              <span style={{fontSize:"14px"}}>📎</span>
+              <span style={{fontSize:"12px",color:C.or,fontWeight:"700"}}>Voir la/les photo(s)</span>
+            </a>
+          )}
         </div>
         {commentaire && (
           <div style={{background:C.card2,border:"1px solid "+C.border,borderRadius:"8px",padding:"8px 12px",marginBottom:"12px",fontSize:"11px",color:C.muted,fontStyle:"italic"}}>
@@ -297,15 +297,15 @@ function Technicien({ agence }) {
     const creneau = (t.fields?.["Créneau"] || "").toLowerCase();
     const statut = t.fields?.Statut || "Nouveau";
     if (onglet === "aujourd_hui") return creneau.includes(todayStr) || creneau.includes(todayLong.toLowerCase());
-    if (onglet === "a_venir") return statut !== "Terminé" && statut !== "Termine" && statut !== "Annulé" && statut !== "Annule";
-    if (onglet === "termines") return statut === "Terminé" || statut === "Termine";
+    if (onglet === "a_venir") return statut !== "Terminé" && statut !== "Annulé";
+    if (onglet === "termines") return statut === "Terminé";
     return true;
   };
 
   const filtered = tickets.filter(filtrer);
   const nbAujourdhui = tickets.filter(t => { const c=(t.fields?.["Créneau"]||"").toLowerCase(); return c.includes(todayStr)||c.includes(todayLong.toLowerCase()); }).length;
-  const nbAVenir = tickets.filter(t => { const s=t.fields?.Statut||"Nouveau"; return s!=="Terminé"&&s!=="Termine"&&s!=="Annulé"&&s!=="Annule"; }).length;
-  const nbTermines = tickets.filter(t => t.fields?.Statut==="Terminé"||t.fields?.Statut==="Termine").length;
+  const nbAVenir = tickets.filter(t => { const s=t.fields?.Statut||"Nouveau"; return s!=="Terminé"&&s!=="Annulé"; }).length;
+  const nbTermines = tickets.filter(t => t.fields?.Statut==="Terminé").length;
   const agenceShort = agence.replace(/ \(\d+\)/,"");
 
   return (
