@@ -296,7 +296,7 @@ function Technicien({ agence }) {
   const filtrer = (t) => {
     const creneau = (t.fields?.["Créneau"] || "").toLowerCase();
     const statut = t.fields?.Statut || "Nouveau";
-    if (onglet === "aujourd_hui") return creneau.includes(todayStr) || creneau.includes(todayLong.toLowerCase());
+    if (onglet === "aujourd_hui") return (creneau.includes(todayStr) || creneau.includes(todayLong.toLowerCase())) && statut !== "Terminé" && statut !== "Annulé";
     if (onglet === "a_venir") return statut !== "Terminé" && statut !== "Annulé";
     if (onglet === "termines") return statut === "Terminé";
     return true;
