@@ -355,6 +355,40 @@ function App() {
     return Object.keys(e).length === 0;
   };
 
+  const libererCreneauSiBesoin = async () => {
+    if (!planningId) return;
+    try {
+      await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning/' + planningId, {
+        method: 'PATCH',
+        headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: { Statut: 'Libre' } })
+      });
+    } catch(e) { console.error(e); }
+  };
+
+  const goBack = async () => {
+    if (etape === "identification") {
+      setEtape("agence");
+    } else if (etape === "produit") {
+      setEtape("identification");
+    } else if (etape === "sous_type") {
+      setSousType(null);
+      setEtape("produit");
+    } else if (etape === "probleme") {
+      setProbleme(null);
+      setEtape(produit?.sousTypes ? "sous_type" : "produit");
+    } else if (etape === "photos") {
+      setEtape("probleme");
+    } else if (etape === "creneau") {
+      setEtape("photos");
+    } else if (etape === "recapitulatif") {
+      await libererCreneauSiBesoin();
+      setCreneau(null);
+      setPlanningId(null);
+      setEtape("creneau");
+    }
+  };
+
   const confirmer = async () => {
     setSending(true);
     const num = 'SAV-' + new Date().getFullYear() + '-' + (Math.floor(Math.random()*9000)+1000);
@@ -416,6 +450,9 @@ function App() {
           </div>
           <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
             {etape !== "agence" && etape !== "merci" && (
+              <button onClick={goBack} style={{background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.25)",color:"rgba(255,255,255,0.85)",borderRadius:"8px",padding:"4px 9px",fontSize:"10px",cursor:"pointer"}}>← Retour</button>
+            )}
+            {etape !== "agence" && etape !== "merci" && (
               <button onClick={reset} style={{background:"rgba(255,107,0,0.15)",border:"1px solid " + F.or,color:F.or,borderRadius:"8px",padding:"4px 9px",fontSize:"10px",cursor:"pointer"}}>↩ Début</button>
             )}
             <button onClick={() => window.toggleWidget()} style={{background:"rgba(255,255,255,0.1)",border:"1px solid rgba(255,255,255,0.2)",color:"rgba(255,255,255,0.7)",borderRadius:"8px",width:"28px",height:"28px",cursor:"pointer",fontSize:"14px",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
@@ -423,7 +460,7 @@ function App() {
         </div>
         <div style={{marginTop:"6px",display:"flex",alignItems:"center",gap:"6px"}}>
           <div style={{width:"7px",height:"7px",background:"#2ECC71",borderRadius:"50%"}}></div>
-          <span style={{color:F.orClair,fontSize:"11px",fontWeight:"500"}}>Alex — SAV en ligne</span>
+          <span style={{color:F.orClair,fontSize:"11px",fontWeight:"500"}}>Iwo — SAV en ligne</span>
         </div>
       </div>
       <div style={{height:"3px",background:"linear-gradient(90deg," + F.or + "," + F.orClair + "," + F.or + ")",flexShrink:0}} />
@@ -433,9 +470,9 @@ function App() {
         {etape === "agence" && (
           <>
             <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
-              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:"2px solid " + F.or}}>A</div>
+              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:"2px solid " + F.or}}>I</div>
               <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",lineHeight:"1.6",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:"1px solid " + F.grisBord}}>
-                Bonjour ! Je suis <strong style={{color:F.marine}}>Alex</strong>, votre assistant SAV RSIA.<br/>Quelle est votre agence ?
+                Bonjour ! Je suis <strong style={{color:F.marine}}>Iwo</strong>, votre assistant SAV RSIA.<br/>Quelle est votre agence ?
               </div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
@@ -517,7 +554,7 @@ function App() {
               <div style={{color:"#475569",fontSize:"10px"}}>{agence?.ville}</div>
             </div>
             <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
-              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:"2px solid " + F.or}}>A</div>
+              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:"2px solid " + F.or}}>I</div>
               <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:"1px solid " + F.grisBord}}>
                 Quel produit est concerné, <strong style={{color:F.marine}}>{client.nom.split(" ")[0]}</strong> ?
               </div>
@@ -534,7 +571,7 @@ function App() {
         {etape === "sous_type" && (
           <>
             <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
-              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:"2px solid " + F.or}}>A</div>
+              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:"2px solid " + F.or}}>I</div>
               <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:"1px solid " + F.grisBord}}>
                 Quel type de porte de garage ?
               </div>
@@ -553,7 +590,7 @@ function App() {
         {etape === "probleme" && (
           <>
             <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
-              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:"2px solid " + F.or}}>A</div>
+              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:"2px solid " + F.or}}>I</div>
               <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:"1px solid " + F.grisBord}}>
                 Quel est le problème avec votre <strong style={{color:F.marine}}>{produit?.label.substring(2).trim()}</strong> ?
               </div>
