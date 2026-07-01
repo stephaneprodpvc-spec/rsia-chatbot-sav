@@ -7,6 +7,7 @@
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', sans-serif; background: #0D0D0D; color: #E5E5E5; min-height: 100vh; }
@@ -381,7 +382,7 @@ function PlanningView({ agenceFilter }) {
   );
 }
 
-function Dashboard({ agenceAccess }) {
+function Dashboard({ agenceAccess, onClose }) {
   const [tickets, setTickets] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [agenceFilter, setAgenceFilter] = React.useState(agenceAccess === "global" ? "global" : agenceAccess);
@@ -392,6 +393,8 @@ function Dashboard({ agenceAccess }) {
   const [lastRefresh, setLastRefresh] = React.useState(null);
   const [showModalRdv, setShowModalRdv] = React.useState(false);
   const [successTicket, setSuccessTicket] = React.useState(null);
+  const [exportDebut, setExportDebut] = React.useState("");
+  const [exportFin, setExportFin] = React.useState("");
 
   const charger = async () => {
     setLoading(true);
@@ -420,6 +423,92 @@ function Dashboard({ agenceAccess }) {
     fetch(WEBHOOK_CLIENT + '?ticketId=' + encodeURIComponent(ticketId))
       .then(() => alert('✅ Mail renvoyé au client !'))
       .catch(() => alert('❌ Erreur lors de l\'envoi'));
+  };
+
+  // Jeu de données pour l'export : respecte agence + statut + recherche + plage de dates
+  const getExportData = () => {
+    return tickets.filter(t => {
+      const matchAgence = agenceFilter==="global" || t.fields?.Agence===agenceFilter;
+      const matchStatut = statutFilter==="tous" || t.fields?.Statut===statutFilter || (!t.fields?.Statut&&statutFilter==="Nouveau");
+      const q = search.toLowerCase();
+      const matchSearch = !q || (t.fields?.Client||"").toLowerCase().includes(q) || (t.fields?.Name||"").toLowerCase().includes(q) || (t.fields?.Produit||"").toLowerCase().includes(q);
+      const dateTicket = parseDateCreneau(t.fields?.Créneau);
+      const matchDebut = !exportDebut || dateTicket >= new Date(exportDebut+'T00:00:00');
+      const matchFin = !exportFin || dateTicket <= new Date(exportFin+'T23:59:59');
+      return matchAgence && matchStatut && matchSearch && matchDebut && matchFin;
+    }).sort((a,b) => parseDateCreneau(a.fields?.Créneau) - parseDateCreneau(b.fields?.Créneau));
+  };
+
+  const nomFichierExport = (ext) => {
+    const ag = agenceFilter==="global" ? "Toutes-agences" : agenceFilter.replace(/[^\w]+/g,"-");
+    const periode = (exportDebut||exportFin) ? (exportDebut||"...")+"_"+(exportFin||"...") : "complet";
+    return "RSIA_Export_"+ag+"_"+periode+"."+ext;
+  };
+
+  const exportExcel = () => {
+    const data = getExportData();
+    if (data.length === 0) { alert("Aucun ticket ne correspond aux filtres sélectionnés."); return; }
+    const rows = data.map(t => ({
+      "N° Ticket": t.fields?.Name || "",
+      "Date intervention": t.fields?.Créneau || "",
+      "Statut": t.fields?.Statut || "Nouveau",
+      "Urgent": (t.fields?.Urgent===true||t.fields?.Urgent==="true") ? "Oui" : "Non",
+      "Agence": t.fields?.Agence || "",
+      "Client": t.fields?.Client || "",
+      "Téléphone": t.fields?.Téléphone || "",
+      "Email": t.fields?.Email || "",
+      "Adresse": t.fields?.Adresse || "",
+      "Produit": t.fields?.Produit || "",
+      "Problème": t.fields?.Problème || "",
+      "Garantie": t.fields?.Garantie ? "Oui" : "Non",
+      "N° Facture": t.fields?.["N° Facture"] || "",
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = Object.keys(rows[0]).map(k => ({ wch: Math.max(k.length, 14) }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Tickets SAV");
+    XLSX.writeFile(wb, nomFichierExport("xlsx"));
+  };
+
+  const exportPDF = () => {
+    const data = getExportData();
+    if (data.length === 0) { alert("Aucun ticket ne correspond aux filtres sélectionnés."); return; }
+    const ag = agenceFilter==="global" ? "Toutes agences" : agenceFilter;
+    const periode = (exportDebut||exportFin) ? "Du "+(exportDebut||"...")+" au "+(exportFin||"...") : "Toutes dates";
+    const lignes = data.map(t => `
+      <tr>
+        <td>${t.fields?.Name||""}</td>
+        <td>${t.fields?.Créneau||""}</td>
+        <td>${t.fields?.Statut||"Nouveau"}</td>
+        <td>${t.fields?.Agence||""}</td>
+        <td>${t.fields?.Client||""}</td>
+        <td>${t.fields?.Téléphone||""}</td>
+        <td>${t.fields?.Produit||""}</td>
+        <td>${t.fields?.Problème||""}</td>
+      </tr>`).join("");
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Export RSIA SAV</title>
+      <style>
+        body{font-family:Arial,sans-serif;padding:24px;color:#111;}
+        h1{color:#111;font-size:18px;margin-bottom:2px;}
+        .sub{color:#666;font-size:11px;margin-bottom:16px;}
+        table{width:100%;border-collapse:collapse;font-size:10px;}
+        th{background:#111;color:#fff;text-align:left;padding:6px 8px;}
+        td{border-bottom:1px solid #ddd;padding:6px 8px;}
+        tr:nth-child(even){background:#f7f7f7;}
+        .footer{margin-top:16px;font-size:9px;color:#999;}
+        @media print { @page { size: landscape; margin: 12mm; } }
+      </style></head><body>
+      <h1>RSIA Conseil — Export tickets SAV</h1>
+      <div class="sub">${ag} — ${periode} — ${data.length} ticket(s) — généré le ${new Date().toLocaleDateString('fr-FR')}</div>
+      <table><thead><tr>
+        <th>N° Ticket</th><th>Date intervention</th><th>Statut</th><th>Agence</th><th>Client</th><th>Téléphone</th><th>Produit</th><th>Problème</th>
+      </tr></thead><tbody>${lignes}</tbody></table>
+      <div class="footer">RSIA Conseil — Document généré automatiquement</div>
+      </body></html>`;
+    const w = window.open('', '_blank');
+    w.document.write(html);
+    w.document.close();
+    setTimeout(() => { w.print(); }, 300);
   };
 
   const updateStatus = async (id, newStatus) => {
@@ -492,6 +581,7 @@ function Dashboard({ agenceAccess }) {
           {lastRefresh && <span style={{fontSize:"10px",color:C.muted}}>MAJ {lastRefresh}</span>}
           <button onClick={() => setShowModalRdv(true)} style={{background:C.or,border:"none",color:"#111",borderRadius:"8px",padding:"8px 16px",fontSize:"12px",fontWeight:"900",cursor:"pointer",display:"flex",alignItems:"center",gap:"6px"}}>📞 + Nouveau RDV</button>
           <button onClick={charger} style={{background:C.orDim,border:"1px solid "+C.orBord,color:C.or,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",fontWeight:"700",cursor:"pointer"}}>↺</button>
+          <button onClick={onClose} title="Fermer la session" style={{background:"rgba(255,255,255,0.06)",border:"1px solid "+C.border,color:C.muted,borderRadius:"8px",width:"30px",height:"30px",cursor:"pointer",fontSize:"14px",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>✕</button>
         </div>
       </div>
 
@@ -536,6 +626,25 @@ function Dashboard({ agenceAccess }) {
               {l}
             </button>
           ))}
+        </div>
+
+        <div style={{background:C.card,border:"1px solid "+C.border,borderRadius:"12px",padding:"14px 16px",marginBottom:"16px"}}>
+          <div style={{fontSize:"12px",fontWeight:"700",color:C.white,marginBottom:"10px"}}>📤 Export (respecte les filtres agence/statut/recherche ci-dessous)</div>
+          <div style={{display:"flex",gap:"10px",flexWrap:"wrap",alignItems:"center"}}>
+            <div style={{display:"flex",gap:"6px",alignItems:"center"}}>
+              <span style={{fontSize:"11px",color:C.muted}}>Du</span>
+              <input type="date" value={exportDebut} onChange={e => setExportDebut(e.target.value)} style={{width:"140px"}}/>
+              <span style={{fontSize:"11px",color:C.muted}}>au</span>
+              <input type="date" value={exportFin} onChange={e => setExportFin(e.target.value)} style={{width:"140px"}}/>
+              {(exportDebut||exportFin) && (
+                <button onClick={() => { setExportDebut(""); setExportFin(""); }} style={{background:"none",border:"none",color:C.muted,fontSize:"11px",cursor:"pointer",textDecoration:"underline"}}>Effacer</button>
+              )}
+            </div>
+            <div style={{display:"flex",gap:"8px",marginLeft:"auto"}}>
+              <button onClick={exportExcel} style={{background:C.vertDim,border:"1px solid rgba(22,163,74,0.4)",color:C.vert,borderRadius:"8px",padding:"8px 14px",fontSize:"12px",fontWeight:"700",cursor:"pointer"}}>📊 Excel</button>
+              <button onClick={exportPDF} style={{background:C.orDim,border:"1px solid "+C.orBord,color:C.or,borderRadius:"8px",padding:"8px 14px",fontSize:"12px",fontWeight:"700",cursor:"pointer"}}>🖨️ PDF</button>
+            </div>
+          </div>
         </div>
 
         {vue === "tickets" && (
@@ -631,7 +740,7 @@ function Login({ onLogin }) {
 
 function App() {
   const [access, setAccess] = React.useState(null);
-  return access ? <Dashboard agenceAccess={access}/> : <Login onLogin={setAccess}/>;
+  return access ? <Dashboard agenceAccess={access} onClose={() => setAccess(null)}/> : <Login onLogin={setAccess}/>;
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
