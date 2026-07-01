@@ -98,12 +98,12 @@ function TicketRow({ t, onStatusChange }) {
               <span style={{color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{val}</span>
             </div>
           ):null)}
-        </div>{t.fields?.Photos && (
+       {t.fields?.Photos && (
   <a href={t.fields.Photos.split(',')[0].trim()} target="_blank" style={{fontSize:"11px",color:C.or,fontWeight:"700",textDecoration:"none",display:"flex",alignItems:"center",gap:"5px",marginTop:"6px"}}>
     📎 Voir la/les photo(s)
   </a>
-      <button onClick={() => renvoyerMailTechnicien(t.fields?.Name)} style={{marginTop:"8px",background:"#FF6B00",color:"#111",border:"none",borderRadius:"8px",padding:"8px 14px",fontWeight:"700",fontSize:"13px",cursor:"pointer",width:"100%"}}>📧 Renvoyer au technicien</button>
-      </div>
+)}
+<button onClick={() => renvoyerMailTechnicien(t.fields?.Name)} style={{marginTop:"8px",background:"#FF6B00",color:"#111",border:"none",borderRadius:"8px",padding:"8px 14px",fontWeight:"700",fontSize:"13px",cursor:"pointer",width:"100%"}}>📧 Renvoyer au technicien</button>
       <div style={{flexShrink:0}}>
         <select value={statut} onChange={e => onStatusChange(t.id, e.target.value)}
           style={{background:"#1f1f1f",border:"1px solid "+C.border,color:C.text,borderRadius:"8px",padding:"5px 8px",fontSize:"11px",cursor:"pointer"}}>
