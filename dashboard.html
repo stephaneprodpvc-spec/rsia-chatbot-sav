@@ -112,12 +112,22 @@ function TicketRow({ t, onStatusChange, onAnnuler, onRenvoyerMail, onRenvoyerMai
           <span style={{fontSize:"10px",color:C.muted,marginLeft:"auto"}}>{t.fields?.Agence}</span>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"4px 16px"}}>
-          {[["👤",t.fields?.Client],["📦",t.fields?.Produit],["🔧",t.fields?.Problème],["📅",t.fields?.Créneau],["📍",t.fields?.Adresse],["📞",t.fields?.Téléphone],["📎",t.fields?.Photos?"Photo(s) jointe(s)":null]].map(([icon,val],i) => val?(
-            <div key={i} style={{fontSize:"11px",color:C.muted,display:"flex",gap:"5px",alignItems:"flex-start"}}>
-              <span style={{flexShrink:0}}>{icon}</span>
-              <span style={{color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{val}</span>
-            </div>
-          ):null)}
+          <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
+            {[["👤",t.fields?.Client],["📍",t.fields?.Adresse],["📞",t.fields?.Téléphone]].map(([icon,val],i) => val?(
+              <div key={i} style={{fontSize:"11px",color:C.muted,display:"flex",gap:"5px",alignItems:"flex-start"}}>
+                <span style={{flexShrink:0}}>{icon}</span>
+                <span style={{color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{val}</span>
+              </div>
+            ):null)}
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
+            {[["📦",t.fields?.Produit],["🔧",t.fields?.Problème],["📅",t.fields?.Créneau]].map(([icon,val],i) => val?(
+              <div key={i} style={{fontSize:"11px",color:C.muted,display:"flex",gap:"5px",alignItems:"flex-start"}}>
+                <span style={{flexShrink:0}}>{icon}</span>
+                <span style={{color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{val}</span>
+              </div>
+            ):null)}
+          </div>
         </div>
         {t.fields?.Photos && (
           <a href={t.fields.Photos.split(',')[0].trim()} target="_blank" style={{fontSize:"11px",color:C.or,fontWeight:"700",textDecoration:"none",display:"flex",alignItems:"center",gap:"5px",marginTop:"6px"}}>
