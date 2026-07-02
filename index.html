@@ -242,17 +242,23 @@ function CreneauPicker({ agenceVille, onSelect }) {
     { id: "apres_midi", label: "🌇 Après-midi", heure: "13h00 — 17h00", valeur: "Après-midi (13h00 — 17h00)" },
   ];
 
+  const DELAI_MIN_JOURS = 7;
+
   const charger = async (c) => {
     setLoading(true);
     setDates([]);
     try {
       const f = encodeURIComponent('AND({Agence}="' + agenceVille + '",{Créneau}="' + c.valeur + '",{Statut}="Libre")');
-      const url = 'https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + f + '&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=20';
+      const url = 'https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + f + '&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=60';
       const r = await fetch(url, { headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN } });
       const json = await r.json();
+      const auPlusTot = new Date();
+      auPlusTot.setDate(auPlusTot.getDate() + DELAI_MIN_JOURS);
+      const auPlusTotStr = auPlusTot.toISOString().split('T')[0];
       const map = {};
       (json.records || []).forEach(rec => {
         const d = rec.fields.Date;
+        if (d < auPlusTotStr) return;
         if (!map[d]) map[d] = { date: d, ids: [] };
         map[d].ids.push(rec.id);
       });
@@ -294,11 +300,12 @@ function CreneauPicker({ agenceVille, onSelect }) {
 
   return (
     <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:"1px solid " + F.grisBord}}>
-      <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"12px"}}>
+      <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}}>
         <span style={{fontSize:"11px",color:F.or,fontWeight:"700"}}>{typeCreneau.label}</span>
         <button onClick={() => { setTypeCreneau(null); setDates([]); }}
           style={{fontSize:"10px",color:"#94A3B8",background:"none",border:"none",cursor:"pointer"}}>← Changer</button>
       </div>
+      <div style={{fontSize:"10px",color:"#94A3B8",marginBottom:"10px"}}>Premières disponibilités à partir d'une semaine</div>
       {loading && <div style={{textAlign:"center",padding:"16px",color:"#64748B",fontSize:"12px"}}>⏳ Chargement des disponibilités...</div>}
       {!loading && dates.length === 0 && (
         <div style={{textAlign:"center",padding:"16px",color:F.rouge,fontSize:"12px"}}>Aucune disponibilité. Essayez l'autre créneau.</div>
