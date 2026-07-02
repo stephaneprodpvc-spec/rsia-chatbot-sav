@@ -395,6 +395,24 @@ function Dashboard({ agenceAccess, onClose }) {
   const [successTicket, setSuccessTicket] = React.useState(null);
   const [exportDebut, setExportDebut] = React.useState("");
   const [exportFin, setExportFin] = React.useState("");
+  const [notifs, setNotifs] = React.useState([]);
+  const idsConnusRef = React.useRef(null);
+
+  const jouerSon = () => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sine';
+      o.frequency.setValueAtTime(740, ctx.currentTime);
+      o.frequency.setValueAtTime(988, ctx.currentTime + 0.12);
+      g.gain.setValueAtTime(0.001, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+      o.start(); o.stop(ctx.currentTime + 0.5);
+    } catch(e) {}
+  };
 
   const charger = async () => {
     setLoading(true);
@@ -403,13 +421,34 @@ function Dashboard({ agenceAccess, onClose }) {
       const url = 'https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets SAV?'+(filter?'filterByFormula='+filter+'&':'')+'sort[0][field]=Name&sort[0][direction]=desc&maxRecords=200';
       const r = await fetch(url, { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
       const json = await r.json();
-      setTickets(json.records||[]);
+      const records = json.records||[];
+
+      const idsActuels = new Set(records.map(t => t.id));
+      if (idsConnusRef.current) {
+        const nouveaux = records.filter(t => !idsConnusRef.current.has(t.id));
+        if (nouveaux.length > 0) {
+          jouerSon();
+          const toasts = nouveaux.map(t => ({
+            id: t.id + '-' + Date.now(),
+            texte: '🆕 ' + (t.fields?.Name||'Nouveau ticket') + ' — ' + (t.fields?.Client||'Client inconnu') + ' (' + (t.fields?.Agence||'') + ')'
+          }));
+          setNotifs(prev => [...prev, ...toasts]);
+          toasts.forEach(t => setTimeout(() => setNotifs(prev => prev.filter(n => n.id !== t.id)), 7000));
+        }
+      }
+      idsConnusRef.current = idsActuels;
+
+      setTickets(records);
       setLastRefresh(new Date().toLocaleTimeString('fr-FR'));
     } catch(e) { console.error(e); }
     setLoading(false);
   };
 
   React.useEffect(() => { charger(); }, [agenceFilter]);
+  React.useEffect(() => {
+    const interval = setInterval(() => { charger(); }, 30000);
+    return () => clearInterval(interval);
+  }, [agenceFilter]);
 
   const renvoyerMailTechnicien = (ticketId) => {
     if (!confirm('Renvoyer le mail au technicien pour le ticket ' + ticketId + ' ?')) return;
@@ -565,6 +604,14 @@ function Dashboard({ agenceAccess, onClose }) {
       )}
       {successTicket && <ModalSuccess ticket={successTicket} onClose={() => setSuccessTicket(null)} />}
 
+      <div style={{position:"fixed",top:"16px",right:"16px",zIndex:2000,display:"flex",flexDirection:"column",gap:"8px",maxWidth:"320px"}}>
+        {notifs.map(n => (
+          <div key={n.id} style={{background:C.card,border:"1px solid "+C.orBord,borderLeft:"4px solid "+C.or,borderRadius:"10px",padding:"12px 14px",boxShadow:"0 8px 24px rgba(0,0,0,0.4)",color:C.white,fontSize:"12px",fontWeight:"600"}}>
+            {n.texte}
+          </div>
+        ))}
+      </div>
+
       <div style={{background:C.card,borderBottom:"1px solid "+C.border,padding:"12px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100}}>
         <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
           <div style={{width:"36px",height:"36px",background:C.or,borderRadius:"8px",display:"flex",alignItems:"center",justifyContent:"center"}}>
@@ -578,7 +625,7 @@ function Dashboard({ agenceAccess, onClose }) {
           </div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
-          {lastRefresh && <span style={{fontSize:"10px",color:C.muted}}>MAJ {lastRefresh}</span>}
+          {lastRefresh && <span style={{fontSize:"10px",color:C.muted,display:"flex",alignItems:"center",gap:"4px"}}><span style={{width:"6px",height:"6px",background:"#22c55e",borderRadius:"50%",display:"inline-block"}}/>MAJ {lastRefresh} · auto</span>}
           <button onClick={() => setShowModalRdv(true)} style={{background:C.or,border:"none",color:"#111",borderRadius:"8px",padding:"8px 16px",fontSize:"12px",fontWeight:"900",cursor:"pointer",display:"flex",alignItems:"center",gap:"6px"}}>📞 + Nouveau RDV</button>
           <button onClick={charger} style={{background:C.orDim,border:"1px solid "+C.orBord,color:C.or,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",fontWeight:"700",cursor:"pointer"}}>↺</button>
           <div style={{width:"1px",height:"24px",background:C.border,margin:"0 4px"}}/>
