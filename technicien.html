@@ -268,6 +268,21 @@ function TicketCard({ ticket, onAction }) {
   );
 }
 
+const MOIS = {janvier:1,février:2,mars:3,avril:4,mai:5,juin:6,juillet:7,août:8,septembre:9,octobre:10,novembre:11,décembre:12};
+const parseDateCreneau = (creneau) => {
+  if (!creneau) return null;
+  const match = creneau.match(/(\d+)\s+(\w+)(?:\s+(\d{4}))?/g);
+  if (!match) return null;
+  const last = match[match.length-1];
+  const parts = last.match(/(\d+)\s+(\w+)(?:\s+(\d{4}))?/);
+  if (!parts) return null;
+  const day = parseInt(parts[1]);
+  const month = MOIS[parts[2].toLowerCase()];
+  if (!month) return null;
+  const year = parts[3] ? parseInt(parts[3]) : new Date().getFullYear();
+  return new Date(year, month-1, day);
+};
+
 function Technicien({ agence, onClose }) {
   const [tickets, setTickets] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -308,6 +323,54 @@ function Technicien({ agence, onClose }) {
   const nbTermines = tickets.filter(t => t.fields?.Statut==="Terminé").length;
   const agenceShort = agence.replace(/ \(\d+\)/,"");
 
+  const imprimerSemaine = () => {
+    const now = new Date();
+    const jourSemaine = now.getDay();
+    const decalageLundi = jourSemaine === 0 ? -6 : 1 - jourSemaine;
+    const lundi = new Date(now); lundi.setDate(now.getDate() + decalageLundi); lundi.setHours(0,0,0,0);
+    const dimanche = new Date(lundi); dimanche.setDate(lundi.getDate() + 6); dimanche.setHours(23,59,59,999);
+
+    const semaine = tickets
+      .filter(t => t.fields?.Statut !== "Annulé")
+      .map(t => ({ t, date: parseDateCreneau(t.fields?.["Créneau"]) }))
+      .filter(x => x.date && x.date >= lundi && x.date <= dimanche)
+      .sort((a,b) => a.date - b.date);
+
+    const fmtJour = (d) => d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
+    const lignes = semaine.map(({t}) => `
+      <tr>
+        <td>${t.fields?.["Créneau"]||""}</td>
+        <td>${t.fields?.Name||""}</td>
+        <td>${t.fields?.Client||""}</td>
+        <td>${t.fields?.Adresse||""}</td>
+        <td>${t.fields?.["Téléphone"]||""}</td>
+        <td>${t.fields?.Produit||""} — ${t.fields?.["Problème"]||""}</td>
+      </tr>`).join("");
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ma semaine — ${agenceShort}</title>
+      <style>
+        body{font-family:Arial,sans-serif;padding:24px;color:#111;}
+        h1{font-size:18px;margin-bottom:2px;}
+        .sub{color:#666;font-size:11px;margin-bottom:16px;}
+        table{width:100%;border-collapse:collapse;font-size:10px;}
+        th{background:#111;color:#fff;text-align:left;padding:6px 8px;}
+        td{border-bottom:1px solid #ddd;padding:6px 8px;vertical-align:top;}
+        tr:nth-child(even){background:#f7f7f7;}
+        .footer{margin-top:16px;font-size:9px;color:#999;}
+        @media print { @page { size: landscape; margin: 12mm; } }
+      </style></head><body>
+      <h1>RSIA Conseil — Planning technicien</h1>
+      <div class="sub">${agenceShort} — Semaine du ${fmtJour(lundi)} au ${fmtJour(dimanche)} — ${semaine.length} intervention(s)</div>
+      <table><thead><tr>
+        <th>Créneau</th><th>N° Ticket</th><th>Client</th><th>Adresse</th><th>Téléphone</th><th>Produit / Problème</th>
+      </tr></thead><tbody>${lignes || '<tr><td colspan="6" style="text-align:center;color:#999;">Aucune intervention cette semaine</td></tr>'}</tbody></table>
+      <div class="footer">RSIA Conseil — Document généré automatiquement</div>
+      </body></html>`;
+    const w = window.open('', '_blank');
+    w.document.write(html);
+    w.document.close();
+    setTimeout(() => { w.print(); }, 300);
+  };
+
   return (
     <div style={{minHeight:"100vh",background:C.bg,maxWidth:"600px",margin:"0 auto"}}>
       {selectedTicket && (
@@ -332,6 +395,7 @@ function Technicien({ agence, onClose }) {
               {lastRefresh && <div style={{fontSize:"9px",color:C.muted}}>MAJ {lastRefresh}</div>}
               <button onClick={charger} style={{background:C.orDim,border:"1px solid "+C.orBord,color:C.or,borderRadius:"8px",padding:"5px 10px",fontSize:"11px",fontWeight:"700",cursor:"pointer",marginTop:"3px"}}>↺</button>
             </div>
+            <button onClick={imprimerSemaine} title="Imprimer ma semaine" style={{background:C.orDim,border:"1px solid "+C.orBord,color:C.or,borderRadius:"8px",padding:"5px 10px",fontSize:"11px",fontWeight:"700",cursor:"pointer"}}>🖨️ Ma semaine</button>
             <div style={{width:"1px",height:"30px",background:C.border}}/>
             <button onClick={onClose} title="Fermer la session" style={{background:"rgba(220,38,38,0.08)",border:"1px solid rgba(220,38,38,0.25)",color:"rgba(220,38,38,0.85)",borderRadius:"8px",width:"28px",height:"28px",cursor:"pointer",fontSize:"14px",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>✕</button>
           </div>
