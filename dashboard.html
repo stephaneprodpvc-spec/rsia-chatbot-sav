@@ -397,10 +397,16 @@ function Dashboard({ agenceAccess, onClose }) {
   const [exportFin, setExportFin] = React.useState("");
   const [notifs, setNotifs] = React.useState([]);
   const idsConnusRef = React.useRef(null);
+  const audioCtxRef = React.useRef(null);
+  const isFetchingRef = React.useRef(false);
 
   const jouerSon = () => {
     try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      const ctx = audioCtxRef.current;
+      if (ctx.state === 'suspended') ctx.resume();
       const o = ctx.createOscillator();
       const g = ctx.createGain();
       o.connect(g); g.connect(ctx.destination);
@@ -411,10 +417,13 @@ function Dashboard({ agenceAccess, onClose }) {
       g.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.02);
       g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
       o.start(); o.stop(ctx.currentTime + 0.5);
+      o.onended = () => { o.disconnect(); g.disconnect(); };
     } catch(e) {}
   };
 
   const charger = async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
     setLoading(true);
     try {
       let filter = agenceFilter !== "global" ? encodeURIComponent('{Agence}="'+agenceFilter+'"') : "";
@@ -442,6 +451,7 @@ function Dashboard({ agenceAccess, onClose }) {
       setLastRefresh(new Date().toLocaleTimeString('fr-FR'));
     } catch(e) { console.error(e); }
     setLoading(false);
+    isFetchingRef.current = false;
   };
 
   React.useEffect(() => { charger(); }, [agenceFilter]);
