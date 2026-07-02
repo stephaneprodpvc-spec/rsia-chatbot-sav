@@ -3,769 +3,873 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RSIA Conseil — SAV Menuiserie</title>
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#FF6B00">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="RSIA SAV">
-<link rel="apple-touch-icon" href="/icon-192.png">
+<title>RSIA — Dashboard Agences</title>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', sans-serif; background: #F5F5F5; min-height: 100vh; }
-#rsia-widget-btn {
-  position: fixed; bottom: 28px; right: 28px; height: 58px; padding: 0 28px;
-  background: #111111; border-radius: 34px; display: flex; align-items: center;
-  justify-content: center; gap: 10px; cursor: pointer;
-  box-shadow: 0 6px 28px rgba(0,0,0,0.5); z-index: 9999; border: none;
-  transition: transform 0.2s; font-family: 'Segoe UI', sans-serif;
-  font-size: 17px; font-weight: 700; color: white; white-space: nowrap; letter-spacing: 0.3px;
-}
-#rsia-widget-btn:hover { transform: scale(1.04); }
-#rsia-widget-btn svg { width: 24px; height: 24px; flex-shrink: 0; }
-#rsia-widget-panel {
-  position: fixed; bottom: 84px; right: 24px; width: 400px; height: 620px;
-  border-radius: 18px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.22);
-  z-index: 9998; display: none; flex-direction: column; background: #F5F5F5;
-}
-#rsia-widget-panel.open { display: flex; }
-@media (max-width: 480px) {
-  #rsia-widget-panel { bottom: 0; right: 0; width: 100vw; height: 100vh; border-radius: 0; }
-  #rsia-widget-btn { bottom: 16px; right: 16px; }
-}
+body { font-family: 'Segoe UI', sans-serif; background: #0D0D0D; color: #E5E5E5; min-height: 100vh; }
+::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #1a1a1a; } ::-webkit-scrollbar-thumb { background: #FF6B00; border-radius: 3px; }
+.modal-overlay { position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px; }
+.modal-box { background:#161616;border:1px solid rgba(255,107,0,0.3);border-radius:16px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto; }
+input, select, textarea { background:#1a1a1a;border:1px solid #2a2a2a;color:#E5E5E5;border-radius:8px;padding:9px 12px;font-size:12px;width:100%;outline:none;font-family:'Segoe UI',sans-serif; }
+input:focus, select:focus, textarea:focus { border-color:rgba(255,107,0,0.5); }
 </style>
 </head>
 <body>
-
-<div style="min-height:100vh;background:#0f0f0f;position:relative;overflow:hidden;">
-  <svg style="position:absolute;top:0;left:0;width:100%;height:100%;" viewBox="0 0 680 420" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-    <rect x="0" y="0" width="680" height="420" fill="#0f0f0f"/>
-    <rect x="310" y="0" width="370" height="420" fill="#FF6B00"/>
-    <polygon points="290,0 350,0 310,420 250,420" fill="#FF6B00" opacity="0.06"/>
-  </svg>
-  <div style="position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;min-height:100vh;padding:60px;">
-    <div style="max-width:360px;">
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:48px;">
-        <div style="width:50px;height:50px;background:#FF6B00;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <span style="font-family:'Arial Black',Arial;font-size:26px;font-weight:900;color:#111;display:inline-block;transform:scaleX(-1);line-height:1;">R</span>
-        </div>
-        <div>
-          <div style="color:#fff;font-weight:900;font-size:22px;font-family:'Segoe UI',sans-serif;">
-            <span style="display:inline-block;transform:scaleX(-1);font-family:'Arial Black',Arial;">R</span>S<span style="color:#FF6B00;">IA</span>
-            <span style="font-size:13px;font-weight:500;margin-left:5px;color:rgba(255,255,255,0.4);">Conseil</span>
-          </div>
-          <div style="color:rgba(255,255,255,0.28);font-size:8px;letter-spacing:3px;text-transform:uppercase;margin-top:3px;">Solutions IA · SAV Menuiserie</div>
-        </div>
-      </div>
-      <h1 style="color:#fff;font-size:40px;font-weight:900;line-height:1.15;margin-bottom:20px;font-family:'Segoe UI',sans-serif;">
-        Le SAV menuiserie<br/><span style="color:#FF6B00;">intelligent.</span>
-      </h1>
-      <div style="width:90px;height:2.5px;background:#FF6B00;border-radius:2px;margin-bottom:24px;"></div>
-      <p style="color:rgba(255,255,255,0.45);font-size:13px;line-height:1.8;margin-bottom:36px;">
-        Ticket automatique · Notification agence<br/>Suivi temps réel · 4 agences
-      </p>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:32px;">
-        <div style="width:8px;height:8px;background:#2ECC71;border-radius:50%;flex-shrink:0;box-shadow:0 0 8px rgba(46,204,113,0.5);"></div>
-        <span style="color:rgba(255,255,255,0.38);font-size:12px;">Disponible 24h/24 — Réponse sous 24h</span>
-      </div>
-    </div>
-  </div>
-  <div style="position:absolute;bottom:0;left:0;right:0;z-index:2;padding:12px 60px;border-top:1px solid rgba(255,107,0,0.12);display:flex;justify-content:space-between;">
-    <span style="color:rgba(255,255,255,0.18);font-size:10px;">© 2025 RSIA Conseil — Solutions IA pour les PME du bâtiment</span>
-    <span style="color:rgba(255,107,0,0.4);font-size:10px;">rsia-chatbot-sav.vercel.app</span>
-  </div>
-</div>
-
-<div id="rsia-widget-panel">
-  <div id="root" style="height:100%;display:flex;flex-direction:column;"></div>
-</div>
-
-<button id="rsia-widget-btn" onclick="toggleWidget()" title="Ouvrir le SAV RSIA">
-  <svg id="icon-chat" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-  </svg>
-  <span id="btn-label">Demande SAV</span>
-  <svg id="icon-close" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="display:none">
-    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-  </svg>
-</button>
-
-<script>
-let widgetOpen = false;
-let reactMounted = false;
-
-function toggleWidget() {
-  widgetOpen = !widgetOpen;
-  const panel = document.getElementById('rsia-widget-panel');
-  const iconChat = document.getElementById('icon-chat');
-  const iconClose = document.getElementById('icon-close');
-  const btnLabel = document.getElementById('btn-label');
-  if (widgetOpen) {
-    panel.classList.add('open');
-    iconChat.style.display = 'none';
-    btnLabel.style.display = 'none';
-    iconClose.style.display = 'block';
-    if (!reactMounted) {
-      reactMounted = true;
-      setTimeout(function() { mountChatbot(); }, 50);
-    }
-  } else {
-    panel.classList.remove('open');
-    iconChat.style.display = 'block';
-    btnLabel.style.display = 'inline';
-    iconClose.style.display = 'none';
-    if (window.__rsiaReset) window.__rsiaReset();
-  }
-}
-</script>
-
+<div id="root"></div>
 <script type="text/babel">
 
 const AIRTABLE_TOKEN = 'patXNwO908NNfQcQZ.6d0f58479c753d1bb828a26eccbfc4b1e10ece70b8c71e381d304ecb62990375';
 const AIRTABLE_BASE = 'appFqAT8WeX0UTudy';
-const CLOUDINARY_CLOUD = 'dvbh3llqq';
-const CLOUDINARY_PRESET = 'rsia_sav_unsigned';
+const WEBHOOK = 'https://hook.eu1.make.com/bkoorc2nn457jgvmvtv6pjme5vrtz68g';
+const WEBHOOK_TECHNICIEN = 'https://hook.eu1.make.com/8idy6ft9mhf2nkr6janhjmvtjfvj6c7f';
+const WEBHOOK_CLIENT = 'https://hook.eu1.make.com/3rexafyrlvxdam58yxe1h8hkpa254k48';
 
-const F = {
-  marine: "#111111", or: "#FF6B00", orClair: "#FFD4B3",
-  blanc: "#FFFFFF", grisClair: "#F5F5F5", grisBord: "#E5E5E5",
-  rouge: "#DC2626", rougeClair: "#FEE2E2", vert: "#15803D", vertClair: "#F0FDF4",
+const PASSWORDS = {
+  "rsia2026": "global",
+  "ibos65": "Ibos (65)",
+  "tarnos40": "Tarnos (40)",
+  "lescar64": "Lescar (64)",
+  "stgaudens31": "Saint-Gaudens (31)",
 };
 
-const AGENCES = [
-  { id: "ibos", label: "📍 Ibos", ville: "Ibos (65)" },
-  { id: "lescar", label: "📍 Lescar", ville: "Lescar (64)" },
-  { id: "tarnos", label: "📍 Tarnos", ville: "Tarnos (40)" },
-  { id: "saint_gaudens", label: "📍 Saint-Gaudens", ville: "Saint-Gaudens (31)" },
-];
+const AGENCES = ["Ibos (65)", "Tarnos (40)", "Lescar (64)", "Saint-Gaudens (31)"];
+const PRODUITS = ["Fenêtre","Coulissant","Volet roulant","Portail","Porte de garage","Véranda","Autre"];
+const PROBLEMES = {
+  "Fenêtre": ["Fermeture difficile","Infiltration d'eau","Courant d'air / joint usé","Vitrage fissuré","Fenêtre bloquée ouverte","Autre"],
+  "Coulissant": ["Rail bloqué","Infiltration d'eau","Serrure défaillante","Autre"],
+  "Volet roulant": ["Volet bloqué","Moteur en panne","Lame cassée","Télécommande HS","Autre"],
+  "Portail": ["Moteur en panne","Télécommande HS","Gond arraché","Fermeture défaillante","Autre"],
+  "Porte de garage": ["Moteur en panne","Ressort cassé","Porte bloquée","Serrure défaillante","Autre"],
+  "Véranda": ["Toiture — Fuite","Coulissant — Rail bloqué","Fenêtre — Fermeture difficile","Autre"],
+  "Autre": ["Décrire le problème"],
+};
 
-const PRODUITS = [
-  { id: "fenetre", label: "🪟 Fenêtre", pb: [
-    { id: "fermeture", label: "Fermeture difficile" },
-    { id: "infiltration", label: "Infiltration d'eau", urgent: true },
-    { id: "joint", label: "Courant d'air / joint usé" },
-    { id: "vitrage", label: "Vitrage fissuré / cassé" },
-    { id: "bloquee", label: "Fenêtre bloquée ouverte", urgent: true },
-    { id: "autre", label: "Autre problème" },
-  ]},
-  { id: "coulissant", label: "↔️ Coulissant", pb: [
-    { id: "rail", label: "Rail bloqué / difficile à glisser" },
-    { id: "infiltration", label: "Infiltration d'eau", urgent: true },
-    { id: "serrure", label: "Serrure / verrouillage défaillant" },
-    { id: "autre", label: "Autre problème" },
-  ]},
-  { id: "volet_roulant", label: "⬛ Volet roulant", pb: [
-    { id: "bloque", label: "Volet bloqué mi-hauteur", urgent: true },
-    { id: "moteur", label: "Moteur en panne" },
-    { id: "lame", label: "Lame cassée / décrochée" },
-    { id: "telecommande", label: "Télécommande / interrupteur HS" },
-    { id: "autre", label: "Autre problème" },
-  ]},
-  { id: "portail", label: "🚪 Portail", pb: [
-    { id: "moteur", label: "Moteur en panne" },
-    { id: "telecommande", label: "Télécommande ne fonctionne plus" },
-    { id: "gond", label: "Gond arraché / portail affaissé", urgent: true },
-    { id: "fermeture", label: "Fermeture / verrouillage défaillant", urgent: true },
-    { id: "autre", label: "Autre problème" },
-  ]},
-  { id: "porte_garage", label: "🏠 Porte de garage", sousTypes: ["Sectionnelle", "Enroulable", "Basculante"], pb: [
-    { id: "moteur", label: "Moteur en panne" },
-    { id: "ressort", label: "Ressort cassé", urgent: true },
-    { id: "bloquee", label: "Porte bloquée ouverte", urgent: true },
-    { id: "serrure", label: "Serrure / verrouillage défaillant", urgent: true },
-    { id: "autre", label: "Autre problème" },
-  ]},
-  { id: "veranda", label: "🏡 Véranda", pb: [
-    { id: "toiture_fuite", label: "Toiture — Fuite / infiltration", urgent: true },
-    { id: "coulissant_rail", label: "Coulissant — Rail bloqué" },
-    { id: "fenetre_fermeture", label: "Fenêtre — Fermeture difficile" },
-    { id: "autre", label: "Autre problème" },
-  ]},
-  { id: "autre", label: "❓ Autre produit", pb: [{ id: "autre", label: "Décrire mon problème" }] },
-];
+const C = {
+  bg: "#0D0D0D", card: "#161616", border: "#2a2a2a",
+  or: "#FF6B00", orDim: "rgba(255,107,0,0.12)", orBord: "rgba(255,107,0,0.3)",
+  text: "#E5E5E5", muted: "#666", white: "#fff",
+  rouge: "#DC2626", rougeDim: "rgba(220,38,38,0.12)",
+  vert: "#16a34a", vertDim: "rgba(22,163,74,0.12)",
+  bleu: "#2563eb", bleuDim: "rgba(37,99,235,0.12)",
+  jaune: "#d97706", jauneDim: "rgba(217,119,6,0.12)",
+};
 
-async function compresserImage(file) {
-  return new Promise((resolve) => {
-    if (!file.type.startsWith('image/')) { resolve(file); return; }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let w = img.width, h = img.height;
-        const maxDim = 1920;
-        if (w > maxDim || h > maxDim) {
-          if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-          else { w = Math.round(w * maxDim / h); h = maxDim; }
-        }
-        canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        canvas.toBlob((blob) => {
-          resolve(new File([blob], file.name, { type: 'image/jpeg' }));
-        }, 'image/jpeg', 0.8);
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
+// ---- TRI PAR DATE ----
+const MOIS = {janvier:1,février:2,mars:3,avril:4,mai:5,juin:6,juillet:7,août:8,septembre:9,octobre:10,novembre:11,décembre:12};
+const parseDateCreneau = (creneau) => {
+  if (!creneau) return new Date(9999,0,1);
+  const match = creneau.match(/(\d+)\s+(\w+)(?:\s+(\d{4}))?/g);
+  if (!match) return new Date(9999,0,1);
+  const last = match[match.length-1];
+  const parts = last.match(/(\d+)\s+(\w+)(?:\s+(\d{4}))?/);
+  if (!parts) return new Date(9999,0,1);
+  const day = parseInt(parts[1]);
+  const month = MOIS[parts[2].toLowerCase()] || 1;
+  const year = parts[3] ? parseInt(parts[3]) : new Date().getFullYear();
+  return new Date(year, month-1, day);
+};
+
+// ---- STATUTS "CLOS" (Terminé / Annulé) ----
+const isStatutClos = (statut) => statut === "Terminé" || statut === "Annulé";
+
+function Badge({ label, color, bg }) {
+  return <span style={{display:"inline-block",padding:"2px 8px",borderRadius:"20px",fontSize:"10px",fontWeight:"700",color,background:bg,letterSpacing:"0.5px"}}>{label}</span>;
+}
+
+function StatCard({ label, value, sub, accent }) {
+  return (
+    <div style={{background:C.card,border:"1px solid "+(accent?C.orBord:C.border),borderRadius:"12px",padding:"16px 20px",flex:1,minWidth:"120px"}}>
+      <div style={{fontSize:"28px",fontWeight:"900",color:accent?C.or:C.white,fontFamily:"monospace"}}>{value}</div>
+      <div style={{fontSize:"12px",fontWeight:"700",color:C.text,marginTop:"4px"}}>{label}</div>
+      {sub && <div style={{fontSize:"10px",color:C.muted,marginTop:"2px"}}>{sub}</div>}
+    </div>
+  );
+}
+
+function TicketRow({ t, onStatusChange, onAnnuler, onRenvoyerMail, onRenvoyerMailClient }) {
+  const urgent = t.fields?.Urgent === true || t.fields?.Urgent === "true";
+  const statut = t.fields?.Statut || "Nouveau";
+  const statusColors = {
+    "Nouveau": { color: C.bleu, bg: C.bleuDim },
+    "En cours": { color: C.jaune, bg: C.jauneDim },
+    "Terminé": { color: C.vert, bg: C.vertDim },
+    "Annulé": { color: C.muted, bg: "#1a1a1a" },
+  };
+  const sc = statusColors[statut] || statusColors["Nouveau"];
+  const clos = isStatutClos(statut);
+  return (
+    <div style={{background:C.card,border:"1px solid "+(urgent?"rgba(220,38,38,0.3)":C.border),borderRadius:"10px",padding:"12px 16px",display:"flex",gap:"12px",alignItems:"flex-start",opacity:clos?0.6:1}}>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginBottom:"6px"}}>
+          <span style={{fontSize:"12px",fontWeight:"900",color:C.or,fontFamily:"monospace"}}>{t.fields?.Name||"—"}</span>
+          {urgent && <Badge label="URGENT" color={C.rouge} bg={C.rougeDim}/>}
+          <Badge label={statut} color={sc.color} bg={sc.bg}/>
+          {t.fields?.["Source"] === "telephone" && <Badge label="📞 Tél." color={C.jaune} bg={C.jauneDim}/>}
+          <span style={{fontSize:"10px",color:C.muted,marginLeft:"auto"}}>{t.fields?.Agence}</span>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"4px 16px"}}>
+          <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
+            {[["👤",t.fields?.Client],["📍",t.fields?.Adresse],["📞",t.fields?.Téléphone]].map(([icon,val],i) => val?(
+              <div key={i} style={{fontSize:"11px",color:C.muted,display:"flex",gap:"5px",alignItems:"flex-start"}}>
+                <span style={{flexShrink:0}}>{icon}</span>
+                <span style={{color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{val}</span>
+              </div>
+            ):null)}
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
+            {[["📦",t.fields?.Produit],["🔧",t.fields?.Problème],["📅",t.fields?.Créneau]].map(([icon,val],i) => val?(
+              <div key={i} style={{fontSize:"11px",color:C.muted,display:"flex",gap:"5px",alignItems:"flex-start"}}>
+                <span style={{flexShrink:0}}>{icon}</span>
+                <span style={{color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{val}</span>
+              </div>
+            ):null)}
+          </div>
+        </div>
+        {t.fields?.Photos && (
+          <a href={t.fields.Photos.split(',')[0].trim()} target="_blank" style={{fontSize:"11px",color:C.or,fontWeight:"700",textDecoration:"none",display:"flex",alignItems:"center",gap:"5px",marginTop:"6px"}}>
+            📎 Voir la/les photo(s)
+          </a>
+        )}
+        {t.fields?.Commentaire && (
+          <div style={{marginTop:"8px",background:"#1a1a1a",border:"1px solid "+C.border,borderRadius:"8px",padding:"7px 10px",fontSize:"11px",color:C.muted,fontStyle:"italic"}}>
+            💬 {t.fields.Commentaire}
+          </div>
+        )}
+        <div style={{marginTop:"10px",paddingTop:"8px",borderTop:"1px solid "+C.border}}>
+          <div style={{fontSize:"9px",fontWeight:"700",color:C.muted,letterSpacing:"1px",marginBottom:"6px"}}>📤 RENVOI TICKET</div>
+          <div style={{display:"flex",gap:"8px"}}>
+            <button onClick={() => onRenvoyerMail(t.fields?.Name)} style={{flex:1,background:"#FF6B00",color:"#111",border:"none",borderRadius:"8px",padding:"8px 10px",fontWeight:"700",fontSize:"12px",cursor:"pointer"}}>
+              📧 Technicien
+            </button>
+            <button onClick={() => onRenvoyerMailClient(t.fields?.Name)} style={{flex:1,background:"#FF6B00",color:"#111",border:"none",borderRadius:"8px",padding:"8px 10px",fontWeight:"700",fontSize:"12px",cursor:"pointer"}}>
+              📧 Client
+            </button>
+          </div>
+        </div>
+      </div>
+      <div style={{flexShrink:0}}>
+        <select value={statut} onChange={e => e.target.value === "Annulé" ? onAnnuler(t) : onStatusChange(t.id, e.target.value)}
+          style={{background:"#1f1f1f",border:"1px solid "+C.border,color:C.text,borderRadius:"8px",padding:"5px 8px",fontSize:"11px",cursor:"pointer"}}>
+          <option>Nouveau</option><option>En cours</option><option>Terminé</option><option>Annulé</option>
+        </select>
+      </div>
+    </div>
+  );
+}
+
+// ---- MODAL AJOUT RDV ----
+function ModalRdv({ agenceAccess, onClose, onSuccess }) {
+  const today = new Date().toISOString().split('T')[0];
+  const [form, setForm] = React.useState({
+    agence: agenceAccess !== "global" ? agenceAccess : AGENCES[0],
+    nom: "", tel: "", email: "", adresse: "",
+    produit: "Fenêtre", probleme: PROBLEMES["Fenêtre"][0],
+    date: today, creneau: "Matin (8h30 — 12h00)",
+    garantie: false, facture: "", notes: ""
   });
-}
+  const [saving, setSaving] = React.useState(false);
+  const [error, setError] = React.useState("");
 
-async function uploadCloudinary(file) {
-  const compressed = await compresserImage(file);
-  const formData = new FormData();
-  formData.append('file', compressed);
-  formData.append('upload_preset', CLOUDINARY_PRESET);
-  formData.append('folder', 'rsia-sav');
-  const resp = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/auto/upload', { method: 'POST', body: formData });
-  const data = await resp.json();
-  return data.secure_url;
-}
+  const set = (k, v) => setForm(prev => ({...prev, [k]: v}));
 
-async function envoyerWebhook(data) {
-  const resp = await fetch('https://hook.eu1.make.com/bkoorc2nn457jgvmvtv6pjme5vrtz68g', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
-  });
-  if (!resp.ok) throw new Error('Erreur webhook');
-  return true;
-}
+  const handleProduit = (p) => {
+    set("produit", p);
+    set("probleme", PROBLEMES[p]?.[0] || "Autre");
+  };
 
-function CreneauPicker({ agenceVille, onSelect }) {
-  const [typeCreneau, setTypeCreneau] = React.useState(null);
-  const [dates, setDates] = React.useState([]);
-  const [loading, setLoading] = React.useState(false);
-
-  const CRENEAUX = [
-    { id: "matin", label: "🌅 Matin", heure: "8h30 — 12h00", valeur: "Matin (8h30 — 12h00)" },
-    { id: "apres_midi", label: "🌇 Après-midi", heure: "13h00 — 17h00", valeur: "Après-midi (13h00 — 17h00)" },
-  ];
-
-  const DELAI_MIN_JOURS = 7;
-
-  const charger = async (c) => {
-    setLoading(true);
-    setDates([]);
+  const sauvegarder = async () => {
+    if (!form.nom.trim() || !form.tel.trim() || !form.date) {
+      setError("Nom, téléphone et date sont obligatoires."); return;
+    }
+    setSaving(true); setError("");
     try {
-      const f = encodeURIComponent('AND({Agence}="' + agenceVille + '",{Créneau}="' + c.valeur + '",{Statut}="Libre")');
-      const url = 'https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + f + '&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=60';
-      const r = await fetch(url, { headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN } });
-      const json = await r.json();
-      const auPlusTot = new Date();
-      auPlusTot.setDate(auPlusTot.getDate() + DELAI_MIN_JOURS);
-      const auPlusTotStr = auPlusTot.toISOString().split('T')[0];
-      const map = {};
-      (json.records || []).forEach(rec => {
-        const d = rec.fields.Date;
-        if (d < auPlusTotStr) return;
-        if (!map[d]) map[d] = { date: d, ids: [] };
-        map[d].ids.push(rec.id);
+      const num = 'SAV-' + new Date().getFullYear() + '-' + (Math.floor(Math.random()*9000)+1000);
+      await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Tickets SAV', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: {
+          Name: num, Agence: form.agence, Client: form.nom, Téléphone: form.tel,
+          Email: form.email, Adresse: form.adresse, Produit: form.produit, Problème: form.probleme,
+          Créneau: form.creneau + ' — ' + new Date(form.date + 'T12:00:00').toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long'}),
+          Garantie: form.garantie, "N° Facture": form.facture, Source: "telephone",
+        }})
       });
-      setDates(Object.values(map).slice(0, 5));
+      const dateLabel = form.creneau === "Matin (8h30 — 12h00)" ? "Matin (8h30 — 12h00)" : "Après-midi (13h00 — 17h00)";
+      const filterPlanning = encodeURIComponent('AND({Agence}="'+form.agence+'",{Créneau}="'+dateLabel+'",{Date}="'+form.date+'",{Statut}="Libre")');
+      const planResp = await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + filterPlanning + '&maxRecords=1', { headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN } });
+      const planJson = await planResp.json();
+      if (planJson.records?.length > 0) {
+        await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning/' + planJson.records[0].id, {
+          method: 'PATCH',
+          headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fields: { Statut: 'Pris' } })
+        });
+      }
+      await fetch(WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ticket: num, agence: form.agence, nom: form.nom, tel: form.tel,
+          "e-mail": form.email || "aucun@rsia.fr",
+          adresse: form.adresse, produit: form.produit, probleme: form.probleme,
+          creneau: dateLabel + ' — ' + new Date(form.date + 'T12:00:00').toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long'}),
+          garantie: form.garantie, facture: form.facture, urgent: false, photos: '', source: 'telephone'
+        })
+      });
+      onSuccess(num);
+    } catch(e) {
+      setError("Erreur lors de l'enregistrement. Vérifiez la connexion.");
+    }
+    setSaving(false);
+  };
+
+  const labelStyle = { fontSize:"11px", fontWeight:"700", color:C.muted, display:"block", marginBottom:"4px" };
+  const groupStyle = { marginBottom:"14px" };
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal-box">
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"20px"}}>
+          <div>
+            <div style={{fontSize:"16px",fontWeight:"900",color:C.white}}>📞 Nouveau RDV téléphone</div>
+            <div style={{fontSize:"11px",color:C.muted,marginTop:"2px"}}>Prise de rendez-vous manuelle</div>
+          </div>
+          <button onClick={onClose} style={{background:"rgba(255,255,255,0.05)",border:"1px solid "+C.border,color:C.muted,borderRadius:"8px",width:"30px",height:"30px",cursor:"pointer",fontSize:"16px"}}>✕</button>
+        </div>
+        <div style={groupStyle}>
+          <label style={labelStyle}>Agence *</label>
+          <select value={form.agence} onChange={e => set("agence", e.target.value)} disabled={agenceAccess !== "global"}>
+            {AGENCES.map(a => <option key={a}>{a}</option>)}
+          </select>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"14px"}}>
+          <div><label style={labelStyle}>Nom et prénom *</label><input placeholder="Jean Dupont" value={form.nom} onChange={e => set("nom",e.target.value)}/></div>
+          <div><label style={labelStyle}>Téléphone *</label><input placeholder="06 12 34 56 78" value={form.tel} onChange={e => set("tel",e.target.value)}/></div>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"14px"}}>
+          <div><label style={labelStyle}>Email</label><input placeholder="jean@gmail.com" value={form.email} onChange={e => set("email",e.target.value)}/></div>
+          <div><label style={labelStyle}>Adresse</label><input placeholder="12 rue des Lilas, 65000" value={form.adresse} onChange={e => set("adresse",e.target.value)}/></div>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"14px"}}>
+          <div>
+            <label style={labelStyle}>Produit *</label>
+            <select value={form.produit} onChange={e => handleProduit(e.target.value)}>{PRODUITS.map(p => <option key={p}>{p}</option>)}</select>
+          </div>
+          <div>
+            <label style={labelStyle}>Problème *</label>
+            <select value={form.probleme} onChange={e => set("probleme",e.target.value)}>{(PROBLEMES[form.produit]||["Autre"]).map(p => <option key={p}>{p}</option>)}</select>
+          </div>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"14px"}}>
+          <div><label style={labelStyle}>Date d'intervention *</label><input type="date" value={form.date} min={today} onChange={e => set("date",e.target.value)}/></div>
+          <div>
+            <label style={labelStyle}>Créneau *</label>
+            <select value={form.creneau} onChange={e => set("creneau",e.target.value)}>
+              <option value="Matin (8h30 — 12h00)">🌅 Matin (8h30 — 12h00)</option>
+              <option value="Après-midi (13h00 — 17h00)">🌇 Après-midi (13h00 — 17h00)</option>
+            </select>
+          </div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"14px",background:"#1a1a1a",borderRadius:"8px",padding:"10px 14px"}}>
+          <input type="checkbox" id="garantie" checked={form.garantie} onChange={e => set("garantie",e.target.checked)} style={{width:"16px",cursor:"pointer"}}/>
+          <label htmlFor="garantie" style={{fontSize:"12px",color:C.text,cursor:"pointer"}}>Produit sous garantie</label>
+          {form.garantie && <input placeholder="N° facture" value={form.facture} onChange={e => set("facture",e.target.value)} style={{flex:1,marginLeft:"8px"}}/>}
+        </div>
+        {error && <div style={{background:C.rougeDim,border:"1px solid rgba(220,38,38,0.3)",borderRadius:"8px",padding:"8px 12px",fontSize:"11px",color:C.rouge,marginBottom:"14px"}}>{error}</div>}
+        <div style={{display:"flex",gap:"10px"}}>
+          <button onClick={onClose} style={{flex:1,padding:"11px",background:"transparent",color:C.muted,border:"1px solid "+C.border,borderRadius:"10px",fontSize:"12px",cursor:"pointer"}}>Annuler</button>
+          <button onClick={sauvegarder} disabled={saving} style={{flex:2,padding:"11px",background:saving?"#333":C.or,color:saving?C.muted:"#111",border:"none",borderRadius:"10px",fontSize:"13px",fontWeight:"900",cursor:saving?"not-allowed":"pointer"}}>
+            {saving ? "⏳ Enregistrement..." : "✅ Confirmer le RDV"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ModalSuccess({ ticket, onClose }) {
+  return (
+    <div className="modal-overlay">
+      <div className="modal-box" style={{textAlign:"center",maxWidth:"360px"}}>
+        <div style={{fontSize:"48px",marginBottom:"16px"}}>✅</div>
+        <div style={{fontSize:"18px",fontWeight:"900",color:C.white,marginBottom:"8px"}}>RDV enregistré !</div>
+        <div style={{background:C.card,border:"1px solid "+C.orBord,borderRadius:"12px",padding:"16px",margin:"16px 0"}}>
+          <div style={{fontSize:"10px",color:C.muted,marginBottom:"6px",letterSpacing:"2px"}}>NUMÉRO DE TICKET</div>
+          <div style={{fontSize:"22px",fontWeight:"900",color:C.or,fontFamily:"monospace"}}>{ticket}</div>
+        </div>
+        <div style={{fontSize:"11px",color:C.muted,marginBottom:"20px"}}>Créneau bloqué · Notification agence envoyée</div>
+        <button onClick={onClose} style={{width:"100%",padding:"11px",background:C.or,color:"#111",border:"none",borderRadius:"10px",fontSize:"13px",fontWeight:"900",cursor:"pointer"}}>Fermer</button>
+      </div>
+    </div>
+  );
+}
+
+function ModalAnnulation({ ticket, onConfirm, onClose }) {
+  const [motif, setMotif] = React.useState("");
+  const [saving, setSaving] = React.useState(false);
+
+  const valider = async () => {
+    if (!motif.trim()) return;
+    setSaving(true);
+    await onConfirm(ticket, motif);
+    setSaving(false);
+  };
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal-box" style={{maxWidth:"420px"}}>
+        <div style={{fontSize:"16px",fontWeight:"900",color:C.white,marginBottom:"4px"}}>❌ Annuler le ticket</div>
+        <div style={{fontSize:"12px",color:C.or,fontFamily:"monospace",marginBottom:"14px"}}>{ticket.fields?.Name} — {ticket.fields?.Client}</div>
+        <div style={{background:C.rougeDim,border:"1px solid rgba(220,38,38,0.3)",borderRadius:"10px",padding:"10px 14px",marginBottom:"14px",fontSize:"12px",color:C.rouge}}>
+          ⚠️ Le créneau planning associé sera automatiquement libéré.
+        </div>
+        <label style={{fontSize:"11px",fontWeight:"700",color:C.muted,display:"block",marginBottom:"6px"}}>Motif d'annulation *</label>
+        <textarea rows={3} placeholder="Ex : Client absent, annulation à la demande du client..."
+          value={motif} onChange={e => setMotif(e.target.value)} style={{resize:"none",marginBottom:"16px"}}/>
+        <div style={{display:"flex",gap:"10px"}}>
+          <button onClick={onClose} style={{flex:1,padding:"11px",background:"transparent",color:C.muted,border:"1px solid "+C.border,borderRadius:"10px",fontSize:"12px",cursor:"pointer"}}>Retour</button>
+          <button onClick={valider} disabled={saving||!motif.trim()}
+            style={{flex:2,padding:"11px",background:saving||!motif.trim()?"#333":C.rouge,color:"#fff",border:"none",borderRadius:"10px",fontSize:"13px",fontWeight:"900",cursor:saving||!motif.trim()?"not-allowed":"pointer"}}>
+            {saving ? "⏳ Enregistrement..." : "❌ Confirmer l'annulation"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+function PlanningView({ agenceFilter }) {
+  const [slots, setSlots] = React.useState([]);
+  const [ticketsByPlanning, setTicketsByPlanning] = React.useState({});
+  const [loading, setLoading] = React.useState(true);
+  const charger = async () => {
+    setLoading(true);
+    try {
+      let filter = agenceFilter !== "global"
+        ? encodeURIComponent('AND({Agence}="'+agenceFilter+'",{Statut}="Pris")')
+        : encodeURIComponent('{Statut}="Pris"');
+      const r = await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Planning?filterByFormula='+filter+'&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=50', { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
+      const json = await r.json();
+      const slotsData = json.records||[];
+      setSlots(slotsData);
+
+      // Charger les tickets SAV liés à un créneau (champ PlanningID = ID du record Planning)
+      const filterTickets = encodeURIComponent('NOT({PlanningID}="")');
+      const rt = await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets SAV?filterByFormula='+filterTickets+'&maxRecords=300', { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
+      const jt = await rt.json();
+      const map = {};
+      (jt.records||[]).forEach(t => {
+        if (t.fields?.PlanningID) map[t.fields.PlanningID] = t.fields;
+      });
+      setTicketsByPlanning(map);
     } catch(e) { console.error(e); }
     setLoading(false);
   };
+  React.useEffect(() => { charger(); }, [agenceFilter]);
+  const byDate = {};
+  slots.forEach(s => { const d = s.fields?.Date; if (!byDate[d]) byDate[d] = []; byDate[d].push(s); });
+  const today = new Date().toISOString().split('T')[0];
+  return (
+    <div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px"}}>
+        <h2 style={{fontSize:"16px",fontWeight:"700",color:C.white}}>📅 Planning interventions</h2>
+        <button onClick={charger} style={{background:C.orDim,border:"1px solid "+C.orBord,color:C.or,borderRadius:"8px",padding:"5px 12px",fontSize:"11px",cursor:"pointer"}}>↺ Rafraîchir</button>
+      </div>
+      {loading && <div style={{textAlign:"center",padding:"40px",color:C.muted}}>Chargement...</div>}
+      {!loading && Object.keys(byDate).length === 0 && (
+        <div style={{textAlign:"center",padding:"40px",color:C.muted,border:"1px dashed "+C.border,borderRadius:"12px"}}>Aucune intervention planifiée</div>
+      )}
+      {!loading && Object.keys(byDate).sort().map(date => {
+        const dateObj = new Date(date+'T12:00:00');
+        const label = dateObj.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+        const isPast = date < today;
+        const isToday = date === today;
+        return (
+          <div key={date} style={{marginBottom:"16px",opacity:isPast?0.5:1}}>
+            <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"8px"}}>
+              <div style={{height:"1px",flex:1,background:C.border}}/>
+              <span style={{fontSize:"12px",fontWeight:"700",color:isToday?C.or:C.muted,textTransform:"capitalize",whiteSpace:"nowrap"}}>{isToday?"⚡ Aujourd'hui — ":""}{label}</span>
+              <div style={{height:"1px",flex:1,background:C.border}}/>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:"6px"}}>
+              {byDate[date].map((s,i) => {
+                const ticket = ticketsByPlanning[s.id];
+                return (
+                <div key={i} style={{background:C.card,border:"1px solid "+C.border,borderRadius:"8px",padding:"10px 14px"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div>
+                      <span style={{fontSize:"12px",fontWeight:"700",color:C.white}}>{s.fields?.Créneau?.replace("Matin (8h30 — 12h00)","🌅 Matin").replace("Après-midi (13h00 — 17h00)","🌇 Après-midi")}</span>
+                      <span style={{fontSize:"10px",color:C.muted,marginLeft:"10px"}}>{s.fields?.Agence}</span>
+                    </div>
+                    <button onClick={async () => {
+                      await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Planning/'+s.id, {
+                        method:'PATCH', headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
+                        body:JSON.stringify({fields:{Statut:'Libre'}})
+                      }); charger();
+                    }} style={{background:"rgba(220,38,38,0.1)",border:"1px solid rgba(220,38,38,0.3)",color:C.rouge,borderRadius:"6px",padding:"3px 8px",fontSize:"10px",cursor:"pointer"}}>
+                      Libérer
+                    </button>
+                  </div>
+                  {ticket ? (
+                    <div style={{marginTop:"8px",paddingTop:"8px",borderTop:"1px solid "+C.border,display:"grid",gridTemplateColumns:"1fr 1fr",gap:"4px 14px"}}>
+                      <div style={{fontSize:"11px",color:C.muted,display:"flex",gap:"5px"}}><span>👤</span><span style={{color:C.text}}>{ticket.Client||"—"}</span></div>
+                      <div style={{fontSize:"11px",color:C.muted,display:"flex",gap:"5px"}}><span>📦</span><span style={{color:C.text}}>{ticket.Produit||"—"}</span></div>
+                      <div style={{fontSize:"11px",color:C.muted,display:"flex",gap:"5px",gridColumn:"1 / -1"}}><span>🔧</span><span style={{color:C.text}}>{ticket.Problème||"—"}</span></div>
+                      {ticket.Name && <div style={{fontSize:"10px",color:C.or,fontFamily:"monospace",gridColumn:"1 / -1",marginTop:"2px"}}>{ticket.Name}</div>}
+                    </div>
+                  ) : (
+                    <div style={{marginTop:"6px",fontSize:"10px",color:C.muted,fontStyle:"italic"}}>Aucun ticket lié à ce créneau</div>
+                  )}
+                </div>
+              );})}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
-  const choisir = async (dateInfo) => {
+function Dashboard({ agenceAccess, onClose }) {
+  const [tickets, setTickets] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [agenceFilter, setAgenceFilter] = React.useState(agenceAccess === "global" ? "global" : agenceAccess);
+  const [vue, setVue] = React.useState("tickets");
+  const [search, setSearch] = React.useState("");
+  const [statutFilter, setStatutFilter] = React.useState("tous");
+  const [sortBy, setSortBy] = React.useState("date");
+  const [lastRefresh, setLastRefresh] = React.useState(null);
+  const [showModalRdv, setShowModalRdv] = React.useState(false);
+  const [successTicket, setSuccessTicket] = React.useState(null);
+  const [modalAnnulation, setModalAnnulation] = React.useState(null);
+  const [exportDebut, setExportDebut] = React.useState("");
+  const [exportFin, setExportFin] = React.useState("");
+  const [notifs, setNotifs] = React.useState([]);
+  const idsConnusRef = React.useRef(null);
+  const audioCtxRef = React.useRef(null);
+  const isFetchingRef = React.useRef(false);
+
+  const jouerSon = () => {
     try {
-      await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning/' + dateInfo.ids[0], {
-        method: 'PATCH',
-        headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fields: { Statut: 'Pris' } })
-      });
-    } catch(e) { console.error(e); }
-    const d = new Date(dateInfo.date + 'T12:00:00');
-    const label = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-    onSelect(typeCreneau.label + ' (' + typeCreneau.heure + ') \u2014 ' + label, dateInfo.ids[0]);
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      const ctx = audioCtxRef.current;
+      if (ctx.state === 'suspended') ctx.resume();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sine';
+      o.frequency.setValueAtTime(740, ctx.currentTime);
+      o.frequency.setValueAtTime(988, ctx.currentTime + 0.12);
+      g.gain.setValueAtTime(0.001, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+      o.start(); o.stop(ctx.currentTime + 0.5);
+      o.onended = () => { o.disconnect(); g.disconnect(); };
+    } catch(e) {}
   };
 
-  if (!typeCreneau) {
-    return (
-      <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:"1px solid " + F.grisBord}}>
-        <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:"3px solid " + F.or,paddingLeft:"8px"}}>Quel créneau vous convient ?</div>
-        <div style={{fontSize:"10px",color:"#64748B",marginBottom:"10px"}}>Matin ou après-midi ?</div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
-          {CRENEAUX.map(c => (
-            <button key={c.id} onClick={() => { setTypeCreneau(c); charger(c); }}
-              style={{padding:"14px 10px",border:"2px solid " + F.grisBord,borderRadius:"12px",background:F.blanc,cursor:"pointer",textAlign:"center"}}>
-              <div style={{fontSize:"12px",fontWeight:"700",color:F.marine}}>{c.label}</div>
-              <div style={{fontSize:"11px",color:"#64748B",marginTop:"2px"}}>{c.heure}</div>
+  const charger = async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    setLoading(true);
+    try {
+      let filter = agenceFilter !== "global" ? encodeURIComponent('{Agence}="'+agenceFilter+'"') : "";
+      const url = 'https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets SAV?'+(filter?'filterByFormula='+filter+'&':'')+'sort[0][field]=Name&sort[0][direction]=desc&maxRecords=200';
+      const r = await fetch(url, { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
+      const json = await r.json();
+      const records = json.records||[];
+
+      const idsActuels = new Set(records.map(t => t.id));
+      if (idsConnusRef.current) {
+        const nouveaux = records.filter(t => !idsConnusRef.current.has(t.id));
+        if (nouveaux.length > 0) {
+          jouerSon();
+          const toasts = nouveaux.map(t => ({
+            id: t.id + '-' + Date.now(),
+            texte: '🆕 ' + (t.fields?.Name||'Nouveau ticket') + ' — ' + (t.fields?.Client||'Client inconnu') + ' (' + (t.fields?.Agence||'') + ')'
+          }));
+          setNotifs(prev => [...prev, ...toasts]);
+          toasts.forEach(t => setTimeout(() => setNotifs(prev => prev.filter(n => n.id !== t.id)), 7000));
+        }
+      }
+      idsConnusRef.current = idsActuels;
+
+      setTickets(records);
+      setLastRefresh(new Date().toLocaleTimeString('fr-FR'));
+    } catch(e) { console.error(e); }
+    setLoading(false);
+    isFetchingRef.current = false;
+  };
+
+  React.useEffect(() => { charger(); }, [agenceFilter]);
+  React.useEffect(() => {
+    const interval = setInterval(() => { charger(); }, 30000);
+    return () => clearInterval(interval);
+  }, [agenceFilter]);
+
+  const renvoyerMailTechnicien = (ticketId) => {
+    if (!confirm('Renvoyer le mail au technicien pour le ticket ' + ticketId + ' ?')) return;
+    fetch(WEBHOOK_TECHNICIEN + '?ticketId=' + encodeURIComponent(ticketId))
+      .then(() => alert('✅ Mail renvoyé au technicien !'))
+      .catch(() => alert('❌ Erreur lors de l\'envoi'));
+  };
+
+  const renvoyerMailClient = (ticketId) => {
+    if (!confirm('Renvoyer le mail de confirmation au client pour le ticket ' + ticketId + ' ?')) return;
+    fetch(WEBHOOK_CLIENT + '?ticketId=' + encodeURIComponent(ticketId))
+      .then(() => alert('✅ Mail renvoyé au client !'))
+      .catch(() => alert('❌ Erreur lors de l\'envoi'));
+  };
+
+  // Jeu de données pour l'export : respecte agence + statut + recherche + plage de dates
+  const getExportData = () => {
+    return tickets.filter(t => {
+      const matchAgence = agenceFilter==="global" || t.fields?.Agence===agenceFilter;
+      const matchStatut = statutFilter==="tous" || t.fields?.Statut===statutFilter || (!t.fields?.Statut&&statutFilter==="Nouveau");
+      const q = search.toLowerCase();
+      const matchSearch = !q || (t.fields?.Client||"").toLowerCase().includes(q) || (t.fields?.Name||"").toLowerCase().includes(q) || (t.fields?.Produit||"").toLowerCase().includes(q);
+      const dateTicket = parseDateCreneau(t.fields?.Créneau);
+      const matchDebut = !exportDebut || dateTicket >= new Date(exportDebut+'T00:00:00');
+      const matchFin = !exportFin || dateTicket <= new Date(exportFin+'T23:59:59');
+      return matchAgence && matchStatut && matchSearch && matchDebut && matchFin;
+    }).sort((a,b) => parseDateCreneau(a.fields?.Créneau) - parseDateCreneau(b.fields?.Créneau));
+  };
+
+  const nomFichierExport = (ext) => {
+    const ag = agenceFilter==="global" ? "Toutes-agences" : agenceFilter.replace(/[^\w]+/g,"-");
+    const periode = (exportDebut||exportFin) ? (exportDebut||"...")+"_"+(exportFin||"...") : "complet";
+    return "RSIA_Export_"+ag+"_"+periode+"."+ext;
+  };
+
+  const exportExcel = () => {
+    const data = getExportData();
+    if (data.length === 0) { alert("Aucun ticket ne correspond aux filtres sélectionnés."); return; }
+    const rows = data.map(t => ({
+      "N° Ticket": t.fields?.Name || "",
+      "Date intervention": t.fields?.Créneau || "",
+      "Statut": t.fields?.Statut || "Nouveau",
+      "Urgent": (t.fields?.Urgent===true||t.fields?.Urgent==="true") ? "Oui" : "Non",
+      "Agence": t.fields?.Agence || "",
+      "Client": t.fields?.Client || "",
+      "Téléphone": t.fields?.Téléphone || "",
+      "Email": t.fields?.Email || "",
+      "Adresse": t.fields?.Adresse || "",
+      "Produit": t.fields?.Produit || "",
+      "Problème": t.fields?.Problème || "",
+      "Garantie": t.fields?.Garantie ? "Oui" : "Non",
+      "N° Facture": t.fields?.["N° Facture"] || "",
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = Object.keys(rows[0]).map(k => ({ wch: Math.max(k.length, 14) }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Tickets SAV");
+    XLSX.writeFile(wb, nomFichierExport("xlsx"));
+  };
+
+  const exportPDF = () => {
+    const data = getExportData();
+    if (data.length === 0) { alert("Aucun ticket ne correspond aux filtres sélectionnés."); return; }
+    const ag = agenceFilter==="global" ? "Toutes agences" : agenceFilter;
+    const periode = (exportDebut||exportFin) ? "Du "+(exportDebut||"...")+" au "+(exportFin||"...") : "Toutes dates";
+    const lignes = data.map(t => `
+      <tr>
+        <td>${t.fields?.Name||""}</td>
+        <td>${t.fields?.Créneau||""}</td>
+        <td>${t.fields?.Statut||"Nouveau"}</td>
+        <td>${t.fields?.Agence||""}</td>
+        <td>${t.fields?.Client||""}</td>
+        <td>${t.fields?.Téléphone||""}</td>
+        <td>${t.fields?.Produit||""}</td>
+        <td>${t.fields?.Problème||""}</td>
+      </tr>`).join("");
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Export RSIA SAV</title>
+      <style>
+        body{font-family:Arial,sans-serif;padding:24px;color:#111;}
+        h1{color:#111;font-size:18px;margin-bottom:2px;}
+        .sub{color:#666;font-size:11px;margin-bottom:16px;}
+        table{width:100%;border-collapse:collapse;font-size:10px;}
+        th{background:#111;color:#fff;text-align:left;padding:6px 8px;}
+        td{border-bottom:1px solid #ddd;padding:6px 8px;}
+        tr:nth-child(even){background:#f7f7f7;}
+        .footer{margin-top:16px;font-size:9px;color:#999;}
+        @media print { @page { size: landscape; margin: 12mm; } }
+      </style></head><body>
+      <h1>RSIA Conseil — Export tickets SAV</h1>
+      <div class="sub">${ag} — ${periode} — ${data.length} ticket(s) — généré le ${new Date().toLocaleDateString('fr-FR')}</div>
+      <table><thead><tr>
+        <th>N° Ticket</th><th>Date intervention</th><th>Statut</th><th>Agence</th><th>Client</th><th>Téléphone</th><th>Produit</th><th>Problème</th>
+      </tr></thead><tbody>${lignes}</tbody></table>
+      <div class="footer">RSIA Conseil — Document généré automatiquement</div>
+      </body></html>`;
+    const w = window.open('', '_blank');
+    w.document.write(html);
+    w.document.close();
+    setTimeout(() => { w.print(); }, 300);
+  };
+
+  const updateStatus = async (id, newStatus) => {
+    setTickets(prev => prev.map(t => t.id===id?{...t,fields:{...t.fields,Statut:newStatus}}:t));
+    await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets SAV/'+id, {
+      method:'PATCH', headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
+      body:JSON.stringify({fields:{Statut:newStatus}})
+    });
+  };
+
+  const confirmerAnnulation = async (ticket, motif) => {
+    const fields = { Statut: "Annulé", Commentaire: "Annulé : " + motif.trim() };
+    const planningId = ticket?.fields?.PlanningID;
+    if (planningId) {
+      try {
+        await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Planning/'+planningId, {
+          method:'PATCH', headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
+          body:JSON.stringify({fields:{Statut:'Libre'}})
+        });
+      } catch(e) { console.error(e); }
+    }
+    setTickets(prev => prev.map(t => t.id===ticket.id?{...t,fields:{...t.fields,...fields}}:t));
+    await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets SAV/'+ticket.id, {
+      method:'PATCH', headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
+      body:JSON.stringify({fields})
+    });
+    setModalAnnulation(null);
+  };
+
+  const filtered = tickets.filter(t => {
+    const matchAgence = agenceFilter==="global" || t.fields?.Agence===agenceFilter;
+    const matchStatut = statutFilter==="tous" || t.fields?.Statut===statutFilter || (!t.fields?.Statut&&statutFilter==="Nouveau");
+    const q = search.toLowerCase();
+    const matchSearch = !q || (t.fields?.Client||"").toLowerCase().includes(q) || (t.fields?.Name||"").toLowerCase().includes(q) || (t.fields?.Produit||"").toLowerCase().includes(q);
+    return matchAgence && matchStatut && matchSearch;
+  });
+
+  const sortFn = (a,b) => {
+    if (sortBy === "date") return parseDateCreneau(a.fields?.Créneau) - parseDateCreneau(b.fields?.Créneau);
+    if (sortBy === "ticket") return (b.fields?.Name||"").localeCompare(a.fields?.Name||"");
+    return 0;
+  };
+
+  // Vue "Tous" : actifs triés en haut, terminés/annulés triés séparément en bas
+  let sorted;
+  if (statutFilter === "tous") {
+    const actifs = filtered.filter(t => !isStatutClos(t.fields?.Statut));
+    const clos = filtered.filter(t => isStatutClos(t.fields?.Statut));
+    sorted = [...actifs.sort(sortFn), ...clos.sort(sortFn)];
+  } else {
+    sorted = [...filtered].sort(sortFn);
+  }
+
+  const stats = {
+    total: tickets.length,
+    urgent: tickets.filter(t => t.fields?.Urgent===true||t.fields?.Urgent==="true").length,
+    nouveau: tickets.filter(t => !t.fields?.Statut||t.fields?.Statut==="Nouveau").length,
+    encours: tickets.filter(t => t.fields?.Statut==="En cours").length,
+    termine: tickets.filter(t => t.fields?.Statut==="Terminé").length,
+    annule: tickets.filter(t => t.fields?.Statut==="Annulé").length,
+  };
+
+  const byAgence = {};
+  AGENCES.forEach(a => { byAgence[a] = tickets.filter(t => t.fields?.Agence===a).length; });
+
+  return (
+    <div style={{minHeight:"100vh",background:C.bg}}>
+      {showModalRdv && (
+        <ModalRdv
+          agenceAccess={agenceFilter !== "global" ? agenceFilter : agenceAccess}
+          onClose={() => setShowModalRdv(false)}
+          onSuccess={(num) => { setShowModalRdv(false); setSuccessTicket(num); charger(); }}
+        />
+      )}
+      {successTicket && <ModalSuccess ticket={successTicket} onClose={() => setSuccessTicket(null)} />}
+      {modalAnnulation && (
+        <ModalAnnulation
+          ticket={modalAnnulation}
+          onClose={() => setModalAnnulation(null)}
+          onConfirm={confirmerAnnulation}
+        />
+      )}
+
+      <div style={{position:"fixed",top:"16px",right:"16px",zIndex:2000,display:"flex",flexDirection:"column",gap:"8px",maxWidth:"320px"}}>
+        {notifs.map(n => (
+          <div key={n.id} style={{background:C.card,border:"1px solid "+C.orBord,borderLeft:"4px solid "+C.or,borderRadius:"10px",padding:"12px 14px",boxShadow:"0 8px 24px rgba(0,0,0,0.4)",color:C.white,fontSize:"12px",fontWeight:"600"}}>
+            {n.texte}
+          </div>
+        ))}
+      </div>
+
+      <div style={{background:C.card,borderBottom:"1px solid "+C.border,padding:"12px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100}}>
+        <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
+          <div style={{width:"36px",height:"36px",background:C.or,borderRadius:"8px",display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <span style={{fontFamily:"Arial Black",fontSize:"18px",fontWeight:"900",color:"#111",transform:"scaleX(-1)",display:"inline-block"}}>R</span>
+          </div>
+          <div>
+            <div style={{fontSize:"15px",fontWeight:"900",color:C.white}}>
+              <span style={{display:"inline-block",transform:"scaleX(-1)",fontFamily:"Arial Black"}}>R</span>S<span style={{color:C.or}}>IA</span>
+              <span style={{fontSize:"11px",fontWeight:"500",marginLeft:"6px",color:C.muted}}>Dashboard SAV</span>
+            </div>
+          </div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
+          {lastRefresh && <span style={{fontSize:"10px",color:C.muted,display:"flex",alignItems:"center",gap:"4px"}}><span style={{width:"6px",height:"6px",background:"#22c55e",borderRadius:"50%",display:"inline-block"}}/>MAJ {lastRefresh} · auto</span>}
+          <button onClick={() => setShowModalRdv(true)} style={{background:C.or,border:"none",color:"#111",borderRadius:"8px",padding:"8px 16px",fontSize:"12px",fontWeight:"900",cursor:"pointer",display:"flex",alignItems:"center",gap:"6px"}}>📞 + Nouveau RDV</button>
+          <button onClick={charger} style={{background:C.orDim,border:"1px solid "+C.orBord,color:C.or,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",fontWeight:"700",cursor:"pointer"}}>↺</button>
+          <div style={{width:"1px",height:"24px",background:C.border,margin:"0 4px"}}/>
+          <button onClick={onClose} title="Fermer la session" style={{background:"rgba(220,38,38,0.08)",border:"1px solid rgba(220,38,38,0.25)",color:"rgba(220,38,38,0.85)",borderRadius:"8px",width:"30px",height:"30px",cursor:"pointer",fontSize:"14px",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>✕</button>
+        </div>
+      </div>
+
+      <div style={{padding:"24px",maxWidth:"1200px",margin:"0 auto"}}>
+        {agenceAccess === "global" && (
+          <div style={{display:"flex",gap:"8px",marginBottom:"20px",flexWrap:"wrap"}}>
+            {["global",...AGENCES].map(a => (
+              <button key={a} onClick={() => setAgenceFilter(a)}
+                style={{padding:"7px 16px",borderRadius:"20px",border:"1px solid "+(agenceFilter===a?C.or:C.border),background:agenceFilter===a?C.or:"transparent",color:agenceFilter===a?"#111":C.muted,fontSize:"12px",fontWeight:"700",cursor:"pointer"}}>
+                {a==="global"?"🌐 Toutes agences":a}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div style={{display:"flex",gap:"12px",marginBottom:"20px",flexWrap:"wrap"}}>
+          <StatCard label="Total tickets" value={stats.total} accent/>
+          <StatCard label="Urgents" value={stats.urgent} sub="à traiter en priorité"/>
+          <StatCard label="Nouveaux" value={stats.nouveau}/>
+          <StatCard label="En cours" value={stats.encours}/>
+          <StatCard label="Terminés" value={stats.termine}/>
+          <StatCard label="Annulés" value={stats.annule}/>
+        </div>
+
+        <div style={{display:"flex",gap:"4px",marginBottom:"16px",background:C.card,borderRadius:"10px",padding:"4px",border:"1px solid "+C.border,width:"fit-content"}}>
+          {[["tickets","🎫 Tickets"],["planning","📅 Planning"]].map(([v,l]) => (
+            <button key={v} onClick={() => setVue(v)}
+              style={{padding:"7px 18px",borderRadius:"7px",border:"none",background:vue===v?C.or:"transparent",color:vue===v?"#111":C.muted,fontSize:"12px",fontWeight:"700",cursor:"pointer"}}>
+              {l}
             </button>
           ))}
         </div>
-      </div>
-    );
-  }
 
-  return (
-    <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:"1px solid " + F.grisBord}}>
-      <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}}>
-        <span style={{fontSize:"11px",color:F.or,fontWeight:"700"}}>{typeCreneau.label}</span>
-        <button onClick={() => { setTypeCreneau(null); setDates([]); }}
-          style={{fontSize:"10px",color:"#94A3B8",background:"none",border:"none",cursor:"pointer"}}>← Changer</button>
-      </div>
-      <div style={{fontSize:"10px",color:"#94A3B8",marginBottom:"10px"}}>Premières disponibilités à partir d'une semaine</div>
-      {loading && <div style={{textAlign:"center",padding:"16px",color:"#64748B",fontSize:"12px"}}>⏳ Chargement des disponibilités...</div>}
-      {!loading && dates.length === 0 && (
-        <div style={{textAlign:"center",padding:"16px",color:F.rouge,fontSize:"12px"}}>Aucune disponibilité. Essayez l'autre créneau.</div>
-      )}
-      {!loading && dates.length > 0 && (
-        <div style={{display:"flex",flexDirection:"column",gap:"6px"}}>
-          {dates.map((d, i) => {
-            const dateObj = new Date(d.date + 'T12:00:00');
-            const label = dateObj.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
-            return (
-              <button key={i} onClick={() => choisir(d)}
-                style={{padding:"12px 14px",border:"2px solid " + F.grisBord,borderRadius:"10px",background:F.blanc,cursor:"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <div style={{fontSize:"12px",fontWeight:"700",color:F.marine,textTransform:"capitalize"}}>{label}</div>
-                <span style={{color:F.or,fontSize:"16px"}}>→</span>
-              </button>
-            );
-          })}
+        <div style={{background:C.card,border:"1px solid "+C.border,borderRadius:"12px",padding:"14px 16px",marginBottom:"16px"}}>
+          <div style={{fontSize:"12px",fontWeight:"700",color:C.white,marginBottom:"10px"}}>📤 Export (respecte les filtres agence/statut/recherche ci-dessous)</div>
+          <div style={{display:"flex",gap:"10px",flexWrap:"wrap",alignItems:"center"}}>
+            <div style={{display:"flex",gap:"6px",alignItems:"center"}}>
+              <span style={{fontSize:"11px",color:C.muted}}>Du</span>
+              <input type="date" value={exportDebut} onChange={e => setExportDebut(e.target.value)} style={{width:"140px"}}/>
+              <span style={{fontSize:"11px",color:C.muted}}>au</span>
+              <input type="date" value={exportFin} onChange={e => setExportFin(e.target.value)} style={{width:"140px"}}/>
+              {(exportDebut||exportFin) && (
+                <button onClick={() => { setExportDebut(""); setExportFin(""); }} style={{background:"none",border:"none",color:C.muted,fontSize:"11px",cursor:"pointer",textDecoration:"underline"}}>Effacer</button>
+              )}
+            </div>
+            <div style={{display:"flex",gap:"8px",marginLeft:"auto"}}>
+              <button onClick={exportExcel} style={{background:C.vertDim,border:"1px solid rgba(22,163,74,0.4)",color:C.vert,borderRadius:"8px",padding:"8px 14px",fontSize:"12px",fontWeight:"700",cursor:"pointer"}}>📊 Excel</button>
+              <button onClick={exportPDF} style={{background:C.orDim,border:"1px solid "+C.orBord,color:C.or,borderRadius:"8px",padding:"8px 14px",fontSize:"12px",fontWeight:"700",cursor:"pointer"}}>🖨️ PDF</button>
+            </div>
+          </div>
         </div>
-      )}
+
+        {vue === "tickets" && (
+          <>
+            <div style={{display:"flex",flexDirection:"column",gap:"10px",marginBottom:"16px"}}>
+              <div style={{display:"flex",gap:"10px",flexWrap:"wrap",alignItems:"center"}}>
+                <input placeholder="🔍 Rechercher client, ticket, produit..." value={search} onChange={e => setSearch(e.target.value)} style={{width:"280px"}}/>
+                <div style={{display:"flex",gap:"6px",flexWrap:"wrap"}}>
+                  {["tous","Nouveau","En cours","Terminé","Annulé"].map(s => (
+                    <button key={s} onClick={() => setStatutFilter(s)}
+                      style={{padding:"6px 12px",borderRadius:"20px",border:"1px solid "+(statutFilter===s?C.or:C.border),background:statutFilter===s?C.orDim:"transparent",color:statutFilter===s?C.or:C.muted,fontSize:"11px",fontWeight:"600",cursor:"pointer"}}>
+                      {s==="tous"?"Tous":s}
+                    </button>
+                  ))}
+                </div>
+                <span style={{fontSize:"11px",color:C.muted,marginLeft:"auto"}}>{sorted.length} ticket{sorted.length>1?"s":""}</span>
+              </div>
+              <div style={{display:"flex",gap:"6px",flexWrap:"wrap",alignItems:"center",background:"#151515",border:"1px solid "+C.border,borderRadius:"10px",padding:"8px 12px"}}>
+                <span style={{fontSize:"11px",color:C.muted,fontWeight:"700",marginRight:"2px"}}>Trier :</span>
+                {[["date","📅 Date"],["ticket","🔢 N° Ticket"]].map(([v,l]) => (
+                  <button key={v} onClick={() => setSortBy(v)}
+                    style={{padding:"6px 14px",borderRadius:"20px",border:"1px solid "+(sortBy===v?C.or:C.border),background:sortBy===v?C.orDim:"transparent",color:sortBy===v?C.or:C.muted,fontSize:"11px",fontWeight:"700",cursor:"pointer"}}>
+                    {l}
+                  </button>
+                ))}
+                {statutFilter === "tous" && (
+                  <span style={{fontSize:"10px",color:C.muted,marginLeft:"auto"}}>Terminés / Annulés repoussés en bas</span>
+                )}
+              </div>
+            </div>
+            {loading && <div style={{textAlign:"center",padding:"60px",color:C.muted}}>Chargement...</div>}
+            {!loading && sorted.length===0 && (
+              <div style={{textAlign:"center",padding:"60px",color:C.muted,border:"1px dashed "+C.border,borderRadius:"12px"}}>Aucun ticket trouvé</div>
+            )}
+            <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+              {sorted.map(t => <TicketRow key={t.id} t={t} onStatusChange={updateStatus} onAnnuler={setModalAnnulation} onRenvoyerMail={renvoyerMailTechnicien} onRenvoyerMailClient={renvoyerMailClient}/>)}
+            </div>
+          </>
+        )}
+
+        {vue === "planning" && <PlanningView agenceFilter={agenceFilter}/>}
+      </div>
+    </div>
+  );
+}
+
+function Login({ onLogin }) {
+  const [pwd, setPwd] = React.useState("");
+  const [error, setError] = React.useState(false);
+  const [show, setShow] = React.useState(false);
+  const tenter = () => {
+    const access = PASSWORDS[pwd.trim()];
+    if (access) { onLogin(access); }
+    else { setError(true); setTimeout(() => setError(false), 2000); }
+  };
+  return (
+    <div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:"24px"}}>
+      <div style={{width:"100%",maxWidth:"380px"}}>
+        <div style={{textAlign:"center",marginBottom:"40px"}}>
+          <div style={{width:"60px",height:"60px",background:C.or,borderRadius:"14px",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px"}}>
+            <span style={{fontFamily:"Arial Black",fontSize:"30px",fontWeight:"900",color:"#111",transform:"scaleX(-1)",display:"inline-block"}}>R</span>
+          </div>
+          <div style={{fontSize:"24px",fontWeight:"900",color:C.white}}>
+            <span style={{display:"inline-block",transform:"scaleX(-1)",fontFamily:"Arial Black"}}>R</span>S<span style={{color:C.or}}>IA</span> Conseil
+          </div>
+          <div style={{fontSize:"12px",color:C.muted,marginTop:"6px",letterSpacing:"2px",textTransform:"uppercase"}}>Dashboard SAV</div>
+        </div>
+        <div style={{background:C.card,border:"1px solid "+(error?"rgba(220,38,38,0.4)":C.orBord),borderRadius:"16px",padding:"28px"}}>
+          <div style={{fontSize:"13px",fontWeight:"700",color:C.white,marginBottom:"16px"}}>Accès sécurisé</div>
+          <div style={{position:"relative",marginBottom:"16px"}}>
+            <input type={show?"text":"password"} placeholder="Mot de passe agence" value={pwd}
+              onChange={e => setPwd(e.target.value)} onKeyDown={e => e.key==="Enter"&&tenter()}/>
+            <button onClick={() => setShow(!show)} style={{position:"absolute",right:"12px",top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:C.muted,cursor:"pointer",fontSize:"14px",width:"auto"}}>
+              {show?"🙈":"👁️"}
+            </button>
+          </div>
+          {error && <div style={{fontSize:"11px",color:C.rouge,marginBottom:"12px",textAlign:"center"}}>Mot de passe incorrect</div>}
+          <button onClick={tenter} style={{width:"100%",padding:"12px",background:C.or,color:"#111",border:"none",borderRadius:"10px",fontSize:"13px",fontWeight:"900",cursor:"pointer"}}>Accéder →</button>
+          <div style={{marginTop:"20px",borderTop:"1px solid "+C.border,paddingTop:"16px"}}>
+            <div style={{fontSize:"10px",color:C.muted,marginBottom:"8px",fontWeight:"700",textTransform:"uppercase",letterSpacing:"1px"}}>Accès disponibles</div>
+            {[["rsia2026","Toutes agences"],["ibos65","Ibos"],["tarnos40","Tarnos"],["lescar64","Lescar"],["stgaudens31","Saint-Gaudens"]].map(([p,l]) => (
+              <div key={p} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:"1px solid "+C.border}}>
+                <span style={{fontSize:"11px",color:C.muted}}>{l}</span>
+                <code style={{fontSize:"11px",color:C.or,background:C.orDim,padding:"1px 6px",borderRadius:"4px"}}>{p}</code>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
 function App() {
-  const [etape, setEtape] = React.useState("agence");
-  const [agence, setAgence] = React.useState(null);
-  const [typeClient, setTypeClient] = React.useState(null);
-  const [garantie, setGarantie] = React.useState(null);
-  const [facture, setFacture] = React.useState("");
-  const [client, setClient] = React.useState({ nom: "", adresse: "", tel: "", email: "" });
-  const [erreurs, setErreurs] = React.useState({});
-  const [produit, setProduit] = React.useState(null);
-  const [sousType, setSousType] = React.useState(null);
-  const [probleme, setProbleme] = React.useState(null);
-  const [creneau, setCreneau] = React.useState(null);
-  const [planningId, setPlanningId] = React.useState(null);
-  const [ticket, setTicket] = React.useState(null);
-  const [envoi, setEnvoi] = React.useState(null);
-  const [sending, setSending] = React.useState(false);
-  const [photos, setPhotos] = React.useState([]);
-  const [factureFichier, setFactureFichier] = React.useState(null);
-  const bottomRef = React.useRef(null);
-
-  React.useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [etape]);
-  React.useEffect(() => { window.__rsiaReset = reset; }, []);
-
-  const validerInfos = () => {
-    const e = {};
-    if (!client.nom.trim()) e.nom = true;
-    if (!client.adresse.trim()) e.adresse = true;
-    if (!client.tel.trim()) e.tel = true;
-    if (!client.email.trim()) e.email = true;
-    setErreurs(e);
-    if (garantie === true && !facture.trim()) { setErreurs(prev => ({...prev, facture: true})); return false; }
-    return Object.keys(e).length === 0;
-  };
-
-  const libererCreneauSiBesoin = async () => {
-    if (!planningId) return;
-    try {
-      await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning/' + planningId, {
-        method: 'PATCH',
-        headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fields: { Statut: 'Libre' } })
-      });
-    } catch(e) { console.error(e); }
-  };
-
-  const goBack = async () => {
-    if (etape === "identification") {
-      setEtape("agence");
-    } else if (etape === "produit") {
-      setEtape("identification");
-    } else if (etape === "sous_type") {
-      setSousType(null);
-      setEtape("produit");
-    } else if (etape === "probleme") {
-      setProbleme(null);
-      setEtape(produit?.sousTypes ? "sous_type" : "produit");
-    } else if (etape === "photos") {
-      setEtape("probleme");
-    } else if (etape === "creneau") {
-      setEtape("photos");
-    } else if (etape === "recapitulatif") {
-      await libererCreneauSiBesoin();
-      setCreneau(null);
-      setPlanningId(null);
-      setEtape("creneau");
-    }
-  };
-
-  const confirmer = async () => {
-    setSending(true);
-    const num = 'SAV-' + new Date().getFullYear() + '-' + (Math.floor(Math.random()*9000)+1000);
-    setTicket(num);
-    try {
-      let photoUrls = '';
-      if (photos.length > 0) {
-        const urls = await Promise.all(photos.map(f => uploadCloudinary(f)));
-        photoUrls = urls.join(', ');
-      }
-      let factureUrl = '';
-      if (factureFichier) {
-        factureUrl = await uploadCloudinary(factureFichier);
-      }
-      const garantieTexte = garantie === true
-        ? "Oui — Facture " + facture
-        : (garantie === false ? "Non / Hors garantie" : "N/A");
-      const urgentTexte = probleme.urgent ? "Oui" : "Non";
-      await envoyerWebhook({
-        ticket: num,
-        agence: agence.ville,
-        nom: client.nom,
-        tel: client.tel,
-        "e-mail": client.email,
-        adresse: client.adresse,
-        produit: produit.label.substring(2).trim() + (sousType ? ' — ' + sousType : ''),
-        probleme: probleme.label,
-        creneau,
-        garantie: garantieTexte,
-        facture,
-        urgent: urgentTexte,
-        photos: photoUrls,
-        facture_photo: factureUrl,
-        planningId: planningId || ''
-      });
-      setEnvoi('ok');
-    } catch(e) { setEnvoi('err'); }
-    setSending(false);
-    setEtape('merci');
-  };
-
-  const reset = () => {
-    setEtape("agence"); setAgence(null); setTypeClient(null); setGarantie(null);
-    setFacture(""); setClient({ nom: "", adresse: "", tel: "", email: "" });
-    setErreurs({}); setProduit(null); setSousType(null); setProbleme(null);
-    setCreneau(null); setPlanningId(null); setTicket(null); setEnvoi(null); setSending(false); setPhotos([]); setFactureFichier(null);
-  };
-
-  return (
-    <div style={{fontFamily:"'Segoe UI',sans-serif",background:F.grisClair,height:"100%",display:"flex",flexDirection:"column",width:"100%"}}>
-      <div style={{background:F.marine,padding:"12px 16px 8px",flexShrink:0}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
-            <div style={{width:"34px",height:"34px",background:F.or,borderRadius:"8px",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-              <span style={{fontFamily:"Arial Black,Arial",fontSize:"17px",fontWeight:"900",color:"#111",display:"inline-block",transform:"scaleX(-1)",lineHeight:1}}>R</span>
-            </div>
-            <div>
-              <div style={{color:F.blanc,fontWeight:"900",fontSize:"15px"}}>
-                <span style={{display:"inline-block",transform:"scaleX(-1)",fontFamily:"Arial Black,Arial"}}>R</span>S<span style={{color:F.or}}>IA</span>
-                <span style={{fontSize:"11px",fontWeight:"600",marginLeft:"5px",color:"rgba(255,255,255,0.6)"}}>Conseil</span>
-              </div>
-              <div style={{color:"rgba(255,255,255,0.4)",fontSize:"8px",letterSpacing:"2px",textTransform:"uppercase",marginTop:"2px"}}>Solutions IA · SAV Menuiserie</div>
-            </div>
-          </div>
-          <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-            {etape !== "agence" && etape !== "merci" && (
-              <button onClick={goBack} style={{background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.25)",color:"rgba(255,255,255,0.85)",borderRadius:"8px",padding:"4px 9px",fontSize:"10px",cursor:"pointer"}}>← Retour</button>
-            )}
-            {etape !== "agence" && etape !== "merci" && (
-              <button onClick={reset} style={{background:"rgba(255,107,0,0.15)",border:"1px solid " + F.or,color:F.or,borderRadius:"8px",padding:"4px 9px",fontSize:"10px",cursor:"pointer"}}>↩ Début</button>
-            )}
-            <button onClick={() => window.toggleWidget()} style={{background:"rgba(255,255,255,0.1)",border:"1px solid rgba(255,255,255,0.2)",color:"rgba(255,255,255,0.7)",borderRadius:"8px",width:"28px",height:"28px",cursor:"pointer",fontSize:"14px",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
-          </div>
-        </div>
-        <div style={{marginTop:"6px",display:"flex",alignItems:"center",gap:"6px"}}>
-          <div style={{width:"7px",height:"7px",background:"#2ECC71",borderRadius:"50%"}}></div>
-          <span style={{color:F.orClair,fontSize:"11px",fontWeight:"500"}}>Iko — SAV en ligne</span>
-        </div>
-      </div>
-      <div style={{height:"3px",background:"linear-gradient(90deg," + F.or + "," + F.orClair + "," + F.or + ")",flexShrink:0}} />
-
-      <div style={{flex:1,overflowY:"auto",padding:"14px",display:"flex",flexDirection:"column",gap:"10px"}}>
-
-        {etape === "agence" && (
-          <>
-            <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
-              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:"2px solid " + F.or}}>I</div>
-              <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",lineHeight:"1.6",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:"1px solid " + F.grisBord}}>
-                Bonjour ! Je suis <strong style={{color:F.marine}}>Iko</strong>, votre assistant SAV RSIA.<br/>Quelle est votre agence ?
-              </div>
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
-              {AGENCES.map(a => (
-                <button key={a.id} onClick={() => { setAgence(a); setEtape("identification"); }}
-                  style={{background:F.blanc,border:"2px solid " + F.grisBord,borderRadius:"12px",padding:"14px 10px",fontSize:"13px",fontWeight:"700",color:F.marine,cursor:"pointer",textAlign:"center",lineHeight:"1.5"}}>
-                  {a.label}<br/><span style={{fontSize:"10px",fontWeight:"400",color:"#64748B"}}>{a.ville}</span>
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-
-        {etape === "identification" && (
-          <>
-            <div style={{background:"#EFF6FF",border:"1px solid #BFDBFE",borderRadius:"10px",padding:"8px 12px",fontSize:"11px"}}>
-              📍 <strong>{agence?.ville}</strong>
-            </div>
-            <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:"1px solid " + F.grisBord}}>
-              <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"8px",borderLeft:"3px solid " + F.or,paddingLeft:"8px"}}>Êtes-vous déjà client RSIA ?</div>
-              <div style={{display:"flex",gap:"8px"}}>
-                {[{val:"existant",label:"✅ Oui, je suis client"},{val:"nouveau",label:"🆕 Première fois"}].map(opt => (
-                  <button key={opt.val} onClick={() => { setTypeClient(opt.val); setGarantie(null); }}
-                    style={{flex:1,padding:"9px",border:"2px solid " + (typeClient===opt.val?F.or:F.grisBord),borderRadius:"10px",background:typeClient===opt.val?F.marine:F.blanc,color:typeClient===opt.val?F.blanc:F.marine,fontSize:"11px",fontWeight:"600",cursor:"pointer"}}>
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {typeClient === "existant" && (
-              <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:"1px solid " + F.grisBord}}>
-                <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"8px",borderLeft:"3px solid " + F.or,paddingLeft:"8px"}}>Produit sous garantie ?</div>
-                <div style={{display:"flex",gap:"8px"}}>
-                  {[{val:true,label:"✅ Oui"},{val:false,label:"❌ Non / Je ne sais pas"}].map(opt => (
-                    <button key={String(opt.val)} onClick={() => { setGarantie(opt.val); setFacture(""); }}
-                      style={{flex:1,padding:"9px",border:"2px solid " + (garantie===opt.val?(opt.val?F.vert:F.rouge):F.grisBord),borderRadius:"10px",background:garantie===opt.val?(opt.val?F.vertClair:F.rougeClair):F.blanc,color:garantie===opt.val?(opt.val?F.vert:F.rouge):F.marine,fontSize:"11px",fontWeight:"600",cursor:"pointer"}}>
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-                {garantie === false && (
-                  <div style={{marginTop:"10px",background:"#FFF7ED",border:"1.5px solid #FED7AA",borderRadius:"10px",padding:"10px 12px",fontSize:"11px",color:"#78350F",lineHeight:"1.7"}}>
-                    ⚠️ <strong>Diagnostic 65€</strong> si hors garantie. Avoir déduit à l'acceptation du devis.
-                  </div>
-                )}
-                {garantie === true && (
-                  <div style={{marginTop:"10px"}}>
-                    <label style={{fontSize:"10px",fontWeight:"700",color:F.marine,display:"block",marginBottom:"4px"}}>N° de facture *</label>
-                    <input type="text" placeholder="Ex : FAL-2024-00842" value={facture} onChange={e => setFacture(e.target.value)}
-                      style={{width:"100%",padding:"8px 10px",border:"1.5px solid " + (erreurs.facture?F.rouge:F.or),borderRadius:"8px",fontSize:"12px",boxSizing:"border-box",outline:"none"}} />
-                    <label style={{display:"block",marginTop:"10px",border:"2px dashed " + F.or,borderRadius:"10px",padding:"12px",textAlign:"center",cursor:"pointer",background:"#FFFDF5"}}>
-                      <input type="file" accept="image/*,.pdf,.jpg,.jpeg,.png" style={{display:"none"}}
-                        onChange={e => setFactureFichier(e.target.files[0] || null)}/>
-                      {factureFichier ? (
-                        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}}>
-                          <span style={{fontSize:"16px"}}>{factureFichier.type.includes('pdf') ? '📄' : '🖼️'}</span>
-                          <span style={{fontSize:"11px",fontWeight:"700",color:F.marine}}>{factureFichier.name}</span>
-                          <button onClick={(e) => { e.preventDefault(); setFactureFichier(null); }} style={{background:"none",border:"none",color:"#94A3B8",cursor:"pointer",fontSize:"14px",padding:"0"}}>✕</button>
-                        </div>
-                      ) : (
-                        <>
-                          <div style={{fontSize:"11px",fontWeight:"700",color:F.or}}>📎 Joindre la facture (facultatif)</div>
-                          <div style={{fontSize:"10px",color:"#94A3B8",marginTop:"2px"}}>Photo ou PDF</div>
-                        </>
-                      )}
-                    </label>
-                  </div>
-                )}
-              </div>
-            )}
-            {(typeClient === "nouveau" || (typeClient === "existant" && garantie !== null)) && (
-              <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:"1px solid " + F.grisBord}}>
-                <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"10px",borderLeft:"3px solid " + F.or,paddingLeft:"8px"}}>Vos coordonnées</div>
-                {[{key:"nom",label:"Nom et prénom",ph:"Ex : Jean Dupont",type:"text"},{key:"adresse",label:"Adresse complète",ph:"Ex : 12 rue des Lilas, 65000 Tarbes",type:"text"},{key:"tel",label:"Téléphone",ph:"Ex : 06 12 34 56 78",type:"tel"},{key:"email",label:"Email",ph:"Ex : jean.dupont@gmail.com",type:"email"}].map(f => (
-                  <div key={f.key} style={{marginBottom:"8px"}}>
-                    <label style={{fontSize:"10px",fontWeight:"600",color:"#64748B",display:"block",marginBottom:"3px"}}>{f.label} *</label>
-                    <input type={f.type} placeholder={f.ph} value={client[f.key]} onChange={e => setClient({...client,[f.key]:e.target.value})}
-                      style={{width:"100%",padding:"8px 10px",border:"1.5px solid " + (erreurs[f.key]?F.rouge:F.grisBord),borderRadius:"8px",fontSize:"12px",boxSizing:"border-box",outline:"none"}} />
-                    {erreurs[f.key] && <span style={{fontSize:"10px",color:F.rouge}}>Champ obligatoire</span>}
-                  </div>
-                ))}
-                <button onClick={() => { if (validerInfos()) setEtape("produit"); }}
-                  style={{width:"100%",padding:"11px",background:F.marine,color:F.blanc,border:"2px solid " + F.or,borderRadius:"10px",fontSize:"12px",fontWeight:"700",cursor:"pointer",marginTop:"4px"}}>
-                  Continuer →
-                </button>
-              </div>
-            )}
-          </>
-        )}
-
-        {etape === "produit" && (
-          <>
-            <div style={{background:F.vertClair,border:"1px solid #86EFAC",borderRadius:"10px",padding:"8px 12px",fontSize:"11px"}}>
-              <div style={{fontWeight:"700",color:F.marine}}>👤 {client.nom}</div>
-              <div style={{color:"#475569",fontSize:"10px"}}>{agence?.ville}</div>
-            </div>
-            <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
-              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:"2px solid " + F.or}}>I</div>
-              <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:"1px solid " + F.grisBord}}>
-                Quel produit est concerné, <strong style={{color:F.marine}}>{client.nom.split(" ")[0]}</strong> ?
-              </div>
-            </div>
-            {PRODUITS.map(p => (
-              <button key={p.id} onClick={() => { setProduit(p); setSousType(null); setEtape(p.sousTypes ? "sous_type" : "probleme"); }}
-                style={{background:F.blanc,border:"2px solid " + F.grisBord,borderRadius:"10px",padding:"11px 14px",fontSize:"12px",fontWeight:"600",color:F.marine,cursor:"pointer",textAlign:"left",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
-                {p.label}
-              </button>
-            ))}
-          </>
-        )}
-
-        {etape === "sous_type" && (
-          <>
-            <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
-              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:"2px solid " + F.or}}>I</div>
-              <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:"1px solid " + F.grisBord}}>
-                Quel type de porte de garage ?
-              </div>
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
-              {produit?.sousTypes?.map(st => (
-                <button key={st} onClick={() => { setSousType(st); setEtape("probleme"); }}
-                  style={{background:F.blanc,border:"2px solid " + F.grisBord,borderRadius:"12px",padding:"16px 8px",fontSize:"12px",fontWeight:"700",color:F.marine,cursor:"pointer",textAlign:"center"}}>
-                  {st}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-
-        {etape === "probleme" && (
-          <>
-            <div style={{display:"flex",gap:"8px",alignItems:"flex-end"}}>
-              <div style={{width:"30px",height:"30px",background:F.marine,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"700",color:F.blanc,flexShrink:0,border:"2px solid " + F.or}}>I</div>
-              <div style={{background:F.blanc,borderRadius:"16px 16px 16px 4px",padding:"10px 14px",fontSize:"12px",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:"1px solid " + F.grisBord}}>
-                Quel est le problème avec votre <strong style={{color:F.marine}}>{produit?.label.substring(2).trim()}</strong> ?
-              </div>
-            </div>
-            {produit?.pb.map(p => (
-              <button key={p.id} onClick={() => { setProbleme(p); setEtape("photos"); }}
-                style={{background:F.blanc,border:"2px solid " + (p.urgent?"#FCA5A5":F.grisBord),borderRadius:"10px",padding:"10px 14px",fontSize:"12px",fontWeight:"600",color:F.marine,cursor:"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
-                <span>{p.label}</span>
-                {p.urgent && <span style={{background:F.rougeClair,color:F.rouge,fontSize:"9px",fontWeight:"700",padding:"2px 7px",borderRadius:"20px",marginLeft:"8px",flexShrink:0}}>URGENT</span>}
-              </button>
-            ))}
-          </>
-        )}
-
-        {etape === "photos" && (
-          <div style={{background:F.blanc,borderRadius:"12px",padding:"12px 14px",border:"1px solid " + F.grisBord}}>
-            <div style={{fontSize:"11px",fontWeight:"700",color:F.marine,marginBottom:"8px",borderLeft:"3px solid " + F.or,paddingLeft:"8px"}}>
-              📎 Photos ou documents (facultatif)
-            </div>
-            <div style={{fontSize:"11px",color:"#64748B",marginBottom:"12px"}}>
-              Joignez une photo du problème, votre facture ou tout document utile.
-            </div>
-            <label style={{display:"block",border:"2px dashed " + F.or,borderRadius:"10px",padding:"20px",textAlign:"center",cursor:"pointer",background:"#FFFDF5"}}>
-              <input type="file" multiple accept="image/*,.pdf,.jpg,.jpeg,.png" style={{display:"none"}}
-                onChange={e => { const files = Array.from(e.target.files); setPhotos(prev => [...prev, ...files].slice(0, 5)); }}/>
-              <div style={{fontSize:"28px",marginBottom:"6px"}}>📷</div>
-              <div style={{fontSize:"12px",fontWeight:"700",color:F.or}}>Appuyer pour ajouter</div>
-              <div style={{fontSize:"10px",color:"#94A3B8",marginTop:"3px"}}>Photos, facture PDF — max 5 fichiers</div>
-            </label>
-            {photos.length > 0 && (
-              <div style={{marginTop:"10px",display:"flex",flexDirection:"column",gap:"6px"}}>
-                {photos.map((f,i) => (
-                  <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#F8FAFC",borderRadius:"8px",padding:"7px 10px",border:"1px solid " + F.grisBord}}>
-                    <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-                      <span style={{fontSize:"16px"}}>{f.type.includes('pdf') ? '📄' : '🖼️'}</span>
-                      <span style={{fontSize:"11px",color:F.marine,fontWeight:"600"}}>{f.name}</span>
-                    </div>
-                    <button onClick={() => setPhotos(prev => prev.filter((_,j) => j!==i))}
-                      style={{background:"none",border:"none",color:"#94A3B8",cursor:"pointer",fontSize:"16px",padding:"0"}}>✕</button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <button onClick={() => setEtape("creneau")}
-              style={{width:"100%",marginTop:"12px",padding:"11px",background:F.marine,color:F.blanc,border:"2px solid " + F.or,borderRadius:"10px",fontSize:"12px",fontWeight:"700",cursor:"pointer"}}>
-              {photos.length > 0 ? "Continuer (" + photos.length + " fichier" + (photos.length>1?'s':'') + ") →" : "Passer cette étape →"}
-            </button>
-          </div>
-        )}
-
-        {etape === "creneau" && agence && (
-          <CreneauPicker agenceVille={agence.ville} onSelect={(c, pid) => { setCreneau(c); setPlanningId(pid); setEtape("recapitulatif"); }} />
-        )}
-
-        {etape === "recapitulatif" && (
-          <>
-            <div style={{background:F.blanc,borderRadius:"12px",border:"2px solid " + F.or,overflow:"hidden"}}>
-              <div style={{background:F.marine,padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <span style={{color:F.blanc,fontWeight:"700",fontSize:"12px"}}>Récapitulatif de votre demande SAV</span>
-                {probleme?.urgent && <span style={{background:F.rouge,color:F.blanc,fontSize:"9px",fontWeight:"700",padding:"2px 7px",borderRadius:"10px"}}>URGENT</span>}
-              </div>
-              <div style={{padding:"12px 14px"}}>
-                {[
-                  ["Agence", agence?.ville],
-                  ["Client", client.nom],
-                  ["Téléphone", client.tel],
-                  ["Email", client.email],
-                  ["Adresse", client.adresse],
-                  ["Garantie", garantie===true?"Oui — Facture " + facture:(garantie===false?"Non / Hors garantie":"N/A")],
-                  ...(factureFichier ? [["Facture jointe", "📎 " + factureFichier.name]] : []),
-                  ["Produit", produit?.label+(sousType?" — "+sousType:"")],
-                  ["Problème", probleme?.label],
-                  ["Créneau", creneau],
-                ].map(([lbl,val],i) => (
-                  <div key={i} style={{display:"flex",gap:"8px",padding:"6px 0",borderBottom:"1px solid " + F.grisBord}}>
-                    <span style={{fontSize:"10px",fontWeight:"700",color:"#64748B",minWidth:"80px",flexShrink:0}}>{lbl}</span>
-                    <span style={{fontSize:"11px",color:F.marine}}>{val}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <button onClick={confirmer} disabled={sending}
-              style={{width:"100%",padding:"13px",background:sending?"#64748B":F.marine,color:F.blanc,border:"2px solid " + F.or,borderRadius:"10px",fontSize:"13px",fontWeight:"700",cursor:sending?"not-allowed":"pointer"}}>
-              {sending ? "⏳ Envoi en cours..." : "✅ Confirmer et envoyer ma demande"}
-            </button>
-          </>
-        )}
-
-        {etape === "merci" && (
-          <>
-            <div style={{textAlign:"center",padding:"16px 0"}}>
-              <div style={{fontSize:"36px",marginBottom:"10px"}}>✅</div>
-              <div style={{fontSize:"18px",fontWeight:"900",color:F.marine,marginBottom:"4px"}}>Demande envoyée !</div>
-              <div style={{fontSize:"12px",color:"#64748B"}}>Votre demande SAV a bien été prise en compte.</div>
-            </div>
-            <div style={{background:F.marine,borderRadius:"12px",padding:"14px",textAlign:"center",border:"2px solid " + F.or}}>
-              <div style={{color:F.orClair,fontSize:"10px",fontWeight:"600",marginBottom:"6px",letterSpacing:"2px"}}>VOTRE NUMÉRO DE TICKET</div>
-              <div style={{color:F.or,fontSize:"24px",fontWeight:"900",letterSpacing:"2px",fontFamily:"monospace"}}>{ticket}</div>
-              <div style={{color:"rgba(255,255,255,0.4)",fontSize:"10px",marginTop:"4px"}}>Conservez ce numéro pour le suivi</div>
-            </div>
-            {envoi === 'ok' && (
-              <div style={{background:F.vertClair,border:"1px solid #86EFAC",borderRadius:"9px",padding:"8px 12px",fontSize:"11px",color:F.vert,fontWeight:"600"}}>
-                ✅ Ticket enregistré — notification envoyée à l'agence
-              </div>
-            )}
-            {envoi === 'err' && (
-              <div style={{background:F.rougeClair,border:"1px solid #FCA5A5",borderRadius:"9px",padding:"8px 12px",fontSize:"11px",color:F.rouge,fontWeight:"600"}}>
-                ⚠️ Ticket créé — erreur d'envoi, contactez l'agence directement
-              </div>
-            )}
-            <div style={{background:probleme?.urgent?F.rougeClair:F.vertClair,border:"1px solid " + (probleme?.urgent?"#FCA5A5":"#86EFAC"),borderRadius:"10px",padding:"10px 14px"}}>
-              <div style={{fontWeight:"700",fontSize:"12px",color:F.marine}}>
-                {probleme?.urgent?"⚡ Intervention sous 24-48h":"🕐 Intervention sous 5-10 jours ouvrés"}
-              </div>
-              <div style={{fontSize:"11px",color:"#475569",marginTop:"2px"}}>Créneau : {creneau}</div>
-            </div>
-            <button onClick={reset}
-              style={{width:"100%",padding:"11px",background:F.blanc,color:F.marine,border:"2px solid " + F.grisBord,borderRadius:"10px",fontSize:"12px",fontWeight:"600",cursor:"pointer"}}>
-              Faire une nouvelle demande SAV
-            </button>
-          </>
-        )}
-
-        <div ref={bottomRef} />
-      </div>
-
-      <div style={{background:F.marine,padding:"6px 14px",textAlign:"center",flexShrink:0}}>
-        <span style={{color:F.or,fontSize:"9px",opacity:0.8}}>© RSIA Conseil — Solutions IA pour les PME du bâtiment</span>
-      </div>
-    </div>
-  );
+  const [access, setAccess] = React.useState(null);
+  return access ? <Dashboard agenceAccess={access} onClose={() => setAccess(null)}/> : <Login onLogin={setAccess}/>;
 }
 
-function mountChatbot() {
-  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-}
-
-</script>
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(() => console.log('SW enregistré'))
-      .catch(e => console.log('SW erreur', e));
-  });
-}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
 </body>
 </html>
