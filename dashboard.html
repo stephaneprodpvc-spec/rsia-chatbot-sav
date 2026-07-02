@@ -661,6 +661,7 @@ function Dashboard({ agenceAccess, onClose }) {
     nouveau: tickets.filter(t => !t.fields?.Statut||t.fields?.Statut==="Nouveau").length,
     encours: tickets.filter(t => t.fields?.Statut==="En cours").length,
     termine: tickets.filter(t => t.fields?.Statut==="Terminé").length,
+    annule: tickets.filter(t => t.fields?.Statut==="Annulé").length,
   };
 
   const byAgence = {};
@@ -731,6 +732,7 @@ function Dashboard({ agenceAccess, onClose }) {
           <StatCard label="Nouveaux" value={stats.nouveau}/>
           <StatCard label="En cours" value={stats.encours}/>
           <StatCard label="Terminés" value={stats.termine}/>
+          <StatCard label="Annulés" value={stats.annule}/>
         </div>
 
         <div style={{display:"flex",gap:"4px",marginBottom:"16px",background:C.card,borderRadius:"10px",padding:"4px",border:"1px solid "+C.border,width:"fit-content"}}>
