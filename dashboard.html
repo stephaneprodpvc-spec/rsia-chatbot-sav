@@ -733,20 +733,6 @@ function Dashboard({ agenceAccess, onClose }) {
           <StatCard label="Terminés" value={stats.termine}/>
         </div>
 
-        {agenceFilter === "global" && (
-          <div style={{background:C.card,border:"1px solid "+C.border,borderRadius:"12px",padding:"16px 20px",marginBottom:"20px"}}>
-            <div style={{fontSize:"13px",fontWeight:"700",color:C.white,marginBottom:"12px"}}>Répartition par agence</div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"12px"}}>
-              {AGENCES.map(a => (
-                <button key={a} onClick={() => setAgenceFilter(a)} style={{background:"#1a1a1a",border:"1px solid "+C.border,borderRadius:"10px",padding:"12px",textAlign:"center",cursor:"pointer"}}>
-                  <div style={{fontSize:"22px",fontWeight:"900",color:C.or,fontFamily:"monospace"}}>{byAgence[a]}</div>
-                  <div style={{fontSize:"11px",color:C.muted,marginTop:"4px"}}>{a}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         <div style={{display:"flex",gap:"4px",marginBottom:"16px",background:C.card,borderRadius:"10px",padding:"4px",border:"1px solid "+C.border,width:"fit-content"}}>
           {[["tickets","🎫 Tickets"],["planning","📅 Planning"]].map(([v,l]) => (
             <button key={v} onClick={() => setVue(v)}
