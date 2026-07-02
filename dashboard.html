@@ -330,6 +330,7 @@ function ModalAnnulation({ ticket, onConfirm, onClose }) {
 }
 
 
+function PlanningView({ agenceFilter }) {
   const [slots, setSlots] = React.useState([]);
   const [ticketsByPlanning, setTicketsByPlanning] = React.useState({});
   const [loading, setLoading] = React.useState(true);
