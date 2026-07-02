@@ -390,14 +390,12 @@ function Technicien({ agence, onClose }) {
               <div style={{fontSize:"11px",color:C.or,marginTop:"1px",fontWeight:"700"}}>📍 {agenceShort}</div>
             </div>
           </div>
-          <div style={{display:"flex",alignItems:"flex-start",gap:"12px"}}>
-            <div style={{textAlign:"right"}}>
-              {lastRefresh && <div style={{fontSize:"9px",color:C.muted}}>MAJ {lastRefresh}</div>}
-              <button onClick={charger} style={{background:C.orDim,border:"1px solid "+C.orBord,color:C.or,borderRadius:"8px",padding:"5px 10px",fontSize:"11px",fontWeight:"700",cursor:"pointer",marginTop:"3px"}}>↺</button>
-            </div>
-            <button onClick={imprimerSemaine} title="Imprimer ma semaine" style={{background:C.orDim,border:"1px solid "+C.orBord,color:C.or,borderRadius:"8px",padding:"5px 10px",fontSize:"11px",fontWeight:"700",cursor:"pointer"}}>🖨️ Ma semaine</button>
-            <div style={{width:"1px",height:"30px",background:C.border}}/>
-            <button onClick={onClose} title="Fermer la session" style={{background:"rgba(220,38,38,0.08)",border:"1px solid rgba(220,38,38,0.25)",color:"rgba(220,38,38,0.85)",borderRadius:"8px",width:"28px",height:"28px",cursor:"pointer",fontSize:"14px",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>✕</button>
+          <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+            {lastRefresh && <span style={{fontSize:"9px",color:C.muted,marginRight:"2px"}}>MAJ {lastRefresh}</span>}
+            <button onClick={charger} title="Rafraîchir" style={{background:C.orDim,border:"1px solid "+C.orBord,color:C.or,borderRadius:"8px",width:"30px",height:"30px",fontSize:"13px",fontWeight:"700",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>↺</button>
+            <button onClick={imprimerSemaine} title="Imprimer ma semaine" style={{background:C.orDim,border:"1px solid "+C.orBord,color:C.or,borderRadius:"8px",padding:"0 12px",height:"30px",fontSize:"11px",fontWeight:"700",cursor:"pointer",display:"flex",alignItems:"center",gap:"5px",whiteSpace:"nowrap",flexShrink:0}}>🖨️ Ma semaine</button>
+            <div style={{width:"1px",height:"22px",background:C.border,margin:"0 2px",flexShrink:0}}/>
+            <button onClick={onClose} title="Fermer la session" style={{background:"rgba(220,38,38,0.08)",border:"1px solid rgba(220,38,38,0.25)",color:"rgba(220,38,38,0.85)",borderRadius:"8px",width:"30px",height:"30px",cursor:"pointer",fontSize:"14px",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>✕</button>
           </div>
         </div>
         <div style={{display:"flex",gap:"4px",marginTop:"12px",background:"#111",borderRadius:"10px",padding:"3px"}}>
