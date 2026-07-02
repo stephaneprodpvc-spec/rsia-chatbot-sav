@@ -314,6 +314,7 @@ function Technicien({ agence, onClose }) {
     if (onglet === "aujourd_hui") return (creneau.includes(todayStr) || creneau.includes(todayLong.toLowerCase())) && statut !== "Terminé" && statut !== "Annulé";
     if (onglet === "a_venir") return statut !== "Terminé" && statut !== "Annulé";
     if (onglet === "termines") return statut === "Terminé";
+    if (onglet === "annules") return statut === "Annulé";
     return true;
   };
 
@@ -321,6 +322,7 @@ function Technicien({ agence, onClose }) {
   const nbAujourdhui = tickets.filter(t => { const c=(t.fields?.["Créneau"]||"").toLowerCase(); return c.includes(todayStr)||c.includes(todayLong.toLowerCase()); }).length;
   const nbAVenir = tickets.filter(t => { const s=t.fields?.Statut||"Nouveau"; return s!=="Terminé"&&s!=="Annulé"; }).length;
   const nbTermines = tickets.filter(t => t.fields?.Statut==="Terminé").length;
+  const nbAnnules = tickets.filter(t => t.fields?.Statut==="Annulé").length;
   const agenceShort = agence.replace(/ \(\d+\)/,"");
 
   const imprimerSemaine = () => {
@@ -398,7 +400,7 @@ function Technicien({ agence, onClose }) {
           </div>
         </div>
         <div style={{display:"flex",gap:"4px",marginTop:"12px",background:"#111",borderRadius:"10px",padding:"3px"}}>
-          {[["aujourd_hui","Aujourd'hui",nbAujourdhui],["a_venir","À venir",nbAVenir],["termines","Terminés",nbTermines]].map(([id,label,count]) => (
+          {[["aujourd_hui","Aujourd'hui",nbAujourdhui],["a_venir","À venir",nbAVenir],["termines","Terminés",nbTermines],["annules","Annulés",nbAnnules]].map(([id,label,count]) => (
             <button key={id} onClick={() => setOnglet(id)}
               style={{flex:1,padding:"7px 4px",borderRadius:"8px",border:"none",background:onglet===id?C.or:"transparent",color:onglet===id?"#111":C.muted,fontSize:"11px",fontWeight:"700",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>
               {label}
@@ -411,9 +413,9 @@ function Technicien({ agence, onClose }) {
         {loading && <div style={{textAlign:"center",padding:"60px",color:C.muted}}>Chargement...</div>}
         {!loading && filtered.length===0 && (
           <div style={{textAlign:"center",padding:"60px 20px",color:C.muted}}>
-            <div style={{fontSize:"40px",marginBottom:"12px"}}>{onglet==="aujourd_hui"?"🎉":onglet==="termines"?"📋":"📭"}</div>
+            <div style={{fontSize:"40px",marginBottom:"12px"}}>{onglet==="aujourd_hui"?"🎉":onglet==="termines"?"📋":onglet==="annules"?"🚫":"📭"}</div>
             <div style={{fontSize:"14px",fontWeight:"700",color:C.text}}>
-              {onglet==="aujourd_hui"?"Aucune intervention aujourd'hui":onglet==="termines"?"Aucune intervention terminée":"Aucune intervention à venir"}
+              {onglet==="aujourd_hui"?"Aucune intervention aujourd'hui":onglet==="termines"?"Aucune intervention terminée":onglet==="annules"?"Aucune intervention annulée":"Aucune intervention à venir"}
             </div>
           </div>
         )}
