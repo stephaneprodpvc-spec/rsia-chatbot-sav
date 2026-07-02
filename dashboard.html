@@ -124,6 +124,11 @@ function TicketRow({ t, onStatusChange, onRenvoyerMail, onRenvoyerMailClient }) 
             📎 Voir la/les photo(s)
           </a>
         )}
+        {t.fields?.Commentaire && (
+          <div style={{marginTop:"8px",background:"#1a1a1a",border:"1px solid "+C.border,borderRadius:"8px",padding:"7px 10px",fontSize:"11px",color:C.muted,fontStyle:"italic"}}>
+            💬 {t.fields.Commentaire}
+          </div>
+        )}
         <div style={{display:"flex",gap:"8px",marginTop:"8px"}}>
           <button onClick={() => onRenvoyerMail(t.fields?.Name)} style={{flex:1,background:"#FF6B00",color:"#111",border:"none",borderRadius:"8px",padding:"8px 10px",fontWeight:"700",fontSize:"12px",cursor:"pointer"}}>
             📧 Technicien
@@ -561,10 +566,29 @@ function Dashboard({ agenceAccess, onClose }) {
   };
 
   const updateStatus = async (id, newStatus) => {
-    setTickets(prev => prev.map(t => t.id===id?{...t,fields:{...t.fields,Statut:newStatus}}:t));
+    const ticket = tickets.find(t => t.id === id);
+    let fields = { Statut: newStatus };
+
+    if (newStatus === "Annulé") {
+      const motif = window.prompt("Motif d'annulation (obligatoire) :", "");
+      if (motif === null) return;
+      if (!motif.trim()) { alert("Un motif est nécessaire pour annuler un ticket."); return; }
+      fields.Commentaire = "Annulé : " + motif.trim();
+      const planningId = ticket?.fields?.PlanningID;
+      if (planningId) {
+        try {
+          await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Planning/'+planningId, {
+            method:'PATCH', headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
+            body:JSON.stringify({fields:{Statut:'Libre'}})
+          });
+        } catch(e) { console.error(e); }
+      }
+    }
+
+    setTickets(prev => prev.map(t => t.id===id?{...t,fields:{...t.fields,...fields}}:t));
     await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets SAV/'+id, {
       method:'PATCH', headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
-      body:JSON.stringify({fields:{Statut:newStatus}})
+      body:JSON.stringify({fields})
     });
   };
 
