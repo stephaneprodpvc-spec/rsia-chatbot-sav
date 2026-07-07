@@ -91,7 +91,7 @@ function StatCard({ label, value, sub, accent }) {
 }
 
 function TicketRow({ t, onStatusChange, onAnnuler, onRenvoyerMail, onRenvoyerMailClient }) {
-  const urgent = t.fields?.Urgent === true || t.fields?.Urgent === "true";
+  const urgent = t.fields?.Qualification === "Oui";
   const statut = t.fields?.Statut || "Nouveau";
   const statusColors = {
     "Nouveau": { color: C.bleu, bg: C.bleuDim },
@@ -555,7 +555,7 @@ function Dashboard({ agenceAccess, onClose }) {
       "N° Ticket": t.fields?.Name || "",
       "Date intervention": t.fields?.Créneau || "",
       "Statut": t.fields?.Statut || "Nouveau",
-      "Urgent": (t.fields?.Urgent===true||t.fields?.Urgent==="true") ? "Oui" : "Non",
+      "Urgent": t.fields?.Qualification === "Oui" ? "Oui" : "Non",
       "Agence": t.fields?.Agence || "",
       "Client": t.fields?.Client || "",
       "Téléphone": t.fields?.Téléphone || "",
@@ -667,7 +667,7 @@ function Dashboard({ agenceAccess, onClose }) {
 
   const stats = {
     total: tickets.length,
-    urgent: tickets.filter(t => t.fields?.Urgent===true||t.fields?.Urgent==="true").length,
+    urgent: tickets.filter(t => t.fields?.Qualification === "Oui").length,
     nouveau: tickets.filter(t => !t.fields?.Statut||t.fields?.Statut==="Nouveau").length,
     encours: tickets.filter(t => t.fields?.Statut==="En cours").length,
     termine: tickets.filter(t => t.fields?.Statut==="Terminé").length,
