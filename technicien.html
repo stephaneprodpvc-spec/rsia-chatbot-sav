@@ -203,7 +203,7 @@ function ModalAction({ ticket, onClose, onDone }) {
 }
 
 function TicketCard({ ticket, onAction }) {
-  const urgent = ticket.fields?.Urgent===true||ticket.fields?.Urgent==="true";
+  const urgent = ticket.fields?.Qualification === "Oui";
   const statut = ticket.fields?.Statut || "Nouveau";
   const commentaire = ticket.fields?.Commentaire;
   const isTermine = statut === "Terminé";
