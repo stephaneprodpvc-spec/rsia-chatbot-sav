@@ -164,6 +164,8 @@
       <a href="#suite"><span class="ic">🧩</span>Suite interne</a>
       <a href="#securite"><span class="ic">🛡</span>Sécurité</a>
       <a href="#journal"><span class="ic">🕐</span>Journal</a>
+      <a href="#idees"><span class="ic">💡</span>Idées & à venir</a>
+      <a href="#notes"><span class="ic">📝</span>Notes rapides</a>
     </div>
 
     <div class="sb-footer">
@@ -287,6 +289,40 @@
       </div>
     </section>
 
+    <section id="idees">
+      <div class="shead"><h2>Idées & à venir</h2><span class="count">Mis de côté pour après la démo</span></div>
+      <div class="glist">
+        <div class="grow">
+          <div class="gicon">🛒</div>
+          <div class="gtext"><b>Iko Vente</b><span>Déclinaison du système pour les commerciaux, en plus du SAV</span></div>
+        </div>
+        <div class="grow">
+          <div class="gicon">📐</div>
+          <div class="gtext"><b>Relevé Chantier</b><span>Outil pour conducteurs de travaux — prototype déjà livré</span></div>
+        </div>
+        <div class="grow">
+          <div class="gicon">📍</div>
+          <div class="gtext"><b>Prospection Nord — Mateco</b><span>Hames-Boucres, cible potentielle pour RSIA</span></div>
+        </div>
+        <div class="grow">
+          <div class="gicon">📍</div>
+          <div class="gtext"><b>Prospection Nord — Art & Fenêtres</b><span>Deuxième cible identifiée dans le Nord</span></div>
+        </div>
+      </div>
+      <div class="footnote">Dis à Claude d'ajouter une idée ici dès qu'elle te vient — même en 3 mots.</div>
+    </section>
+
+    <section id="notes">
+      <div class="shead"><h2>Notes rapides</h2><span class="count" id="notesStatus">Enregistré localement</span></div>
+      <div class="glist" style="padding:4px;">
+        <textarea id="notesArea" placeholder="Note une idée, un rappel, un truc à ne pas oublier..."
+          style="width:100%; min-height:140px; border:none; background:transparent; resize:vertical;
+          font-family:var(--body); font-size:0.88rem; color:var(--text); padding:16px; outline:none;"></textarea>
+      </div>
+      <div class="footnote">Ces notes restent <b>sur cet appareil uniquement</b> (stockées dans ce navigateur) — pas synchronisées ailleurs, pas visibles par Claude.</div>
+    </section>
+
+
   </main>
 </div>
 
@@ -330,6 +366,22 @@
     });
   }, {rootMargin:'-35% 0px -55% 0px'});
   targets.forEach(t=>t && io.observe(t));
+
+  // notes rapides : sauvegarde locale (sur cet appareil), pas de serveur, pas d'envoi
+  const notesArea = document.getElementById('notesArea');
+  const notesStatus = document.getElementById('notesStatus');
+  if(notesArea){
+    notesArea.value = localStorage.getItem('rsia_notes_rapides') || '';
+    let saveTimeout;
+    notesArea.addEventListener('input', () => {
+      notesStatus.textContent = 'Enregistrement...';
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        localStorage.setItem('rsia_notes_rapides', notesArea.value);
+        notesStatus.textContent = 'Enregistré localement';
+      }, 400);
+    });
+  }
 </script>
 
 </body>
