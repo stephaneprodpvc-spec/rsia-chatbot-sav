@@ -22,7 +22,6 @@ input:focus, select:focus, textarea:focus { border-color:rgba(255,107,0,0.5); }
 <div id="root"></div>
 <script type="text/babel">
 
-const AIRTABLE_TOKEN = 'patXNwO908NNfQcQZ.6d0f58479c753d1bb828a26eccbfc4b1e10ece70b8c71e381d304ecb62990375';
 const AIRTABLE_BASE = 'appFqAT8WeX0UTudy';
 const WEBHOOK = 'https://hook.eu1.make.com/bkoorc2nn457jgvmvtv6pjme5vrtz68g';
 const WEBHOOK_TECHNICIEN = 'https://hook.eu1.make.com/8idy6ft9mhf2nkr6janhjmvtjfvj6c7f';
@@ -188,7 +187,7 @@ function ModalRdv({ agenceAccess, onClose, onSuccess }) {
     setSaving(true); setError("");
     try {
       const num = 'SAV-' + new Date().getFullYear() + '-' + (Math.floor(Math.random()*9000)+1000);
-      await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Tickets SAV', {
+      await fetch('/api/airtable/' + AIRTABLE_BASE + '/Tickets SAV', {
         method: 'POST',
         headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
         body: JSON.stringify({ fields: {
@@ -200,10 +199,10 @@ function ModalRdv({ agenceAccess, onClose, onSuccess }) {
       });
       const dateLabel = form.creneau === "Matin (8h30 — 12h00)" ? "Matin (8h30 — 12h00)" : "Après-midi (13h00 — 17h00)";
       const filterPlanning = encodeURIComponent('AND({Agence}="'+form.agence+'",{Créneau}="'+dateLabel+'",{Date}="'+form.date+'",{Statut}="Libre")');
-      const planResp = await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + filterPlanning + '&maxRecords=1', { headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN } });
+      const planResp = await fetch('/api/airtable/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + filterPlanning + '&maxRecords=1', { headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN } });
       const planJson = await planResp.json();
       if (planJson.records?.length > 0) {
-        await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning/' + planJson.records[0].id, {
+        await fetch('/api/airtable/' + AIRTABLE_BASE + '/Planning/' + planJson.records[0].id, {
           method: 'PATCH',
           headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
           body: JSON.stringify({ fields: { Statut: 'Pris' } })
@@ -353,14 +352,14 @@ function PlanningView({ agenceFilter }) {
       let filter = agenceFilter !== "global"
         ? encodeURIComponent('AND({Agence}="'+agenceFilter+'",{Statut}="Pris")')
         : encodeURIComponent('{Statut}="Pris"');
-      const r = await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Planning?filterByFormula='+filter+'&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=50', { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
+      const r = await fetch('/api/airtable/'+AIRTABLE_BASE+'/Planning?filterByFormula='+filter+'&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=50', { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
       const json = await r.json();
       const slotsData = json.records||[];
       setSlots(slotsData);
 
       // Charger les tickets SAV liés à un créneau (champ PlanningID = ID du record Planning)
       const filterTickets = encodeURIComponent('NOT({PlanningID}="")');
-      const rt = await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets SAV?filterByFormula='+filterTickets+'&maxRecords=300', { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
+      const rt = await fetch('/api/airtable/'+AIRTABLE_BASE+'/Tickets SAV?filterByFormula='+filterTickets+'&maxRecords=300', { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
       const jt = await rt.json();
       const map = {};
       (jt.records||[]).forEach(t => {
@@ -407,7 +406,7 @@ function PlanningView({ agenceFilter }) {
                       <span style={{fontSize:"10px",color:C.muted,marginLeft:"10px"}}>{s.fields?.Agence}</span>
                     </div>
                     <button onClick={async () => {
-                      await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Planning/'+s.id, {
+                      await fetch('/api/airtable/'+AIRTABLE_BASE+'/Planning/'+s.id, {
                         method:'PATCH', headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
                         body:JSON.stringify({fields:{Statut:'Libre'}})
                       }); charger();
@@ -481,7 +480,7 @@ function Dashboard({ agenceAccess, onClose }) {
     setLoading(true);
     try {
       let filter = agenceFilter !== "global" ? encodeURIComponent('{Agence}="'+agenceFilter+'"') : "";
-      const url = 'https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets SAV?'+(filter?'filterByFormula='+filter+'&':'')+'sort[0][field]=Name&sort[0][direction]=desc&maxRecords=200';
+      const url = '/api/airtable/'+AIRTABLE_BASE+'/Tickets SAV?'+(filter?'filterByFormula='+filter+'&':'')+'sort[0][field]=Name&sort[0][direction]=desc&maxRecords=200';
       const r = await fetch(url, { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
       const json = await r.json();
       const records = json.records||[];
@@ -616,7 +615,7 @@ function Dashboard({ agenceAccess, onClose }) {
 
   const updateStatus = async (id, newStatus) => {
     setTickets(prev => prev.map(t => t.id===id?{...t,fields:{...t.fields,Statut:newStatus}}:t));
-    await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets SAV/'+id, {
+    await fetch('/api/airtable/'+AIRTABLE_BASE+'/Tickets SAV/'+id, {
       method:'PATCH', headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
       body:JSON.stringify({fields:{Statut:newStatus}})
     });
@@ -627,14 +626,14 @@ function Dashboard({ agenceAccess, onClose }) {
     const planningId = ticket?.fields?.PlanningID;
     if (planningId) {
       try {
-        await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Planning/'+planningId, {
+        await fetch('/api/airtable/'+AIRTABLE_BASE+'/Planning/'+planningId, {
           method:'PATCH', headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
           body:JSON.stringify({fields:{Statut:'Libre'}})
         });
       } catch(e) { console.error(e); }
     }
     setTickets(prev => prev.map(t => t.id===ticket.id?{...t,fields:{...t.fields,...fields}}:t));
-    await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets SAV/'+ticket.id, {
+    await fetch('/api/airtable/'+AIRTABLE_BASE+'/Tickets SAV/'+ticket.id, {
       method:'PATCH', headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
       body:JSON.stringify({fields})
     });
