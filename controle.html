@@ -319,7 +319,10 @@
           <div class="gtext"><b>Prospection Nord — Art & Fenêtres</b><span>Deuxième cible identifiée dans le Nord</span></div>
         </div>
       </div>
-      <div class="footnote">Dis à Claude d'ajouter une idée ici dès qu'elle te vient — même en 3 mots.</div>
+      <div class="footnote" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <span>Dis à Claude d'ajouter une idée ici dès qu'elle te vient — même en 3 mots.</span>
+        <button onclick="lockIdees()" class="btn ghost" style="border:none; cursor:pointer; flex-shrink:0;">🔒 Verrouiller</button>
+      </div>
     </section>
 
     <section id="notes">
@@ -405,6 +408,14 @@
     } else {
       document.getElementById('ideesError').style.display = 'block';
     }
+  }
+  function lockIdees(){
+    document.getElementById('ideesContent').style.display = 'none';
+    document.getElementById('ideesLock').style.display = 'block';
+    document.getElementById('ideesLockStatus').textContent = '🔒 Verrouillé';
+    document.getElementById('ideesPwd').value = '';
+    document.getElementById('ideesError').style.display = 'none';
+    sessionStorage.removeItem('rsia_idees_unlocked');
   }
   if(sessionStorage.getItem('rsia_idees_unlocked') === '1'){
     const lockEl = document.getElementById('ideesLock');
