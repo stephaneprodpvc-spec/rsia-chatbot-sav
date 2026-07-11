@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSIA — Centre de contrôle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f3f6; --bg-soft:#ffffff;
+    --glass:rgba(255,255,255,0.72); --glass-hi:rgba(255,255,255,0.9); --glass-border:rgba(20,15,10,0.07);
+    --sidebar-bg:rgba(255,255,255,0.65);
+    --orange:#ff6a1a; --orange-soft:#ff8a42;
+    --text:#1c1b1f; --text-dim:#6b6670; --text-faint:#a39fa8;
+    --green:#22b866; --sep:rgba(20,15,10,0.07);
+    --display:'Sora',sans-serif; --body:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+    --r-lg:20px; --r-md:14px; --r-sm:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:radial-gradient(ellipse 90% 60% at 20% -10%, rgba(255,106,26,0.10), transparent 55%),
+               radial-gradient(ellipse 80% 60% at 100% 10%, rgba(255,145,66,0.07), transparent 50%),
+               var(--bg);
+    color:var(--text); font-family:var(--body); line-height:1.5; min-height:100vh;
+  }
+  a{color:inherit;text-decoration:none;}
+  ::selection{background:var(--orange);color:#fff;}
+
+  .shell{display:flex;min-height:100vh;}
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{width:236px;flex-shrink:0;background:var(--sidebar-bg);backdrop-filter:blur(26px) saturate(180%);
+    border-right:1px solid var(--sep);padding:22px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;}
+  .sb-brand{display:flex;align-items:center;gap:10px;padding:6px 8px 22px;}
+  .sb-badge{width:30px;height:30px;border-radius:9px;background:linear-gradient(155deg,var(--orange-soft),var(--orange));
+    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.95rem;transform:scaleX(-1);
+    box-shadow:0 4px 12px rgba(255,106,26,0.3);flex-shrink:0;}
+  .sb-brand-text b{display:block;font-family:var(--display);font-weight:700;font-size:0.88rem;color:var(--text);}
+  .sb-brand-text span{display:block;font-family:var(--body);font-size:0.68rem;color:var(--text-faint);}
+
+  .sb-group-label{font-size:0.66rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.04em;
+    padding:14px 12px 6px;font-weight:600;}
+  .sb-nav{display:flex;flex-direction:column;gap:1px;}
+  .sb-nav a{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;
+    font-size:0.86rem;color:var(--text-dim);transition:background .18s,color .18s;}
+  .sb-nav a:hover{background:rgba(0,0,0,0.04);color:var(--text);}
+  .sb-nav a.active{background:linear-gradient(155deg, var(--orange-soft), var(--orange));color:#fff;
+    box-shadow:0 3px 10px rgba(255,106,26,0.28);}
+  .sb-nav a .ic{width:18px;text-align:center;flex-shrink:0;font-size:0.92rem;}
+
+  .sb-footer{margin-top:auto;padding:14px 12px 4px;border-top:1px solid var(--sep);}
+  .sb-footer .row{display:flex;align-items:center;gap:8px;font-size:0.72rem;color:var(--text-faint);}
+  .sb-footer .row .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);
+    animation:blink 1.8s ease-in-out infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.35;}}
+
+  /* ---------- MAIN ---------- */
+  main{flex:1;min-width:0;padding:36px 44px 60px;max-width:980px;}
+
+  /* ---------- HERO CARD ---------- */
+  .hero-card{background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:blur(20px);
+    border-radius:var(--r-lg);padding:28px 30px;margin-bottom:36px;display:grid;grid-template-columns:1fr auto;
+    align-items:center;gap:20px;box-shadow:0 16px 44px rgba(20,15,10,0.08), inset 0 1px 0 var(--glass-hi);}
+  .hero-card h1{font-family:var(--display);font-weight:700;font-size:1.45rem;margin-bottom:6px;color:var(--text);}
+  .hero-card p{color:var(--text-dim);font-size:0.88rem;}
+  .hero-stats{display:flex;gap:22px;}
+  .hstat{text-align:center;}
+  .hstat b{display:block;font-family:var(--display);font-weight:700;font-size:1.5rem;color:var(--orange);}
+  .hstat span{font-size:0.66rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.04em;}
+
+  /* ---------- SECTION HEADS ---------- */
+  section{margin-bottom:34px;scroll-margin-top:24px;}
+  .shead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:0 4px;}
+  .shead h2{font-family:var(--display);font-weight:700;font-size:1.05rem;color:var(--text);}
+  .shead .count{font-size:0.74rem;color:var(--text-faint);font-family:var(--mono);}
+
+  /* ---------- GLASS LIST CARD ---------- */
+  .glist{background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:blur(20px);
+    border-radius:var(--r-lg);overflow:hidden;box-shadow:0 10px 32px rgba(20,15,10,0.07), inset 0 1px 0 var(--glass-hi);}
+  .grow{display:flex;align-items:center;gap:14px;padding:15px 20px;border-bottom:1px solid var(--sep);transition:background .15s;}
+  .grow:last-child{border-bottom:none;}
+  .grow:hover{background:rgba(0,0,0,0.02);}
+  .grow .gicon{width:38px;height:38px;border-radius:10px;background:rgba(255,106,26,0.1);
+    display:flex;align-items:center;justify-content:center;font-size:1.05rem;flex-shrink:0;}
+  .grow .gtext{flex:1;min-width:0;}
+  .grow .gtext b{display:block;font-family:var(--display);font-weight:600;font-size:0.9rem;color:var(--text);}
+  .grow .gtext span{font-size:0.8rem;color:var(--text-dim);}
+  .grow .gactions{display:flex;gap:8px;flex-shrink:0;align-items:center;}
+  .badge{font-size:0.66rem;font-family:var(--body);font-weight:600;padding:4px 10px;border-radius:20px;
+    background:rgba(34,184,102,0.12);color:var(--green);white-space:nowrap;}
+
+  .btn{font-family:var(--body);font-weight:600;font-size:0.78rem;padding:7px 13px;border-radius:20px;
+    transition:transform .15s,box-shadow .2s;white-space:nowrap;}
+  .btn.primary{background:linear-gradient(155deg,var(--orange-soft),var(--orange));color:#fff;
+    box-shadow:0 4px 12px rgba(255,106,26,0.28);}
+  .btn.primary:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(255,106,26,0.38);}
+  .btn.ghost{background:rgba(0,0,0,0.045);border:1px solid var(--glass-border);color:var(--text-dim);}
+  .btn.ghost:hover{background:rgba(0,0,0,0.07);color:var(--text);}
+
+  /* ---------- SECURITY ---------- */
+  .grow.sec .check-ic{width:20px;height:20px;border-radius:50%;background:var(--green);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:0.62rem;flex-shrink:0;}
+  .grow.sec .gtext{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .grow.sec .gtext .date{font-size:0.72rem;color:var(--text-faint);flex-shrink:0;}
+
+  .footnote{margin-top:12px;padding:14px 18px;background:var(--glass);border:1px solid var(--glass-border);
+    border-radius:var(--r-md);font-size:0.82rem;color:var(--text-dim);backdrop-filter:blur(14px);}
+  .footnote b{color:var(--orange);}
+
+  /* ---------- TOOLS ---------- */
+  .tool-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .tool-card{background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:blur(18px);
+    border-radius:var(--r-md);padding:16px;text-align:center;transition:transform .2s,border-color .2s;
+    box-shadow:0 8px 22px rgba(20,15,10,0.06), inset 0 1px 0 var(--glass-hi);}
+  .tool-card:hover{transform:translateY(-3px);border-color:rgba(20,15,10,0.14);}
+  .tool-card .ic{font-size:1.4rem;margin-bottom:8px;}
+  .tool-card b{display:block;font-family:var(--display);font-weight:600;font-size:0.82rem;color:var(--text);}
+  .tool-card span{font-size:0.68rem;color:var(--text-faint);}
+
+  /* ---------- JOURNAL ---------- */
+  .jrow{display:flex;gap:14px;padding:13px 20px;border-bottom:1px solid var(--sep);align-items:baseline;}
+  .jrow:last-child{border-bottom:none;}
+  .jrow .jdate{font-family:var(--mono);font-size:0.72rem;color:var(--orange);flex-shrink:0;width:56px;}
+  .jrow .jtext{font-size:0.85rem;color:var(--text-dim);}
+  .jrow .jtext b{color:var(--text);font-weight:600;}
+
+  footer{padding:26px 44px;text-align:center;color:var(--text-faint);font-size:0.72rem;}
+
+  @media (max-width:880px){
+    .shell{flex-direction:column;}
+    .sidebar{position:relative;width:100%;height:auto;flex-direction:row;align-items:center;padding:14px 16px;overflow-x:auto;}
+    .sb-brand{padding:0 12px 0 0;}
+    .sb-group-label{display:none;}
+    .sb-nav{flex-direction:row;}
+    .sb-footer{display:none;}
+    main{padding:24px 18px 40px;}
+    .hero-card{grid-template-columns:1fr;text-align:left;}
+    .hero-stats{flex-wrap:wrap;}
+    .tool-grid{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <nav class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-badge">Я</div>
+      <div class="sb-brand-text"><b>RSIA Conseil</b><span>Centre de contrôle</span></div>
+    </div>
+
+    <div class="sb-group-label">Aperçu</div>
+    <div class="sb-nav">
+      <a href="#hero" class="active"><span class="ic">◈</span>Vue d'ensemble</a>
+    </div>
+
+    <div class="sb-group-label">Gestion</div>
+    <div class="sb-nav">
+      <a href="#projets"><span class="ic">▤</span>Projets</a>
+      <a href="#securite"><span class="ic">🛡</span>Sécurité</a>
+      <a href="#outils"><span class="ic">⚙</span>Outils</a>
+      <a href="#journal"><span class="ic">🕐</span>Journal</a>
+    </div>
+
+    <div class="sb-footer">
+      <div class="row"><span class="dot"></span>Tous les systèmes opérationnels</div>
+    </div>
+  </nav>
+
+  <main>
+
+    <div class="hero-card" id="hero">
+      <div>
+        <h1>Bonjour Stéphane 👋</h1>
+        <p>4 projets en ligne · sécurité vérifiée le 11 juillet</p>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><b>4</b><span>Projets</span></div>
+        <div class="hstat"><b>9/9</b><span>Sécurité</span></div>
+        <div class="hstat"><b>13j</b><span>Avant démo</span></div>
+      </div>
+    </div>
+
+    <section id="projets">
+      <div class="shead"><h2>Projets</h2><span class="count">4 actifs</span></div>
+      <div class="glist">
+
+        <div class="grow">
+          <div class="gicon">🖥️</div>
+          <div class="gtext"><b>Site vitrine — Système Iko</b><span>Présentation RSIA, démo chatbot & replanification</span></div>
+          <div class="gactions">
+            <span class="badge">● Live</span>
+            <a class="btn primary" href="https://rsia-chatbot-sav-git-main-akial.vercel.app/systeme-iko.html" target="_blank">Ouvrir</a>
+          </div>
+        </div>
+
+        <div class="grow">
+          <div class="gicon">💬</div>
+          <div class="gtext"><b>Chatbot client (Falliero)</b><span>Prise de RDV SAV, garantie, facture</span></div>
+          <div class="gactions">
+            <span class="badge">● Live</span>
+            <a class="btn primary" href="https://rsia-chatbot-sav-git-main-akial.vercel.app/index.html" target="_blank">Ouvrir</a>
+          </div>
+        </div>
+
+        <div class="grow">
+          <div class="gicon">📊</div>
+          <div class="gtext"><b>Dashboard agences</b><span>Tickets, statuts, export — accès protégé</span></div>
+          <div class="gactions">
+            <span class="badge">● Live</span>
+            <a class="btn primary" href="https://rsia-chatbot-sav-git-main-akial.vercel.app/dashboard.html" target="_blank">Ouvrir</a>
+          </div>
+        </div>
+
+        <div class="grow">
+          <div class="gicon">🛠️</div>
+          <div class="gtext"><b>Espace technicien</b><span>Planning, itinéraire, replanification terrain</span></div>
+          <div class="gactions">
+            <span class="badge">● Live</span>
+            <a class="btn primary" href="https://rsia-chatbot-sav-git-main-akial.vercel.app/technicien.html" target="_blank">Ouvrir</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="securite">
+      <div class="shead"><h2>Sécurité</h2><span class="count">9/9 vérifiés</span></div>
+      <div class="glist">
+        <div class="grow sec"><div class="check-ic">✓</div>
+          <div class="gtext"><b>Token Airtable protégé</b><span class="date">11 juil.</span></div></div>
+        <div class="grow sec"><div class="check-ic">✓</div>
+          <div class="gtext"><b>Anciens tokens révoqués</b><span class="date">11 juil.</span></div></div>
+        <div class="grow sec"><div class="check-ic">✓</div>
+          <div class="gtext"><b>Mots de passe sécurisés</b><span class="date">11 juil.</span></div></div>
+        <div class="grow sec"><div class="check-ic">✓</div>
+          <div class="gtext"><b>Webhooks Make masqués</b><span class="date">11 juil.</span></div></div>
+        <div class="grow sec"><div class="check-ic">✓</div>
+          <div class="gtext"><b>api/ticket.js corrigé</b><span class="date">11 juil.</span></div></div>
+      </div>
+      <div class="footnote">Pour relancer une vérification complète, dis à Claude : <b>« relance l'audit sécurité de mes projets »</b></div>
+    </section>
+
+    <section id="outils">
+      <div class="shead"><h2>Outils</h2></div>
+      <div class="tool-grid">
+        <a class="tool-card" href="https://github.com/stephaneprodpvc-spec/rsia-chatbot-sav" target="_blank">
+          <div class="ic">🗂️</div><b>GitHub</b><span>rsia-chatbot-sav</span></a>
+        <a class="tool-card" href="https://vercel.com/akial/rsia-chatbot-sav" target="_blank">
+          <div class="ic">▲</div><b>Vercel</b><span>Déploiements</span></a>
+        <a class="tool-card" href="https://airtable.com/appFqAT8WeX0UTudy" target="_blank">
+          <div class="ic">🗃️</div><b>Airtable</b><span>Tickets & Planning</span></a>
+        <a class="tool-card" href="https://mail.google.com/mail/u/0/#inbox" target="_blank">
+          <div class="ic">✉️</div><b>Gmail</b><span>Boîte perso</span></a>
+      </div>
+    </section>
+
+    <section id="journal">
+      <div class="shead"><h2>Journal</h2></div>
+      <div class="glist">
+        <div class="jrow"><span class="jdate">11 juil.</span><span class="jtext"><b>Audit sécurité complet</b> — 2 fuites supplémentaires corrigées</span></div>
+        <div class="jrow"><span class="jdate">11 juil.</span><span class="jtext"><b>Sécurisation token Airtable</b> — serverless + variables d'environnement</span></div>
+        <div class="jrow"><span class="jdate">10 juil.</span><span class="jtext"><b>Site enrichi</b> — tilt 3D, visuel Iko en fond, galerie duotone</span></div>
+        <div class="jrow"><span class="jdate">9 juil.</span><span class="jtext"><b>Démo replanification</b> — modale technicien fonctionnelle</span></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>RSIA Conseil — Centre de contrôle · Généré et maintenu avec Claude</footer>
+
+<script>
+  const links = document.querySelectorAll('.sb-nav a');
+  const targets = [...links].map(l => document.querySelector(l.getAttribute('href')));
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const idx = targets.indexOf(e.target);
+        links.forEach(l=>l.classList.remove('active'));
+        if(links[idx]) links[idx].classList.add('active');
+      }
+    });
+  }, {rootMargin:'-35% 0px -55% 0px'});
+  targets.forEach(t=>t && io.observe(t));
+</script>
+
+</body>
+</html>
