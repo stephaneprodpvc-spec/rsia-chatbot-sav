@@ -179,7 +179,6 @@
       <div>
         <h1>Bonjour Stéphane 👋</h1>
         <p>4 projets en ligne · sécurité vérifiée le 11 juillet</p>
-        <a href="#" onclick="openNotesModal();return false;" class="btn ghost" style="display:inline-flex; margin-top:12px;">📝 Notes rapides</a>
       </div>
       <div class="hero-stats">
         <div class="hstat"><b>4</b><span>Projets</span></div>
@@ -209,7 +208,12 @@
     </section>
 
     <section id="idees">
-      <div class="shead"><h2>Idées & à venir</h2><span class="count" id="ideesLockStatus" onclick="lockIdees()" style="cursor:pointer;">🔒 Verrouillé</span></div>
+      <div class="shead"><h2>Idées & à venir</h2>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <a href="#" onclick="openNotesModal();return false;" class="btn ghost" style="border:none; cursor:pointer;">📝 Notes rapides</a>
+          <span class="count" id="ideesLockStatus" onclick="lockIdees()" style="cursor:pointer;">🔒 Verrouillé</span>
+        </div>
+      </div>
 
       <div id="ideesLock" class="glist" style="padding:26px 20px; text-align:center;">
         <p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:14px;">Section protégée — entre le code pour l'afficher</p>
