@@ -278,9 +278,10 @@
 <script>
   function openClaudeWindow(e){
     e.preventDefault();
-    const w = 900, h = 700;
-    const left = (screen.width - w) / 2;
-    const top = (screen.height - h) / 2;
+    const w = Math.round(screen.width / 2);
+    const h = screen.height - 80;
+    const left = screen.width - w;
+    const top = 0;
     const popup = window.open(
       'https://claude.ai/new',
       'claude_window',
