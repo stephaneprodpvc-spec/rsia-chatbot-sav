@@ -249,7 +249,7 @@ function CreneauPicker({ agenceVille, onSelect }) {
     try {
       const f = encodeURIComponent('AND({Agence}="' + agenceVille + '",{Créneau}="' + c.valeur + '",{Statut}="Libre")');
       const url = '/api/airtable/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + f + '&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=60';
-      const r = await fetch(url, { headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN } });
+      const r = await fetch(url, { headers: {} });
       const json = await r.json();
       const auPlusTot = new Date();
       auPlusTot.setDate(auPlusTot.getDate() + DELAI_MIN_JOURS);
@@ -270,7 +270,7 @@ function CreneauPicker({ agenceVille, onSelect }) {
     try {
       await fetch('/api/airtable/' + AIRTABLE_BASE + '/Planning/' + dateInfo.ids[0], {
         method: 'PATCH',
-        headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fields: { Statut: 'Pris' } })
       });
     } catch(e) { console.error(e); }
@@ -367,7 +367,7 @@ function App() {
     try {
       await fetch('/api/airtable/' + AIRTABLE_BASE + '/Planning/' + planningId, {
         method: 'PATCH',
-        headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fields: { Statut: 'Libre' } })
       });
     } catch(e) { console.error(e); }

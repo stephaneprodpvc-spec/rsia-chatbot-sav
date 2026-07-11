@@ -178,7 +178,7 @@ function ModalRdv({ agenceAccess, onClose, onSuccess }) {
       const num = 'SAV-' + new Date().getFullYear() + '-' + (Math.floor(Math.random()*9000)+1000);
       await fetch('/api/airtable/' + AIRTABLE_BASE + '/Tickets SAV', {
         method: 'POST',
-        headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fields: {
           Name: num, Agence: form.agence, Client: form.nom, Téléphone: form.tel,
           Email: form.email, Adresse: form.adresse, Produit: form.produit, Problème: form.probleme,
@@ -188,12 +188,12 @@ function ModalRdv({ agenceAccess, onClose, onSuccess }) {
       });
       const dateLabel = form.creneau === "Matin (8h30 — 12h00)" ? "Matin (8h30 — 12h00)" : "Après-midi (13h00 — 17h00)";
       const filterPlanning = encodeURIComponent('AND({Agence}="'+form.agence+'",{Créneau}="'+dateLabel+'",{Date}="'+form.date+'",{Statut}="Libre")');
-      const planResp = await fetch('/api/airtable/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + filterPlanning + '&maxRecords=1', { headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN } });
+      const planResp = await fetch('/api/airtable/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + filterPlanning + '&maxRecords=1', { headers: {} });
       const planJson = await planResp.json();
       if (planJson.records?.length > 0) {
         await fetch('/api/airtable/' + AIRTABLE_BASE + '/Planning/' + planJson.records[0].id, {
           method: 'PATCH',
-          headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ fields: { Statut: 'Pris' } })
         });
       }
@@ -341,14 +341,14 @@ function PlanningView({ agenceFilter }) {
       let filter = agenceFilter !== "global"
         ? encodeURIComponent('AND({Agence}="'+agenceFilter+'",{Statut}="Pris")')
         : encodeURIComponent('{Statut}="Pris"');
-      const r = await fetch('/api/airtable/'+AIRTABLE_BASE+'/Planning?filterByFormula='+filter+'&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=50', { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
+      const r = await fetch('/api/airtable/'+AIRTABLE_BASE+'/Planning?filterByFormula='+filter+'&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=50', { headers: {} });
       const json = await r.json();
       const slotsData = json.records||[];
       setSlots(slotsData);
 
       // Charger les tickets SAV liés à un créneau (champ PlanningID = ID du record Planning)
       const filterTickets = encodeURIComponent('NOT({PlanningID}="")');
-      const rt = await fetch('/api/airtable/'+AIRTABLE_BASE+'/Tickets SAV?filterByFormula='+filterTickets+'&maxRecords=300', { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
+      const rt = await fetch('/api/airtable/'+AIRTABLE_BASE+'/Tickets SAV?filterByFormula='+filterTickets+'&maxRecords=300', { headers: {} });
       const jt = await rt.json();
       const map = {};
       (jt.records||[]).forEach(t => {
@@ -396,7 +396,7 @@ function PlanningView({ agenceFilter }) {
                     </div>
                     <button onClick={async () => {
                       await fetch('/api/airtable/'+AIRTABLE_BASE+'/Planning/'+s.id, {
-                        method:'PATCH', headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
+                        method:'PATCH', headers:{'Content-Type':'application/json'},
                         body:JSON.stringify({fields:{Statut:'Libre'}})
                       }); charger();
                     }} style={{background:"rgba(220,38,38,0.1)",border:"1px solid rgba(220,38,38,0.3)",color:C.rouge,borderRadius:"6px",padding:"3px 8px",fontSize:"10px",cursor:"pointer"}}>
@@ -470,7 +470,7 @@ function Dashboard({ agenceAccess, onClose }) {
     try {
       let filter = agenceFilter !== "global" ? encodeURIComponent('{Agence}="'+agenceFilter+'"') : "";
       const url = '/api/airtable/'+AIRTABLE_BASE+'/Tickets SAV?'+(filter?'filterByFormula='+filter+'&':'')+'sort[0][field]=Name&sort[0][direction]=desc&maxRecords=200';
-      const r = await fetch(url, { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
+      const r = await fetch(url, { headers: {} });
       const json = await r.json();
       const records = json.records||[];
 
@@ -605,7 +605,7 @@ function Dashboard({ agenceAccess, onClose }) {
   const updateStatus = async (id, newStatus) => {
     setTickets(prev => prev.map(t => t.id===id?{...t,fields:{...t.fields,Statut:newStatus}}:t));
     await fetch('/api/airtable/'+AIRTABLE_BASE+'/Tickets SAV/'+id, {
-      method:'PATCH', headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
+      method:'PATCH', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({fields:{Statut:newStatus}})
     });
   };
@@ -616,14 +616,14 @@ function Dashboard({ agenceAccess, onClose }) {
     if (planningId) {
       try {
         await fetch('/api/airtable/'+AIRTABLE_BASE+'/Planning/'+planningId, {
-          method:'PATCH', headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
+          method:'PATCH', headers:{'Content-Type':'application/json'},
           body:JSON.stringify({fields:{Statut:'Libre'}})
         });
       } catch(e) { console.error(e); }
     }
     setTickets(prev => prev.map(t => t.id===ticket.id?{...t,fields:{...t.fields,...fields}}:t));
     await fetch('/api/airtable/'+AIRTABLE_BASE+'/Tickets SAV/'+ticket.id, {
-      method:'PATCH', headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
+      method:'PATCH', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({fields})
     });
     setModalAnnulation(null);
