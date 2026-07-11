@@ -191,15 +191,15 @@
       <div class="shead"><h2>Outils</h2></div>
       <div class="tool-grid">
         <a class="tool-card" href="https://claude.ai/new" target="_blank" onclick="return openClaudeWindow(event)" style="border-color:rgba(255,106,26,0.3);">
-          <div class="ic">✦</div><b>Claude</b><span>Nouvelle conversation</span></a>
+          <div class="ic"><img src="https://cdn.simpleicons.org/anthropic/FF6A1A" style="width:26px;height:26px;" alt=""></div><b>Claude</b><span>Nouvelle conversation</span></a>
         <a class="tool-card" href="https://github.com/stephaneprodpvc-spec/rsia-chatbot-sav" target="_blank">
-          <div class="ic">🗂️</div><b>GitHub</b><span>rsia-chatbot-sav</span></a>
+          <div class="ic"><img src="https://cdn.simpleicons.org/github/1c1b1f" style="width:26px;height:26px;" alt=""></div><b>GitHub</b><span>rsia-chatbot-sav</span></a>
         <a class="tool-card" href="https://vercel.com/akial/rsia-chatbot-sav" target="_blank">
-          <div class="ic">▲</div><b>Vercel</b><span>Déploiements</span></a>
+          <div class="ic"><img src="https://cdn.simpleicons.org/vercel/1c1b1f" style="width:26px;height:26px;" alt=""></div><b>Vercel</b><span>Déploiements</span></a>
         <a class="tool-card" href="https://airtable.com/appFqAT8WeX0UTudy" target="_blank">
-          <div class="ic">🗃️</div><b>Airtable</b><span>Tickets & Planning</span></a>
+          <div class="ic"><img src="https://cdn.simpleicons.org/airtable/1c1b1f" style="width:26px;height:26px;" alt=""></div><b>Airtable</b><span>Tickets & Planning</span></a>
         <a class="tool-card" href="https://mail.google.com/mail/u/0/#inbox" target="_blank">
-          <div class="ic">✉️</div><b>Gmail</b><span>Boîte perso</span></a>
+          <div class="ic"><img src="https://cdn.simpleicons.org/gmail/EA4335" style="width:26px;height:26px;" alt=""></div><b>Gmail</b><span>Boîte perso</span></a>
       </div>
     </section>
 
@@ -290,8 +290,18 @@
     </section>
 
     <section id="idees">
-      <div class="shead"><h2>Idées & à venir</h2><span class="count">Mis de côté pour après la démo</span></div>
-      <div class="glist">
+      <div class="shead"><h2>Idées & à venir</h2><span class="count" id="ideesLockStatus">🔒 Verrouillé</span></div>
+
+      <div id="ideesLock" class="glist" style="padding:26px 20px; text-align:center;">
+        <p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:14px;">Section protégée — entre le code pour l'afficher</p>
+        <input id="ideesPwd" type="password" placeholder="Code d'accès" style="width:200px; text-align:center; padding:10px 14px;
+          border-radius:20px; border:1px solid var(--glass-border); background:rgba(0,0,0,0.03); font-size:0.86rem;
+          color:var(--text); outline:none; margin-right:8px;">
+        <button onclick="unlockIdees()" class="btn primary" style="border:none; cursor:pointer;">Déverrouiller</button>
+        <div id="ideesError" style="color:#e0453a; font-size:0.78rem; margin-top:10px; display:none;">Code incorrect</div>
+      </div>
+
+      <div id="ideesContent" class="glist" style="display:none;">
         <div class="grow">
           <div class="gicon">🛒</div>
           <div class="gtext"><b>Iko Vente</b><span>Déclinaison du système pour les commerciaux, en plus du SAV</span></div>
@@ -381,6 +391,29 @@
         notesStatus.textContent = 'Enregistré localement';
       }, 400);
     });
+  }
+
+  // verrou simple sur la section idées — protection basique côté navigateur, pas un vrai système sécurisé
+  const IDEES_CODE = 'nord2026';
+  function unlockIdees(){
+    const val = document.getElementById('ideesPwd').value.trim();
+    if(val === IDEES_CODE){
+      document.getElementById('ideesLock').style.display = 'none';
+      document.getElementById('ideesContent').style.display = 'block';
+      document.getElementById('ideesLockStatus').textContent = '🔓 Déverrouillé';
+      sessionStorage.setItem('rsia_idees_unlocked', '1');
+    } else {
+      document.getElementById('ideesError').style.display = 'block';
+    }
+  }
+  if(sessionStorage.getItem('rsia_idees_unlocked') === '1'){
+    const lockEl = document.getElementById('ideesLock');
+    const contentEl = document.getElementById('ideesContent');
+    if(lockEl && contentEl){
+      lockEl.style.display = 'none';
+      contentEl.style.display = 'block';
+      document.getElementById('ideesLockStatus').textContent = '🔓 Déverrouillé';
+    }
   }
 </script>
 
