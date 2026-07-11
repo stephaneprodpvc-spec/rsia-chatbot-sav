@@ -187,7 +187,7 @@
     <section id="outils">
       <div class="shead"><h2>Outils</h2></div>
       <div class="tool-grid">
-        <a class="tool-card" href="https://claude.ai/new" target="_blank" style="border-color:rgba(255,106,26,0.3);">
+        <a class="tool-card" href="https://claude.ai/new" target="_blank" onclick="return openClaudeWindow(event)" style="border-color:rgba(255,106,26,0.3);">
           <div class="ic">✦</div><b>Claude</b><span>Nouvelle conversation</span></a>
         <a class="tool-card" href="https://github.com/stephaneprodpvc-spec/rsia-chatbot-sav" target="_blank">
           <div class="ic">🗂️</div><b>GitHub</b><span>rsia-chatbot-sav</span></a>
@@ -276,6 +276,21 @@
 <footer>RSIA Conseil — Centre de contrôle · Généré et maintenu avec Claude</footer>
 
 <script>
+  function openClaudeWindow(e){
+    e.preventDefault();
+    const w = 900, h = 700;
+    const left = (screen.width - w) / 2;
+    const top = (screen.height - h) / 2;
+    const popup = window.open(
+      'https://claude.ai/new',
+      'claude_window',
+      `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes,toolbar=no,menubar=no`
+    );
+    // fallback: if popup blocked or unsupported (mobile Safari), open a normal tab instead
+    if(!popup){ window.open('https://claude.ai/new', '_blank'); }
+    return false;
+  }
+</script>
   const links = document.querySelectorAll('.sb-nav a');
   const targets = [...links].map(l => document.querySelector(l.getAttribute('href')));
   const io = new IntersectionObserver((entries)=>{
