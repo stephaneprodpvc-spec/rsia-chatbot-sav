@@ -27,13 +27,6 @@ input:focus, select:focus, textarea:focus { border-color:rgba(255,107,0,0.5); }
 
 const AIRTABLE_BASE = 'appFqAT8WeX0UTudy';
 
-const PASSWORDS = {
-  "ibos65": "Ibos (65)",
-  "tarnos40": "Tarnos (40)",
-  "lescar64": "Lescar (64)",
-  "stgaudens31": "Saint-Gaudens (31)",
-};
-
 const C = {
   bg: "#0D0D0D", card: "#161616", card2: "#1a1a1a", border: "#2a2a2a",
   or: "#FF6B00", orDim: "rgba(255,107,0,0.12)", orBord: "rgba(255,107,0,0.3)",
@@ -431,11 +424,26 @@ function Login({ onLogin }) {
   const [pwd, setPwd] = React.useState("");
   const [error, setError] = React.useState(false);
   const [show, setShow] = React.useState(false);
+  const [checking, setChecking] = React.useState(false);
 
-  const tenter = () => {
-    const agence = PASSWORDS[pwd.trim()];
-    if (agence) { onLogin(agence); }
-    else { setError(true); setTimeout(() => setError(false), 2000); }
+  const tenter = async () => {
+    if (!pwd.trim() || checking) return;
+    setChecking(true);
+    try {
+      const r = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pwd.trim() }),
+      });
+      const data = await r.json();
+      if (data.ok && data.access !== 'global') { onLogin(data.access); }
+      else if (data.ok) { onLogin(data.access); }
+      else { setError(true); setTimeout(() => setError(false), 2000); }
+    } catch (e) {
+      setError(true); setTimeout(() => setError(false), 2000);
+    } finally {
+      setChecking(false);
+    }
   };
 
   return (

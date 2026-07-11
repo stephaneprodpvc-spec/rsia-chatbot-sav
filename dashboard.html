@@ -23,17 +23,6 @@ input:focus, select:focus, textarea:focus { border-color:rgba(255,107,0,0.5); }
 <script type="text/babel">
 
 const AIRTABLE_BASE = 'appFqAT8WeX0UTudy';
-const WEBHOOK = 'https://hook.eu1.make.com/bkoorc2nn457jgvmvtv6pjme5vrtz68g';
-const WEBHOOK_TECHNICIEN = 'https://hook.eu1.make.com/8idy6ft9mhf2nkr6janhjmvtjfvj6c7f';
-const WEBHOOK_CLIENT = 'https://hook.eu1.make.com/3rexafyrlvxdam58yxe1h8hkpa254k48';
-
-const PASSWORDS = {
-  "rsia2026": "global",
-  "ibos65": "Ibos (65)",
-  "tarnos40": "Tarnos (40)",
-  "lescar64": "Lescar (64)",
-  "stgaudens31": "Saint-Gaudens (31)",
-};
 
 const AGENCES = ["Ibos (65)", "Tarnos (40)", "Lescar (64)", "Saint-Gaudens (31)"];
 const PRODUITS = ["Fenêtre","Coulissant","Volet roulant","Portail","Porte de garage","Véranda","Autre"];
@@ -208,7 +197,7 @@ function ModalRdv({ agenceAccess, onClose, onSuccess }) {
           body: JSON.stringify({ fields: { Statut: 'Pris' } })
         });
       }
-      await fetch(WEBHOOK, {
+      await fetch('/api/webhook/default', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -515,14 +504,14 @@ function Dashboard({ agenceAccess, onClose }) {
 
   const renvoyerMailTechnicien = (ticketId) => {
     if (!confirm('Renvoyer le mail au technicien pour le ticket ' + ticketId + ' ?')) return;
-    fetch(WEBHOOK_TECHNICIEN + '?ticketId=' + encodeURIComponent(ticketId))
+    fetch('/api/webhook/technicien?ticketId=' + encodeURIComponent(ticketId))
       .then(() => alert('✅ Mail renvoyé au technicien !'))
       .catch(() => alert('❌ Erreur lors de l\'envoi'));
   };
 
   const renvoyerMailClient = (ticketId) => {
     if (!confirm('Renvoyer le mail de confirmation au client pour le ticket ' + ticketId + ' ?')) return;
-    fetch(WEBHOOK_CLIENT + '?ticketId=' + encodeURIComponent(ticketId))
+    fetch('/api/webhook/client?ticketId=' + encodeURIComponent(ticketId))
       .then(() => alert('✅ Mail renvoyé au client !'))
       .catch(() => alert('❌ Erreur lors de l\'envoi'));
   };
@@ -820,10 +809,24 @@ function Login({ onLogin }) {
   const [pwd, setPwd] = React.useState("");
   const [error, setError] = React.useState(false);
   const [show, setShow] = React.useState(false);
-  const tenter = () => {
-    const access = PASSWORDS[pwd.trim()];
-    if (access) { onLogin(access); }
-    else { setError(true); setTimeout(() => setError(false), 2000); }
+  const [checking, setChecking] = React.useState(false);
+  const tenter = async () => {
+    if (!pwd.trim() || checking) return;
+    setChecking(true);
+    try {
+      const r = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pwd.trim() }),
+      });
+      const data = await r.json();
+      if (data.ok) { onLogin(data.access); }
+      else { setError(true); setTimeout(() => setError(false), 2000); }
+    } catch (e) {
+      setError(true); setTimeout(() => setError(false), 2000);
+    } finally {
+      setChecking(false);
+    }
   };
   return (
     <div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:"24px"}}>
@@ -848,15 +851,6 @@ function Login({ onLogin }) {
           </div>
           {error && <div style={{fontSize:"11px",color:C.rouge,marginBottom:"12px",textAlign:"center"}}>Mot de passe incorrect</div>}
           <button onClick={tenter} style={{width:"100%",padding:"12px",background:C.or,color:"#111",border:"none",borderRadius:"10px",fontSize:"13px",fontWeight:"900",cursor:"pointer"}}>Accéder →</button>
-          <div style={{marginTop:"20px",borderTop:"1px solid "+C.border,paddingTop:"16px"}}>
-            <div style={{fontSize:"10px",color:C.muted,marginBottom:"8px",fontWeight:"700",textTransform:"uppercase",letterSpacing:"1px"}}>Accès disponibles</div>
-            {[["rsia2026","Toutes agences"],["ibos65","Ibos"],["tarnos40","Tarnos"],["lescar64","Lescar"],["stgaudens31","Saint-Gaudens"]].map(([p,l]) => (
-              <div key={p} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:"1px solid "+C.border}}>
-                <span style={{fontSize:"11px",color:C.muted}}>{l}</span>
-                <code style={{fontSize:"11px",color:C.or,background:C.orDim,padding:"1px 6px",borderRadius:"4px"}}>{p}</code>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </div>

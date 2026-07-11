@@ -224,7 +224,7 @@ async function uploadCloudinary(file) {
 }
 
 async function envoyerWebhook(data) {
-  const resp = await fetch('https://hook.eu1.make.com/bkoorc2nn457jgvmvtv6pjme5vrtz68g', {
+  const resp = await fetch('/api/webhook/default', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
   });
   if (!resp.ok) throw new Error('Erreur webhook');
