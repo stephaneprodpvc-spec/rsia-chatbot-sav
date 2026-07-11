@@ -412,7 +412,10 @@
   }
 
   const links = document.querySelectorAll('.sb-nav a');
-  const targets = [...links].map(l => document.querySelector(l.getAttribute('href')));
+  const targets = [...links].map(l => {
+    const href = l.getAttribute('href');
+    return (href && href.length > 1 && href.startsWith('#')) ? document.querySelector(href) : null;
+  });
   const io = new IntersectionObserver((entries)=>{
     entries.forEach(e=>{
       if(e.isIntersecting){
