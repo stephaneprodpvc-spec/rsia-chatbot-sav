@@ -110,7 +110,7 @@
   .footnote b{color:var(--orange);}
 
   /* ---------- TOOLS ---------- */
-  .tool-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+  .tool-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;}
   .tool-card{background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:blur(18px);
     border-radius:var(--r-md);padding:16px;text-align:center;transition:transform .2s,border-color .2s;
     box-shadow:0 8px 22px rgba(20,15,10,0.06), inset 0 1px 0 var(--glass-hi);}
@@ -160,11 +160,11 @@
     <div class="sb-group-label">Gestion</div>
     <div class="sb-nav">
       <a href="#outils"><span class="ic">⚙</span>Outils</a>
+      <a href="#idees"><span class="ic">💡</span>Idées & à venir</a>
       <a href="#projets"><span class="ic">▤</span>Projets</a>
       <a href="#suite"><span class="ic">🧩</span>Suite interne</a>
       <a href="#securite"><span class="ic">🛡</span>Sécurité</a>
       <a href="#journal"><span class="ic">🕐</span>Journal</a>
-      <a href="#idees"><span class="ic">💡</span>Idées & à venir</a>
       <a href="#notes"><span class="ic">📝</span>Notes rapides</a>
     </div>
 
@@ -179,6 +179,7 @@
       <div>
         <h1>Bonjour Stéphane 👋</h1>
         <p>4 projets en ligne · sécurité vérifiée le 11 juillet</p>
+        <a href="#notes" class="btn ghost" style="display:inline-flex; margin-top:12px;">📝 Notes rapides</a>
       </div>
       <div class="hero-stats">
         <div class="hstat"><b>4</b><span>Projets</span></div>
@@ -198,9 +199,44 @@
           <div class="ic"><img src="https://cdn.simpleicons.org/vercel/1c1b1f" style="width:26px;height:26px;" alt=""></div><b>Vercel</b><span>Déploiements</span></a>
         <a class="tool-card" href="https://airtable.com/appFqAT8WeX0UTudy" target="_blank">
           <div class="ic"><img src="https://cdn.simpleicons.org/airtable/1c1b1f" style="width:26px;height:26px;" alt=""></div><b>Airtable</b><span>Tickets & Planning</span></a>
+        <a class="tool-card" href="https://www.make.com" target="_blank">
+          <div class="ic"><img src="https://cdn.simpleicons.org/make/6D00CC" style="width:26px;height:26px;" alt=""></div><b>Make</b><span>3 scénarios actifs</span></a>
         <a class="tool-card" href="https://mail.google.com/mail/u/0/#inbox" target="_blank">
           <div class="ic"><img src="https://cdn.simpleicons.org/gmail/EA4335" style="width:26px;height:26px;" alt=""></div><b>Gmail</b><span>Boîte perso</span></a>
       </div>
+    </section>
+
+    <section id="idees">
+      <div class="shead"><h2>Idées & à venir</h2><span class="count" id="ideesLockStatus" onclick="lockIdees()" style="cursor:pointer;">🔒 Verrouillé</span></div>
+
+      <div id="ideesLock" class="glist" style="padding:26px 20px; text-align:center;">
+        <p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:14px;">Section protégée — entre le code pour l'afficher</p>
+        <input id="ideesPwd" type="password" placeholder="Code d'accès" style="width:200px; text-align:center; padding:10px 14px;
+          border-radius:20px; border:1px solid var(--glass-border); background:rgba(0,0,0,0.03); font-size:0.86rem;
+          color:var(--text); outline:none; margin-right:8px;">
+        <button onclick="unlockIdees()" class="btn primary" style="border:none; cursor:pointer;">Déverrouiller</button>
+        <div id="ideesError" style="color:#e0453a; font-size:0.78rem; margin-top:10px; display:none;">Code incorrect</div>
+      </div>
+
+      <div id="ideesContent" class="glist" style="display:none;">
+        <div class="grow">
+          <div class="gicon">🛒</div>
+          <div class="gtext"><b>Iko Vente</b><span>Déclinaison du système pour les commerciaux, en plus du SAV</span></div>
+        </div>
+        <div class="grow">
+          <div class="gicon">📐</div>
+          <div class="gtext"><b>Relevé Chantier</b><span>Outil pour conducteurs de travaux — prototype déjà livré</span></div>
+        </div>
+        <div class="grow">
+          <div class="gicon">📍</div>
+          <div class="gtext"><b>Prospection Nord — Mateco</b><span>Hames-Boucres, cible potentielle pour RSIA</span></div>
+        </div>
+        <div class="grow">
+          <div class="gicon">📍</div>
+          <div class="gtext"><b>Prospection Nord — Art & Fenêtres</b><span>Deuxième cible identifiée dans le Nord</span></div>
+        </div>
+      </div>
+      <div class="footnote">Dis à Claude d'ajouter une idée ici dès qu'elle te vient — même en 3 mots.</div>
     </section>
 
     <section id="projets">
@@ -289,39 +325,6 @@
       </div>
     </section>
 
-    <section id="idees">
-      <div class="shead"><h2>Idées & à venir</h2><span class="count" id="ideesLockStatus" onclick="lockIdees()" style="cursor:pointer;">🔒 Verrouillé</span></div>
-
-      <div id="ideesLock" class="glist" style="padding:26px 20px; text-align:center;">
-        <p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:14px;">Section protégée — entre le code pour l'afficher</p>
-        <input id="ideesPwd" type="password" placeholder="Code d'accès" style="width:200px; text-align:center; padding:10px 14px;
-          border-radius:20px; border:1px solid var(--glass-border); background:rgba(0,0,0,0.03); font-size:0.86rem;
-          color:var(--text); outline:none; margin-right:8px;">
-        <button onclick="unlockIdees()" class="btn primary" style="border:none; cursor:pointer;">Déverrouiller</button>
-        <div id="ideesError" style="color:#e0453a; font-size:0.78rem; margin-top:10px; display:none;">Code incorrect</div>
-      </div>
-
-      <div id="ideesContent" class="glist" style="display:none;">
-        <div class="grow">
-          <div class="gicon">🛒</div>
-          <div class="gtext"><b>Iko Vente</b><span>Déclinaison du système pour les commerciaux, en plus du SAV</span></div>
-        </div>
-        <div class="grow">
-          <div class="gicon">📐</div>
-          <div class="gtext"><b>Relevé Chantier</b><span>Outil pour conducteurs de travaux — prototype déjà livré</span></div>
-        </div>
-        <div class="grow">
-          <div class="gicon">📍</div>
-          <div class="gtext"><b>Prospection Nord — Mateco</b><span>Hames-Boucres, cible potentielle pour RSIA</span></div>
-        </div>
-        <div class="grow">
-          <div class="gicon">📍</div>
-          <div class="gtext"><b>Prospection Nord — Art & Fenêtres</b><span>Deuxième cible identifiée dans le Nord</span></div>
-        </div>
-      </div>
-      <div class="footnote">Dis à Claude d'ajouter une idée ici dès qu'elle te vient — même en 3 mots.</div>
-    </section>
-
     <section id="notes">
       <div class="shead"><h2>Notes rapides</h2><span class="count" id="notesStatus">Enregistré localement</span></div>
       <div class="glist" style="padding:4px;">
@@ -329,7 +332,13 @@
           style="width:100%; min-height:140px; border:none; background:transparent; resize:vertical;
           font-family:var(--body); font-size:0.88rem; color:var(--text); padding:16px; outline:none;"></textarea>
       </div>
-      <div class="footnote">Ces notes restent <b>sur cet appareil uniquement</b> (stockées dans ce navigateur) — pas synchronisées ailleurs, pas visibles par Claude.</div>
+      <div class="footnote" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+        <span>Ces notes restent <b>sur cet appareil uniquement</b> — pas synchronisées ailleurs, pas visibles par Claude.</span>
+        <div style="display:flex; gap:8px; flex-shrink:0;">
+          <button onclick="copyNotes()" class="btn ghost" style="border:none; cursor:pointer;" id="copyNotesBtn">📋 Copier</button>
+          <button onclick="downloadNotes()" class="btn ghost" style="border:none; cursor:pointer;">⬇️ Télécharger</button>
+        </div>
+      </div>
     </section>
 
 
@@ -422,6 +431,26 @@
       contentEl.style.display = 'block';
       document.getElementById('ideesLockStatus').textContent = '🔓 Déverrouillé';
     }
+  }
+
+  function copyNotes(){
+    const text = document.getElementById('notesArea').value;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copyNotesBtn');
+      const original = btn.textContent;
+      btn.textContent = '✅ Copié';
+      setTimeout(() => { btn.textContent = original; }, 1500);
+    });
+  }
+  function downloadNotes(){
+    const text = document.getElementById('notesArea').value;
+    const blob = new Blob([text], {type:'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'notes-rsia-' + new Date().toISOString().slice(0,10) + '.txt';
+    a.click();
+    URL.revokeObjectURL(url);
   }
 </script>
 
