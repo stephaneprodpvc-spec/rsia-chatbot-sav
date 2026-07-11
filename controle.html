@@ -276,6 +276,15 @@
 <footer>RSIA Conseil — Centre de contrôle · Généré et maintenu avec Claude</footer>
 
 <script>
+  // tente de repositionner cette fenêtre sur la moitié gauche de l'écran (fonctionne
+  // seulement si la fenêtre a été ouverte via un lien scripté, sinon le navigateur bloque silencieusement)
+  try{
+    const w = Math.round(screen.width / 2);
+    const h = screen.height - 80;
+    window.resizeTo(w, h);
+    window.moveTo(0, 0);
+  }catch(e){}
+
   function openClaudeWindow(e){
     e.preventDefault();
     const w = Math.round(screen.width / 2);
