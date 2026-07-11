@@ -124,7 +124,6 @@ function toggleWidget() {
 
 <script type="text/babel">
 
-const AIRTABLE_TOKEN = 'patXNwO908NNfQcQZ.6d0f58479c753d1bb828a26eccbfc4b1e10ece70b8c71e381d304ecb62990375';
 const AIRTABLE_BASE = 'appFqAT8WeX0UTudy';
 const CLOUDINARY_CLOUD = 'dvbh3llqq';
 const CLOUDINARY_PRESET = 'rsia_sav_unsigned';
@@ -249,7 +248,7 @@ function CreneauPicker({ agenceVille, onSelect }) {
     setDates([]);
     try {
       const f = encodeURIComponent('AND({Agence}="' + agenceVille + '",{Créneau}="' + c.valeur + '",{Statut}="Libre")');
-      const url = 'https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + f + '&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=60';
+      const url = '/api/airtable/' + AIRTABLE_BASE + '/Planning?filterByFormula=' + f + '&sort[0][field]=Date&sort[0][direction]=asc&maxRecords=60';
       const r = await fetch(url, { headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN } });
       const json = await r.json();
       const auPlusTot = new Date();
@@ -269,7 +268,7 @@ function CreneauPicker({ agenceVille, onSelect }) {
 
   const choisir = async (dateInfo) => {
     try {
-      await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning/' + dateInfo.ids[0], {
+      await fetch('/api/airtable/' + AIRTABLE_BASE + '/Planning/' + dateInfo.ids[0], {
         method: 'PATCH',
         headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
         body: JSON.stringify({ fields: { Statut: 'Pris' } })
@@ -366,7 +365,7 @@ function App() {
   const libererCreneauSiBesoin = async () => {
     if (!planningId) return;
     try {
-      await fetch('https://api.airtable.com/v0/' + AIRTABLE_BASE + '/Planning/' + planningId, {
+      await fetch('/api/airtable/' + AIRTABLE_BASE + '/Planning/' + planningId, {
         method: 'PATCH',
         headers: { Authorization: 'Bearer ' + AIRTABLE_TOKEN, 'Content-Type': 'application/json' },
         body: JSON.stringify({ fields: { Statut: 'Libre' } })
