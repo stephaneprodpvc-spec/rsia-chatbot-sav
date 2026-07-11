@@ -6,9 +6,13 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const AIRTABLE_TOKEN = 'patVv2Jmisci900TY.45d3f25095a992e5f8c3511eb913378e0513afa90f4c7afa3f83a786b8cf8d19';
+  const AIRTABLE_TOKEN = process.env.AIRTABLE_TOKEN;
   const AIRTABLE_BASE = 'appFqAT8WeX0UTudy';
   const AIRTABLE_TABLE = 'Tickets SAV';
+
+  if (!AIRTABLE_TOKEN) {
+    return res.status(500).json({ error: 'AIRTABLE_TOKEN manquant côté serveur.' });
+  }
 
   try {
     const body = req.body;
