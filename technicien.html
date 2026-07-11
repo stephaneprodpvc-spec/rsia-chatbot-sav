@@ -25,7 +25,6 @@ input:focus, select:focus, textarea:focus { border-color:rgba(255,107,0,0.5); }
 <div id="root"></div>
 <script type="text/babel">
 
-const AIRTABLE_TOKEN = 'patXNwO908NNfQcQZ.6d0f58479c753d1bb828a26eccbfc4b1e10ece70b8c71e381d304ecb62990375';
 const AIRTABLE_BASE = 'appFqAT8WeX0UTudy';
 
 const PASSWORDS = {
@@ -66,7 +65,7 @@ function ModalAction({ ticket, onClose, onDone }) {
         fields.Commentaire = "Annulé : " + commentaire;
         const planningId = ticket.fields?.PlanningID;
         if (planningId) {
-          await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Planning/'+planningId, {
+          await fetch('/api/airtable/'+AIRTABLE_BASE+'/Planning/'+planningId, {
             method:'PATCH',
             headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
             body:JSON.stringify({fields:{Statut:'Libre'}})
@@ -78,7 +77,7 @@ function ModalAction({ ticket, onClose, onDone }) {
         fields["Créneau"] = newCreneau + ' — ' + dateLabel;
         if (commentaire) fields.Commentaire = "Replanifié : " + commentaire;
       }
-      await fetch('https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets%20SAV/'+ticket.id, {
+      await fetch('/api/airtable/'+AIRTABLE_BASE+'/Tickets%20SAV/'+ticket.id, {
         method:'PATCH',
         headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
         body:JSON.stringify({fields})
@@ -294,7 +293,7 @@ function Technicien({ agence, onClose }) {
     setLoading(true);
     try {
       const filter = encodeURIComponent('{Agence}="'+agence+'"');
-      const url = 'https://api.airtable.com/v0/'+AIRTABLE_BASE+'/Tickets%20SAV?filterByFormula='+filter+'&sort[0][field]=Name&sort[0][direction]=desc&maxRecords=100';
+      const url = '/api/airtable/'+AIRTABLE_BASE+'/Tickets%20SAV?filterByFormula='+filter+'&sort[0][field]=Name&sort[0][direction]=desc&maxRecords=100';
       const r = await fetch(url, { headers: { Authorization: 'Bearer '+AIRTABLE_TOKEN } });
       const json = await r.json();
       setTickets(json.records||[]);
