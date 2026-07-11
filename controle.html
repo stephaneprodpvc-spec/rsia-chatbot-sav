@@ -110,7 +110,7 @@
   .footnote b{color:var(--orange);}
 
   /* ---------- TOOLS ---------- */
-  .tool-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .tool-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
   .tool-card{background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:blur(18px);
     border-radius:var(--r-md);padding:16px;text-align:center;transition:transform .2s,border-color .2s;
     box-shadow:0 8px 22px rgba(20,15,10,0.06), inset 0 1px 0 var(--glass-hi);}
@@ -138,7 +138,7 @@
     main{padding:24px 18px 40px;}
     .hero-card{grid-template-columns:1fr;text-align:left;}
     .hero-stats{flex-wrap:wrap;}
-    .tool-grid{grid-template-columns:repeat(2,1fr);}
+    .tool-grid{grid-template-columns:repeat(3,1fr);}
   }
 </style>
 </head>
@@ -159,9 +159,9 @@
 
     <div class="sb-group-label">Gestion</div>
     <div class="sb-nav">
+      <a href="#outils"><span class="ic">⚙</span>Outils</a>
       <a href="#projets"><span class="ic">▤</span>Projets</a>
       <a href="#securite"><span class="ic">🛡</span>Sécurité</a>
-      <a href="#outils"><span class="ic">⚙</span>Outils</a>
       <a href="#journal"><span class="ic">🕐</span>Journal</a>
     </div>
 
@@ -184,6 +184,22 @@
       </div>
     </div>
 
+    <section id="outils">
+      <div class="shead"><h2>Outils</h2></div>
+      <div class="tool-grid">
+        <a class="tool-card" href="https://claude.ai/new" target="_blank" style="border-color:rgba(255,106,26,0.3);">
+          <div class="ic">✦</div><b>Claude</b><span>Nouvelle conversation</span></a>
+        <a class="tool-card" href="https://github.com/stephaneprodpvc-spec/rsia-chatbot-sav" target="_blank">
+          <div class="ic">🗂️</div><b>GitHub</b><span>rsia-chatbot-sav</span></a>
+        <a class="tool-card" href="https://vercel.com/akial/rsia-chatbot-sav" target="_blank">
+          <div class="ic">▲</div><b>Vercel</b><span>Déploiements</span></a>
+        <a class="tool-card" href="https://airtable.com/appFqAT8WeX0UTudy" target="_blank">
+          <div class="ic">🗃️</div><b>Airtable</b><span>Tickets & Planning</span></a>
+        <a class="tool-card" href="https://mail.google.com/mail/u/0/#inbox" target="_blank">
+          <div class="ic">✉️</div><b>Gmail</b><span>Boîte perso</span></a>
+      </div>
+    </section>
+
     <section id="projets">
       <div class="shead"><h2>Projets</h2><span class="count">4 actifs</span></div>
       <div class="glist">
@@ -202,7 +218,7 @@
           <div class="gtext"><b>Chatbot client (Falliero)</b><span>Prise de RDV SAV, garantie, facture</span></div>
           <div class="gactions">
             <span class="badge">● Live</span>
-            <a class="btn primary" href="https://rsia-chatbot-sav-git-main-akial.vercel.app/index.html" target="_blank">Ouvrir</a>
+            <a class="btn primary" href="https://falliero-chatbot-sav-4znu.vercel.app/" target="_blank">Ouvrir</a>
           </div>
         </div>
 
@@ -242,20 +258,6 @@
           <div class="gtext"><b>api/ticket.js corrigé</b><span class="date">11 juil.</span></div></div>
       </div>
       <div class="footnote">Pour relancer une vérification complète, dis à Claude : <b>« relance l'audit sécurité de mes projets »</b></div>
-    </section>
-
-    <section id="outils">
-      <div class="shead"><h2>Outils</h2></div>
-      <div class="tool-grid">
-        <a class="tool-card" href="https://github.com/stephaneprodpvc-spec/rsia-chatbot-sav" target="_blank">
-          <div class="ic">🗂️</div><b>GitHub</b><span>rsia-chatbot-sav</span></a>
-        <a class="tool-card" href="https://vercel.com/akial/rsia-chatbot-sav" target="_blank">
-          <div class="ic">▲</div><b>Vercel</b><span>Déploiements</span></a>
-        <a class="tool-card" href="https://airtable.com/appFqAT8WeX0UTudy" target="_blank">
-          <div class="ic">🗃️</div><b>Airtable</b><span>Tickets & Planning</span></a>
-        <a class="tool-card" href="https://mail.google.com/mail/u/0/#inbox" target="_blank">
-          <div class="ic">✉️</div><b>Gmail</b><span>Boîte perso</span></a>
-      </div>
     </section>
 
     <section id="journal">
