@@ -139,6 +139,8 @@
     .hero-card{grid-template-columns:1fr;text-align:left;}
     .hero-stats{flex-wrap:wrap;}
     .tool-grid{grid-template-columns:repeat(3,1fr);}
+    #idees, #notes-launcher{}
+    div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important;}
   }
 </style>
 </head>
@@ -207,43 +209,53 @@
       </div>
     </section>
 
-    <section id="idees">
-      <div class="shead"><h2>Idées & à venir</h2>
-        <div style="display:flex; align-items:center; gap:10px;">
-          <a href="#" onclick="openNotesModal();return false;" class="btn ghost" style="border:none; cursor:pointer;">📝 Notes rapides</a>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start;">
+
+      <section id="idees" style="margin-bottom:0;">
+        <div class="shead"><h2>Idées & à venir</h2>
           <span class="count" id="ideesLockStatus" onclick="lockIdees()" style="cursor:pointer;">🔒 Verrouillé</span>
         </div>
-      </div>
 
-      <div id="ideesLock" class="glist" style="padding:26px 20px; text-align:center;">
-        <p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:14px;">Section protégée — entre le code pour l'afficher</p>
-        <input id="ideesPwd" type="password" placeholder="Code d'accès" style="width:200px; text-align:center; padding:10px 14px;
-          border-radius:20px; border:1px solid var(--glass-border); background:rgba(0,0,0,0.03); font-size:0.86rem;
-          color:var(--text); outline:none; margin-right:8px;">
-        <button onclick="unlockIdees()" class="btn primary" style="border:none; cursor:pointer;">Déverrouiller</button>
-        <div id="ideesError" style="color:#e0453a; font-size:0.78rem; margin-top:10px; display:none;">Code incorrect</div>
-      </div>
+        <div id="ideesLock" class="glist" style="padding:26px 20px; text-align:center;">
+          <p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:14px;">Section protégée — entre le code pour l'afficher</p>
+          <input id="ideesPwd" type="password" placeholder="Code d'accès" onkeydown="if(event.key==='Enter'){unlockIdees();}" style="width:200px; text-align:center; padding:10px 14px;
+            border-radius:20px; border:1px solid var(--glass-border); background:rgba(0,0,0,0.03); font-size:0.86rem;
+            color:var(--text); outline:none; margin-right:8px;">
+          <button onclick="unlockIdees()" class="btn primary" style="border:none; cursor:pointer;">Déverrouiller</button>
+          <div id="ideesError" style="color:#e0453a; font-size:0.78rem; margin-top:10px; display:none;">Code incorrect</div>
+        </div>
 
-      <div id="ideesContent" class="glist" style="display:none;">
-        <div class="grow">
-          <div class="gicon">🛒</div>
-          <div class="gtext"><b>Iko Vente</b><span>Déclinaison du système pour les commerciaux, en plus du SAV</span></div>
+        <div id="ideesContent" class="glist" style="display:none;">
+          <div class="grow">
+            <div class="gicon">🛒</div>
+            <div class="gtext"><b>Iko Vente</b><span>Déclinaison du système pour les commerciaux, en plus du SAV</span></div>
+          </div>
+          <div class="grow">
+            <div class="gicon">📐</div>
+            <div class="gtext"><b>Relevé Chantier</b><span>Outil pour conducteurs de travaux — prototype déjà livré</span></div>
+          </div>
+          <div class="grow">
+            <div class="gicon">📍</div>
+            <div class="gtext"><b>Prospection Nord — Mateco</b><span>Hames-Boucres, cible potentielle pour RSIA</span></div>
+          </div>
+          <div class="grow">
+            <div class="gicon">📍</div>
+            <div class="gtext"><b>Prospection Nord — Art & Fenêtres</b><span>Deuxième cible identifiée dans le Nord</span></div>
+          </div>
         </div>
-        <div class="grow">
-          <div class="gicon">📐</div>
-          <div class="gtext"><b>Relevé Chantier</b><span>Outil pour conducteurs de travaux — prototype déjà livré</span></div>
+        <div class="footnote">Dis à Claude d'ajouter une idée ici dès qu'elle te vient — même en 3 mots.</div>
+      </section>
+
+      <section id="notes-launcher" style="margin-bottom:0;">
+        <div class="shead"><h2>Notes rapides</h2><span class="count">Sur cet appareil</span></div>
+        <div class="glist" style="padding:26px 20px; text-align:center; min-height:180px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;">
+          <div style="font-size:2rem;">📝</div>
+          <p style="color:var(--text-dim); font-size:0.85rem; max-width:260px;">Note une idée, un rappel, un truc à ne pas oublier — ça reste sur cet appareil.</p>
+          <a href="#" onclick="openNotesModal();return false;" class="btn primary" style="border:none; cursor:pointer;">Ouvrir mes notes</a>
         </div>
-        <div class="grow">
-          <div class="gicon">📍</div>
-          <div class="gtext"><b>Prospection Nord — Mateco</b><span>Hames-Boucres, cible potentielle pour RSIA</span></div>
-        </div>
-        <div class="grow">
-          <div class="gicon">📍</div>
-          <div class="gtext"><b>Prospection Nord — Art & Fenêtres</b><span>Deuxième cible identifiée dans le Nord</span></div>
-        </div>
-      </div>
-      <div class="footnote">Dis à Claude d'ajouter une idée ici dès qu'elle te vient — même en 3 mots.</div>
-    </section>
+      </section>
+
+    </div>
 
     <section id="projets">
       <div class="shead"><h2>Projets</h2><span class="count">2 actifs</span></div>
