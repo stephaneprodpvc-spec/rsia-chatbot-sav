@@ -169,15 +169,15 @@ export class IkoWidget {
       box.setFromObject(this.model);
     } else {
       // les articulations n'incluent pas l'epaisseur du maillage autour d'elles :
-      // on ajoute une marge pour ne pas couper les extremites (tete, mains, pieds)
-      box.expandByScalar(0.35);
+      // on ajoute une petite marge pour ne pas couper les extremites (tete, mains, pieds)
+      box.expandByScalar(0.12);
     }
 
     const sphere = new THREE.Sphere();
     box.getBoundingSphere(sphere);
 
     const fovRad = (this.camera.fov * Math.PI) / 180;
-    const distance = (sphere.radius / Math.sin(fovRad / 2)) * 1.4; // 40% de marge
+    const distance = (sphere.radius / Math.sin(fovRad / 2)) * 1.08; // marge reduite, Iko doit bien remplir le cadre
 
     this.camera.position.set(sphere.center.x, sphere.center.y, sphere.center.z + distance);
     this.camera.lookAt(sphere.center);
