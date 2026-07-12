@@ -1431,6 +1431,14 @@
 
 <!-- ============ IKO — mascotte 3D (entree posee) ============ -->
 <div id="iko-container" style="position:fixed; bottom:22px; right:26px; width:200px; height:200px; z-index:900; pointer-events:none;"></div>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
 <script type="module">
   import { IkoWidget } from '/assets/iko/iko-widget.js';
 

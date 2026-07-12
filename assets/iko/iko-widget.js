@@ -17,8 +17,8 @@
  *   iko.enterTumble();   // ou iko.enterFloat();
  */
 
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { gsap } from 'https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm';
 
 export class IkoWidget {
