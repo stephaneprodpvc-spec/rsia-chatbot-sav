@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git --version)",
+      "Bash(git clone *)",
+      "Bash(awk '$1>1')",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(python3 -)",
+      "Bash(python -)",
+      "Bash(git push *)",
+      "Bash(git config *)",
+      "Bash(gh auth *)",
+      "Bash(tasklist //FI \"IMAGENAME eq git-credential-manager*\")",
+      "Bash(tasklist //FI \"IMAGENAME eq GitHub*\")",
+      "Bash(nohup git push origin main)",
+      "Bash(echo \"started with pid $!\")",
+      "Bash(sleep 5; ps aux | grep -i git; echo \"---log---\"; cat /tmp/push_output.log 2>&1)",
+      "PowerShell(Get-Process | Where-Object { $_.MainWindowTitle -ne \"\" } | Select-Object Id, ProcessName, MainWindowTitle)",
+      "mcp__claude-in-chrome__tabs_context_mcp"
+    ]
+  }
+}

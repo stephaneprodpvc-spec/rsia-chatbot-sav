@@ -506,5 +506,22 @@
   }
 </script>
 
+<!-- ============ IKO — mascotte 3D (entree capotage) ============ -->
+<div id="iko-container" style="position:fixed; bottom:22px; right:26px; width:180px; height:180px; z-index:900; pointer-events:none;"></div>
+<script type="module">
+  import { IkoWidget } from '/assets/iko/iko-widget.js';
+
+  const iko = new IkoWidget('iko-container', {
+    idleUrl: '/assets/iko/iko_idle_FINAL.glb',
+    waveUrl: '/assets/iko/iko_wave_hello.glb',
+    size: 180,
+  });
+
+  iko.init().then(() => {
+    // petit delai pour laisser la page se stabiliser avant l'entree fracassante
+    setTimeout(() => iko.enterTumble(), 500);
+  });
+</script>
+
 </body>
 </html>

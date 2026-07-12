@@ -1429,5 +1429,21 @@
   rpRender();
 </script>
 
+<!-- ============ IKO — mascotte 3D (entree posee) ============ -->
+<div id="iko-container" style="position:fixed; bottom:22px; right:26px; width:200px; height:200px; z-index:900; pointer-events:none;"></div>
+<script type="module">
+  import { IkoWidget } from '/assets/iko/iko-widget.js';
+
+  const iko = new IkoWidget('iko-container', {
+    idleUrl: '/assets/iko/iko_idle_FINAL.glb',
+    waveUrl: '/assets/iko/iko_wave_hello.glb',
+    size: 200,
+  });
+
+  iko.init().then(() => {
+    setTimeout(() => iko.enterFloat(), 400);
+  });
+</script>
+
 </body>
 </html>
