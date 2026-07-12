@@ -507,7 +507,7 @@
 </script>
 
 <!-- ============ IKO — mascotte 3D (entree capotage) ============ -->
-<div id="iko-container" style="position:fixed; bottom:22px; right:26px; width:180px; height:180px; z-index:900; pointer-events:none;"></div>
+<div id="iko-container" style="position:fixed; bottom:0px; right:16px; width:420px; height:420px; z-index:900; pointer-events:none;"></div>
 <script type="importmap">
 {
   "imports": {
@@ -522,7 +522,7 @@
   const iko = new IkoWidget('iko-container', {
     idleUrl: '/assets/iko/iko_idle_FINAL.glb',
     waveUrl: '/assets/iko/iko_wave_hello.glb',
-    size: 180,
+    size: 420,
   });
 
   iko.init().then(() => {

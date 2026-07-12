@@ -1430,7 +1430,7 @@
 </script>
 
 <!-- ============ IKO — mascotte 3D (entree posee) ============ -->
-<div id="iko-container" style="position:fixed; bottom:22px; right:26px; width:200px; height:200px; z-index:900; pointer-events:none;"></div>
+<div id="iko-container" style="position:fixed; bottom:0px; right:16px; width:440px; height:440px; z-index:900; pointer-events:none;"></div>
 <script type="importmap">
 {
   "imports": {
@@ -1445,7 +1445,7 @@
   const iko = new IkoWidget('iko-container', {
     idleUrl: '/assets/iko/iko_idle_FINAL.glb',
     waveUrl: '/assets/iko/iko_wave_hello.glb',
-    size: 200,
+    size: 440,
   });
 
   iko.init().then(() => {

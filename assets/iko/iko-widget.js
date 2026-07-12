@@ -119,19 +119,8 @@ export class IkoWidget {
             });
           }
         });
-        // fallback : si aucun materiau "visiere" detecte, on prend tous les materiaux
-        if (this.emissiveMaterials.length === 0) {
-          this.model.traverse((child) => {
-            if (child.isMesh && child.material) {
-              const mats = Array.isArray(child.material) ? child.material : [child.material];
-              mats.forEach((m) => {
-                m.emissive = m.emissive || new THREE.Color(0xffb066);
-                m.emissiveIntensity = 0.08;
-                this.emissiveMaterials.push(m);
-              });
-            }
-          });
-        }
+        // (pas de fallback "tout le robot brille" : si aucun materiau visiere
+        // n'est identifie, on n'applique simplement pas d'effet de pulse)
 
         this.mixer = new THREE.AnimationMixer(this.model);
         if (gltf.animations && gltf.animations.length) {
