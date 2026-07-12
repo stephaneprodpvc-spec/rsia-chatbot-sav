@@ -216,7 +216,7 @@ export class IkoWidget {
   _playWaveThenIdle() {
     if (!this.opts.waveUrl || !this.mixer) return;
     // charge et joue l'animation de salut une fois, puis revient a l'idle
-    const loader = new GLTFLoader();
+    const loader = makeLoader();
     loader.load(this.opts.waveUrl, (gltf) => {
       if (!gltf.animations || !gltf.animations.length) return;
       const waveClip = gltf.animations[0];
