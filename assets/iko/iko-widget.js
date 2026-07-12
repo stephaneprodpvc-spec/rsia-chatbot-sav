@@ -294,7 +294,10 @@ export class IkoWidget {
       .to(body, { x: 3, y: -2, duration: 0.04 })
       .to(body, { x: -3, y: 2, duration: 0.04 })
       .to(body, { x: 2, y: -1, duration: 0.04 })
-      .to(body, { x: 0, y: 0, duration: 0.04 });
+      .to(body, { x: 0, y: 0, duration: 0.04 })
+      // important : une transform CSS laissee sur le body (meme a 0,0) change le
+      // repere des elements position:fixed comme le widget Iko -> on la retire.
+      .set(body, { clearProps: 'transform' });
   }
 
   /* ---------------------------------------------------------------
