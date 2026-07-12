@@ -251,7 +251,7 @@
         <div class="glist" style="padding:26px 20px; text-align:center; min-height:180px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;">
           <div style="font-size:2rem;">📝</div>
           <p style="color:var(--text-dim); font-size:0.85rem; max-width:260px;">Note une idée, un rappel, un truc à ne pas oublier — ça reste sur cet appareil.</p>
-          <a href="#" onclick="openNotesModal();return false;" class="btn primary" style="border:none; cursor:pointer;">Ouvrir mes notes</a>
+          <a id="btn-ouvrir-notes" href="#" onclick="openNotesModal();return false;" class="btn primary" style="border:none; cursor:pointer;">Ouvrir mes notes</a>
         </div>
       </section>
 
@@ -527,7 +527,11 @@
 
   iko.init().then(() => {
     // petit delai pour laisser la page se stabiliser avant l'entree fracassante
-    setTimeout(() => iko.enterTumble(), 500);
+    setTimeout(() => {
+      iko.enterTumble();
+      // demo : Iko va cliquer sur "Ouvrir mes notes" quelques secondes apres son arrivee
+      setTimeout(() => iko.walkToAndClick('#btn-ouvrir-notes'), 3500);
+    }, 500);
   });
 </script>
 

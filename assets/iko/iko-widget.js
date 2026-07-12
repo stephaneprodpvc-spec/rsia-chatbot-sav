@@ -20,6 +20,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { gsap } from 'https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm';
 
 function makeLoader() {
@@ -83,15 +84,23 @@ export class IkoWidget {
     this.renderer.setSize(size, size);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.15;
     this.container.appendChild(this.renderer.domElement);
 
-    // eclairage studio simple
-    const hemi = new THREE.HemisphereLight(0xfff2e0, 0x201018, 1.1);
+    // environnement (reflets) : indispensable pour qu'un materiau "vinyle brillant"
+    // (metalness/roughness) rende correctement -- sans ca les PBR paraissent ternes.
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    pmrem.dispose();
+
+    // eclairage studio complementaire
+    const hemi = new THREE.HemisphereLight(0xfff2e0, 0x201018, 0.7);
     this.scene.add(hemi);
-    const key = new THREE.DirectionalLight(0xffffff, 1.6);
+    const key = new THREE.DirectionalLight(0xffffff, 1.8);
     key.position.set(2, 3, 3);
     this.scene.add(key);
-    const rim = new THREE.DirectionalLight(0xff9142, 0.8);
+    const rim = new THREE.DirectionalLight(0xff9142, 0.9);
     rim.position.set(-2, 1, -2);
     this.scene.add(rim);
   }
@@ -243,6 +252,41 @@ export class IkoWidget {
         this._playWaveThenIdle();
       },
     });
+    return tl;
+  }
+
+  /**
+   * Fait deplacer Iko a l'ecran jusqu'a un element cliquable, joue un petit
+   * geste, declenche le vrai clic dessus, puis revient a sa position de repos.
+   * Ex: iko.walkToAndClick('#btn-ouvrir-notes')
+   */
+  walkToAndClick(selector) {
+    const target = document.querySelector(selector);
+    if (!target) {
+      console.warn('IkoWidget: cible introuvable pour walkToAndClick:', selector);
+      return;
+    }
+
+    const targetRect = target.getBoundingClientRect();
+    const containerRect = this.container.getBoundingClientRect();
+    const currentX = Number(gsap.getProperty(this.container, 'x')) || 0;
+    const currentY = Number(gsap.getProperty(this.container, 'y')) || 0;
+
+    // vise le bord gauche du bouton, a sa hauteur
+    const destX = currentX + (targetRect.left - containerRect.left) - containerRect.width * 0.32;
+    const destY = currentY + (targetRect.top + targetRect.height / 2 - containerRect.top) - containerRect.height * 0.5;
+
+    const tl = gsap.timeline();
+    tl.to(this.container, { x: destX, y: destY, duration: 1.1, ease: 'power2.inOut' });
+    tl.call(() => {
+      this._pulseVisor(400);
+      gsap.timeline()
+        .to(this.container, { scale: 0.92, duration: 0.1, ease: 'power1.out' })
+        .to(this.container, { scale: 1.05, duration: 0.12, ease: 'power1.out' })
+        .to(this.container, { scale: 1, duration: 0.1 });
+      target.click();
+    });
+    tl.to(this.container, { x: currentX, y: currentY, duration: 1.1, ease: 'power2.inOut', delay: 0.6 });
     return tl;
   }
 
