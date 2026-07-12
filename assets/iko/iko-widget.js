@@ -77,8 +77,7 @@ export class IkoWidget {
     this.scene = new THREE.Scene();
 
     this.camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
-    this.camera.position.set(0, 1.1, 4.2);
-    this.camera.lookAt(0, 0.6, 0);
+    this.camera.position.set(0, 1, 4.2); // recalibre dynamiquement une fois le modele charge (voir _frameCamera)
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setSize(size, size);
@@ -103,17 +102,20 @@ export class IkoWidget {
       loader.load(url, (gltf) => {
         this.model = gltf.scene;
 
-        // recentre + met a l'echelle pour remplir le cadre proprement
+        // recentre + met a l'echelle sur la HAUTEUR (plus fiable que la dimension max
+        // pour un mascot large/trapu, sinon la camera se retrouve cadree n'importe comment)
         const box = new THREE.Box3().setFromObject(this.model);
         const sizeVec = new THREE.Vector3();
         box.getSize(sizeVec);
         const center = new THREE.Vector3();
         box.getCenter(center);
-        const scale = 2.2 / Math.max(sizeVec.x, sizeVec.y, sizeVec.z);
+        const targetHeight = 1.6;
+        const scale = targetHeight / sizeVec.y;
         this.model.scale.setScalar(scale);
         this.model.position.set(-center.x * scale, -box.min.y * scale, -center.z * scale);
 
         this.scene.add(this.model);
+        this._frameCamera(sizeVec, scale);
 
         // reperage des materiaux "visiere" pour le pulse audio (fallback : tous)
         this.model.traverse((child) => {
@@ -151,6 +153,14 @@ export class IkoWidget {
         resolve(gltf);
       }, undefined, reject);
     });
+  }
+
+  /** Recadre la camera en fonction de la taille reelle du modele charge. */
+  _frameCamera(sizeVec, scale) {
+    const modelHeight = sizeVec.y * scale; // = targetHeight, mais calcule proprement
+    const modelHalfWidth = (Math.max(sizeVec.x, sizeVec.z) * scale) / 2;
+    this.camera.position.set(0, modelHeight * 0.55, modelHeight * 2.2 + modelHalfWidth);
+    this.camera.lookAt(0, modelHeight * 0.5, 0);
   }
 
   _animate() {
