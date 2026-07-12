@@ -19,7 +19,14 @@
 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { gsap } from 'https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm';
+
+function makeLoader() {
+  const loader = new GLTFLoader();
+  loader.setMeshoptDecoder(MeshoptDecoder);
+  return loader;
+}
 
 export class IkoWidget {
   constructor(containerId, options = {}) {
@@ -92,7 +99,7 @@ export class IkoWidget {
 
   _loadModel(url) {
     return new Promise((resolve, reject) => {
-      const loader = new GLTFLoader();
+      const loader = makeLoader();
       loader.load(url, (gltf) => {
         this.model = gltf.scene;
 
