@@ -102,20 +102,8 @@ export class IkoWidget {
       loader.load(url, (gltf) => {
         this.model = gltf.scene;
 
-        // recentre + met a l'echelle sur la HAUTEUR (plus fiable que la dimension max
-        // pour un mascot large/trapu, sinon la camera se retrouve cadree n'importe comment)
-        const box = new THREE.Box3().setFromObject(this.model);
-        const sizeVec = new THREE.Vector3();
-        box.getSize(sizeVec);
-        const center = new THREE.Vector3();
-        box.getCenter(center);
-        const targetHeight = 1.6;
-        const scale = targetHeight / sizeVec.y;
-        this.model.scale.setScalar(scale);
-        this.model.position.set(-center.x * scale, -box.min.y * scale, -center.z * scale);
-
         this.scene.add(this.model);
-        this._frameCamera(sizeVec, scale);
+        this._frameCamera();
 
         // reperage des materiaux "visiere" pour le pulse audio (fallback : tous)
         this.model.traverse((child) => {
@@ -155,12 +143,24 @@ export class IkoWidget {
     });
   }
 
-  /** Recadre la camera en fonction de la taille reelle du modele charge. */
-  _frameCamera(sizeVec, scale) {
-    const modelHeight = sizeVec.y * scale; // = targetHeight, mais calcule proprement
-    const modelHalfWidth = (Math.max(sizeVec.x, sizeVec.z) * scale) / 2;
-    this.camera.position.set(0, modelHeight * 0.55, modelHeight * 2.2 + modelHalfWidth);
-    this.camera.lookAt(0, modelHeight * 0.5, 0);
+  /**
+   * Recadre la camera pour que le modele entier tienne dans le champ de vision,
+   * quelle que soit sa taille/orientation native (calcul par sphere englobante,
+   * fiable contrairement a des distances/echelles devinees a la main).
+   */
+  _frameCamera() {
+    const box = new THREE.Box3().setFromObject(this.model);
+    const sphere = new THREE.Sphere();
+    box.getBoundingSphere(sphere);
+
+    const fovRad = (this.camera.fov * Math.PI) / 180;
+    const distance = (sphere.radius / Math.sin(fovRad / 2)) * 1.4; // 40% de marge
+
+    this.camera.position.set(sphere.center.x, sphere.center.y, sphere.center.z + distance);
+    this.camera.lookAt(sphere.center);
+    this.camera.near = Math.max(0.01, distance - sphere.radius * 3);
+    this.camera.far = distance + sphere.radius * 4;
+    this.camera.updateProjectionMatrix();
   }
 
   _animate() {
