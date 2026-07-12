@@ -184,6 +184,17 @@ export class IkoWidget {
   /** Entree "capotage" : tumbling + impact + secousse d'ecran. Reserve a controle.html */
   enterTumble() {
     const el = this.container;
+
+    // MODE DEBUG TEMPORAIRE : entree instantanee, sans rotation/culbute, pour
+    // verifier isolement le cadrage camera avant de remettre l'effet d'impact.
+    const DEBUG_STATIC = true;
+    if (DEBUG_STATIC) {
+      gsap.set(el, { opacity: 1, x: 0, y: 0, rotation: 0, scale: 1 });
+      this._pulseVisor(650);
+      this._playWaveThenIdle();
+      return;
+    }
+
     gsap.set(el, { opacity: 1, x: -window.innerWidth * 0.6, y: -260, rotation: -540, scale: 0.7 });
 
     const tl = gsap.timeline();
