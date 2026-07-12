@@ -144,12 +144,35 @@ export class IkoWidget {
   }
 
   /**
-   * Recadre la camera pour que le modele entier tienne dans le champ de vision,
-   * quelle que soit sa taille/orientation native (calcul par sphere englobante,
-   * fiable contrairement a des distances/echelles devinees a la main).
+   * Recadre la camera pour que le modele entier tienne dans le champ de vision.
+   * Box3.setFromObject() se base sur la geometrie au repos (bind pose), qui peut
+   * mal representer un personnage rigge/anime -> on mesure plutot la position
+   * reelle (world space) de chaque articulation du squelette, methode fiable
+   * quelle que soit la pose. Fallback sur la geometrie si pas de squelette trouve.
    */
   _frameCamera() {
-    const box = new THREE.Box3().setFromObject(this.model);
+    const box = new THREE.Box3();
+    let foundBones = false;
+
+    this.model.traverse((child) => {
+      if (child.isSkinnedMesh && child.skeleton && child.skeleton.bones.length) {
+        foundBones = true;
+        const pos = new THREE.Vector3();
+        child.skeleton.bones.forEach((bone) => {
+          bone.getWorldPosition(pos);
+          box.expandByPoint(pos);
+        });
+      }
+    });
+
+    if (!foundBones || box.isEmpty()) {
+      box.setFromObject(this.model);
+    } else {
+      // les articulations n'incluent pas l'epaisseur du maillage autour d'elles :
+      // on ajoute une marge pour ne pas couper les extremites (tete, mains, pieds)
+      box.expandByScalar(0.35);
+    }
+
     const sphere = new THREE.Sphere();
     box.getBoundingSphere(sphere);
 
