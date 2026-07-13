@@ -143,9 +143,28 @@ const clipsEl = document.getElementById('clips');
 let mixer = null;
 const actions = [];
 
-new GLTFLoader().load(
-  './stef.glb',
-  (gltf) => {
+const candidates = ['./stef.glb', './stef-anime.glb'];
+let candidateIdx = 0;
+const loader = new GLTFLoader();
+
+function tryLoad() {
+  loader.load(candidates[candidateIdx], onLoaded, onProgress, onError);
+}
+
+function onError(err) {
+  console.warn('Echec de chargement:', candidates[candidateIdx], err);
+  candidateIdx++;
+  if (candidateIdx < candidates.length) {
+    tryLoad();
+  } else {
+    loaderEl.querySelector('p').textContent = 'Aucun modèle trouvé (stef.glb ou stef-anime.glb) à côté de cette page';
+  }
+}
+
+function onProgress(xhr) { if (xhr.total) fill.style.width = (xhr.loaded / xhr.total * 100) + '%'; }
+
+function onLoaded(gltf) {
+  {
     const model = gltf.scene;
     // Centrage + mise a l echelle automatique
     const box = new THREE.Box3().setFromObject(model);
@@ -185,13 +204,10 @@ new GLTFLoader().load(
     }
 
     loaderEl.classList.add('done');
-  },
-  (xhr) => { if (xhr.total) fill.style.width = (xhr.loaded / xhr.total * 100) + '%'; },
-  (err) => {
-    loaderEl.querySelector('p').textContent = 'Fichier stef.glb introuvable — vérifier qu\'il est bien à côté de cette page';
-    console.error(err);
   }
-);
+}
+
+tryLoad();
 
 const clock = new THREE.Clock();
 function animate() {
