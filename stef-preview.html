@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Stef — Mascotte Falliero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #16233F;
+    --navy-deep: #0D1526;
+    --yellow: #E5B531;
+    --white: #F5F5F2;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; background: var(--navy-deep); font-family: 'Outfit', sans-serif; }
+  #scene { position: fixed; inset: 0; touch-action: none; }
+
+  header {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; align-items: baseline; gap: 10px;
+    padding: 18px 22px; pointer-events: none; z-index: 10;
+  }
+  .brand { color: var(--white); font-weight: 800; font-size: 18px; letter-spacing: 0.02em; }
+  .brand .roof { color: var(--yellow); }
+  .tag { color: var(--yellow); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; }
+
+  #hint {
+    position: fixed; bottom: 16px; left: 0; right: 0;
+    text-align: center; color: rgba(245,245,242,0.45);
+    font-size: 12px; letter-spacing: 0.06em; pointer-events: none; z-index: 10;
+  }
+
+  #clips {
+    position: fixed; bottom: 44px; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;
+    padding: 0 16px; z-index: 10;
+  }
+  #clips button {
+    font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600;
+    padding: 8px 16px; border-radius: 999px; cursor: pointer;
+    background: rgba(22,35,63,0.85); color: var(--white);
+    border: 1px solid rgba(229,181,49,0.35);
+    transition: background 0.2s, border-color 0.2s;
+  }
+  #clips button.active { background: var(--yellow); color: var(--navy); border-color: var(--yellow); }
+
+  #loader {
+    position: fixed; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 18px;
+    background: var(--navy-deep); z-index: 20; transition: opacity 0.5s;
+  }
+  #loader.done { opacity: 0; pointer-events: none; }
+  .roofmark { width: 54px; height: 34px; }
+  #bar { width: 180px; height: 3px; background: rgba(245,245,242,0.12); border-radius: 2px; overflow: hidden; }
+  #fill { height: 100%; width: 0%; background: var(--yellow); transition: width 0.2s; }
+  #loader p { color: rgba(245,245,242,0.5); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
+  @media (prefers-reduced-motion: reduce) { #fill { transition: none; } }
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+
+<header>
+  <span class="brand">Fall<span class="roof">i</span>ero</span>
+  <span class="tag">Stef · Assistant SAV</span>
+</header>
+
+<div id="clips"></div>
+<div id="hint">Glisser pour tourner · Pincer pour zoomer</div>
+
+<div id="loader">
+  <svg class="roofmark" viewBox="0 0 54 34" fill="none">
+    <path d="M2 32 L20 6 L32 22 L38 14 L52 32" stroke="#E5B531" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <div id="bar"><div id="fill"></div></div>
+  <p>Chargement de Stef</p>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0D1526);
+scene.fog = new THREE.Fog(0x0D1526, 10, 22);
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 1.4;
+controls.maxPolarAngle = Math.PI * 0.55;
+
+// Scene : socle + anneau Falliero
+const ground = new THREE.Mesh(
+  new THREE.CircleGeometry(12, 48),
+  new THREE.MeshStandardMaterial({ color: 0x101B33, roughness: 0.95 })
+);
+ground.rotation.x = -Math.PI / 2;
+scene.add(ground);
+
+const ring = new THREE.Mesh(
+  new THREE.TorusGeometry(1, 0.015, 8, 72),
+  new THREE.MeshStandardMaterial({ color: 0xE5B531, emissive: 0xE5B531, emissiveIntensity: 0.9 })
+);
+ring.rotation.x = -Math.PI / 2;
+ring.position.y = 0.01;
+scene.add(ring);
+
+// Lumieres
+scene.add(new THREE.HemisphereLight(0x8FA3C8, 0x1A2438, 1.1));
+const key = new THREE.DirectionalLight(0xFFF2DC, 1.6);
+key.position.set(3, 6, 4);
+scene.add(key);
+const rim = new THREE.PointLight(0xE5B531, 12, 20);
+rim.position.set(-3.5, 2.5, -3);
+scene.add(rim);
+
+// Chargement du modele
+const fill = document.getElementById('fill');
+const loaderEl = document.getElementById('loader');
+const clipsEl = document.getElementById('clips');
+let mixer = null;
+const actions = [];
+
+new GLTFLoader().load(
+  './stef.glb',
+  (gltf) => {
+    const model = gltf.scene;
+    // Centrage + mise a l echelle automatique
+    const box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const scale = 2.1 / size.y;
+    model.scale.setScalar(scale);
+    box.setFromObject(model);
+    box.getCenter(center);
+    model.position.x -= center.x;
+    model.position.z -= center.z;
+    model.position.y -= box.min.y;
+    scene.add(model);
+
+    ring.scale.setScalar(Math.max(size.x, size.z) * scale * 0.8);
+
+    camera.position.set(0, size.y * scale * 0.62, size.y * scale * 1.55);
+    controls.target.set(0, size.y * scale * 0.5, 0);
+
+    // Animations : un bouton par clip si le fichier en contient
+    if (gltf.animations.length > 0) {
+      mixer = new THREE.AnimationMixer(model);
+      gltf.animations.forEach((clip, i) => {
+        const action = mixer.clipAction(clip);
+        actions.push(action);
+        const btn = document.createElement('button');
+        btn.textContent = clip.name || `Clip ${i + 1}`;
+        btn.addEventListener('click', () => {
+          actions.forEach(a => a.fadeOut(0.3));
+          action.reset().fadeIn(0.3).play();
+          clipsEl.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        });
+        clipsEl.appendChild(btn);
+        if (i === 0) { action.play(); btn.classList.add('active'); }
+      });
+    }
+
+    loaderEl.classList.add('done');
+  },
+  (xhr) => { if (xhr.total) fill.style.width = (xhr.loaded / xhr.total * 100) + '%'; },
+  (err) => {
+    loaderEl.querySelector('p').textContent = 'Fichier stef.glb introuvable — vérifier qu\'il est bien à côté de cette page';
+    console.error(err);
+  }
+);
+
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = clock.getDelta();
+  if (mixer) mixer.update(dt);
+  ring.material.emissiveIntensity = 0.7 + Math.sin(clock.elapsedTime * 2.5) * 0.25;
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
