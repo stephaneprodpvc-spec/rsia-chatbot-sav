@@ -142,6 +142,18 @@
     #idees, #notes-launcher{}
     div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important;}
   }
+
+  .tool-orbit{position:relative;width:380px;height:380px;max-width:100%;margin:26px auto 14px;}
+  .orbit-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:84px;height:84px;border-radius:50%;border:none;cursor:pointer;background:radial-gradient(circle at 32% 28%, #fff 0%, var(--orange-soft) 40%, var(--orange) 78%, #b34400 100%);box-shadow:0 8px 26px rgba(255,106,26,0.4), inset -5px -5px 10px rgba(0,0,0,0.2), inset 4px 4px 8px rgba(255,255,255,0.55);color:#fff;display:flex;align-items:center;justify-content:center;transition:transform .4s cubic-bezier(.34,1.56,.64,1);z-index:2;}
+  .orbit-center:hover{transform:translate(-50%,-50%) scale(1.08);}
+  .tool-orbit.open .orbit-center{transform:translate(-50%,-50%) rotate(45deg);}
+  .orbit-center-ic{font-size:2.1rem;line-height:1;display:block;font-weight:300;}
+  .tool-orbit .tool-card{position:absolute;top:50%;left:50%;width:78px;transform:translate(-50%,-50%) scale(0);opacity:0;pointer-events:none;transition:transform .5s cubic-bezier(.34,1.56,.64,1), opacity .3s ease;text-align:center;background:none;border:none;box-shadow:none;padding:0;backdrop-filter:none;}
+  .tool-orbit.open .tool-card{--angle:calc(var(--i) * (360deg / 8));transform:translate(-50%,-50%) rotate(var(--angle)) translate(150px) rotate(calc(var(--angle) * -1)) scale(1);opacity:1;pointer-events:auto;transition-delay:calc(var(--i) * 0.045s);}
+  .tool-orbit.open .tool-card:hover{transform:translate(-50%,-50%) rotate(var(--angle)) translate(150px) rotate(calc(var(--angle) * -1)) scale(1.16);}
+  .tool-orbit .tool-card b{display:block;margin-top:6px;font-size:0.66rem;font-weight:600;color:var(--text);}
+  .tool-orbit .tool-card span{display:none;}
+  @media (max-width:520px){.tool-orbit{width:300px;height:300px;} .tool-orbit.open .tool-card{transform:translate(-50%,-50%) rotate(var(--angle)) translate(115px) rotate(calc(var(--angle) * -1)) scale(1);} .tool-orbit.open .tool-card:hover{transform:translate(-50%,-50%) rotate(var(--angle)) translate(115px) rotate(calc(var(--angle) * -1)) scale(1.16);}}
 </style>
 </head>
 <body>
@@ -190,23 +202,16 @@
 
     <section id="outils">
       <div class="shead"><h2>Outils</h2></div>
-      <div class="tool-grid">
-        <a class="tool-card" href="https://claude.ai/new" target="_blank" onclick="return openClaudeWindow(event)" style="border-color:rgba(255,106,26,0.3);">
-          <div class="ic"><img src="https://cdn.simpleicons.org/anthropic/FF6A1A" style="width:26px;height:26px;" alt=""></div><b>Claude</b><span>Nouvelle conversation</span></a>
-        <a class="tool-card" href="https://claude.ai" target="_blank" style="border-color:rgba(255,106,26,0.3);">
-          <div class="ic"><img src="https://cdn.simpleicons.org/anthropic/FF9142" style="width:26px;height:26px;" alt=""></div><b>Cowork</b><span>Tâches autonomes</span></a>
-        <a class="tool-card" href="https://github.com/stephaneprodpvc-spec/rsia-chatbot-sav" target="_blank">
-          <div class="ic"><img src="https://cdn.simpleicons.org/github/1c1b1f" style="width:26px;height:26px;" alt=""></div><b>GitHub</b><span>rsia-chatbot-sav</span></a>
-        <a class="tool-card" href="https://vercel.com/akial/rsia-chatbot-sav" target="_blank">
-          <div class="ic"><img src="https://cdn.simpleicons.org/vercel/1c1b1f" style="width:26px;height:26px;" alt=""></div><b>Vercel</b><span>Déploiements</span></a>
-        <a class="tool-card" href="https://airtable.com/appFqAT8WeX0UTudy" target="_blank">
-          <div class="ic"><img src="https://cdn.simpleicons.org/airtable/1c1b1f" style="width:26px;height:26px;" alt=""></div><b>Airtable</b><span>Tickets & Planning</span></a>
-        <a class="tool-card" href="https://www.make.com" target="_blank">
-          <div class="ic"><img src="https://cdn.simpleicons.org/make/6D00CC" style="width:26px;height:26px;" alt=""></div><b>Make</b><span>3 scénarios actifs</span></a>
-        <a class="tool-card" href="https://mail.google.com/mail/u/0/#inbox" target="_blank">
-          <div class="ic"><img src="https://cdn.simpleicons.org/gmail/EA4335" style="width:26px;height:26px;" alt=""></div><b>Gmail</b><span>Boîte perso</span></a>
-        <a class="tool-card" href="https://www.meshy.ai" target="_blank">
-          <div class="ic"><img src="https://www.google.com/s2/favicons?domain=meshy.ai&sz=64" style="width:26px;height:26px;" alt=""></div><b>Meshy</b><span>Génération 3D</span></a>
+      <div class="tool-orbit" id="toolOrbit">
+        <button type="button" class="orbit-center" id="orbitToggle" aria-label="Ouvrir les outils"><span class="orbit-center-ic">+</span></button>
+        <a class="tool-card" style="--i:0" href="https://claude.ai/new" target="_blank" onclick="return openClaudeWindow(event)" title="Nouvelle conversation"><div class="ic"><img src="https://cdn.simpleicons.org/anthropic/FF6A1A" style="width:26px;height:26px;" alt=""></div><b>Claude</b></a>
+        <a class="tool-card" style="--i:1" href="https://claude.ai" target="_blank" title="Tâches autonomes"><div class="ic"><img src="https://cdn.simpleicons.org/anthropic/FF9142" style="width:26px;height:26px;" alt=""></div><b>Cowork</b></a>
+        <a class="tool-card" style="--i:2" href="https://github.com/stephaneprodpvc-spec/rsia-chatbot-sav" target="_blank" title="rsia-chatbot-sav"><div class="ic"><img src="https://cdn.simpleicons.org/github/1c1b1f" style="width:26px;height:26px;" alt=""></div><b>GitHub</b></a>
+        <a class="tool-card" style="--i:3" href="https://vercel.com/akial/rsia-chatbot-sav" target="_blank" title="Déploiements"><div class="ic"><img src="https://cdn.simpleicons.org/vercel/1c1b1f" style="width:26px;height:26px;" alt=""></div><b>Vercel</b></a>
+        <a class="tool-card" style="--i:4" href="https://airtable.com/appFqAT8WeX0UTudy" target="_blank" title="Tickets & Planning"><div class="ic"><img src="https://cdn.simpleicons.org/airtable/1c1b1f" style="width:26px;height:26px;" alt=""></div><b>Airtable</b></a>
+        <a class="tool-card" style="--i:5" href="https://www.make.com" target="_blank" title="3 scénarios actifs"><div class="ic"><img src="https://cdn.simpleicons.org/make/6D00CC" style="width:26px;height:26px;" alt=""></div><b>Make</b></a>
+        <a class="tool-card" style="--i:6" href="https://mail.google.com/mail/u/0/#inbox" target="_blank" title="Boîte perso"><div class="ic"><img src="https://cdn.simpleicons.org/gmail/EA4335" style="width:26px;height:26px;" alt=""></div><b>Gmail</b></a>
+        <a class="tool-card" style="--i:7" href="https://www.meshy.ai" target="_blank" title="Génération 3D"><div class="ic"><img src="https://www.google.com/s2/favicons?domain=meshy.ai&sz=64" style="width:26px;height:26px;" alt=""></div><b>Meshy</b></a>
       </div>
     </section>
 
@@ -534,5 +539,14 @@
   });
 </script>
 
+<script>
+(function(){
+  const orbit = document.getElementById("toolOrbit");
+  const toggle = document.getElementById("orbitToggle");
+  if(!orbit || !toggle) return;
+  toggle.addEventListener("click", function(e){ e.stopPropagation(); orbit.classList.toggle("open"); });
+  document.addEventListener("click", function(e){ if(orbit.classList.contains("open") && !orbit.contains(e.target)){ orbit.classList.remove("open"); } });
+})();
+</script>
 </body>
 </html>
