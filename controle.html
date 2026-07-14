@@ -154,6 +154,10 @@
   .tool-orbit .tool-card b{display:block;margin-top:6px;font-size:0.66rem;font-weight:600;color:var(--text);}
   .tool-orbit .tool-card span{display:none;}
   @media (max-width:520px){.tool-orbit{width:300px;height:300px;} .tool-orbit.open .tool-card{transform:translate(-50%,-50%) rotate(var(--angle)) translate(115px) rotate(calc(var(--angle) * -1)) scale(1);} .tool-orbit.open .tool-card:hover{transform:translate(-50%,-50%) rotate(var(--angle)) translate(115px) rotate(calc(var(--angle) * -1)) scale(1.16);}}
+
+  .gsublinks{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+  .gsublinks a{font-size:0.72rem;font-weight:600;color:var(--orange);background:rgba(255,106,26,0.08);border:1px solid rgba(255,106,26,0.25);border-radius:20px;padding:4px 12px;text-decoration:none;transition:background .2s ease, transform .2s ease;}
+  .gsublinks a:hover{background:rgba(255,106,26,0.18);transform:translateY(-1px);}
 </style>
 </head>
 <body>
@@ -278,7 +282,7 @@
 
         <div class="grow">
           <div class="gicon">💬</div>
-          <div class="gtext"><b>Chatbot client (Falliero)</b><span>Prise de RDV SAV, garantie, facture</span></div>
+          <div class="gtext"><b>Chatbot client (Falliero)</b><span>Prise de RDV SAV, garantie, facture</span><div class="gsublinks"><a href="https://falliero-chatbot-sav-4znu.vercel.app/dashboard.html" target="_blank">📊 Dashboard</a><a href="https://falliero-chatbot-sav-4znu.vercel.app/technicien.html" target="_blank">🔧 Technicien</a></div></div>
           <div class="gactions">
             <span class="badge">● Live</span>
             <a class="btn primary" href="https://falliero-chatbot-sav-4znu.vercel.app/" target="_blank">Ouvrir</a>
