@@ -194,7 +194,7 @@
   }
   .outils-side{display:flex; flex-direction:column; gap:16px;}
   .outils-side .shead{margin-bottom:12px;}
-  .outils-orbit{display:flex; align-items:center; justify-content:center;}
+  .outils-orbit{display:flex; align-items:flex-start; justify-content:center; padding-top:4px;}
   @media (max-width: 900px){
     .outils-layout{grid-template-columns:1fr;}
     .outils-side{flex-direction:row; flex-wrap:wrap;}
@@ -217,22 +217,47 @@
 
   .orbit-light{
     position:absolute; top:50%; left:50%; border-radius:50%;
-    pointer-events:none;
+    pointer-events:none; z-index:2;
   }
   .orbit-light.l1{
     width:24px; height:24px;
     background:radial-gradient(circle, rgba(255,194,102,0.95), rgba(255,106,26,0.35) 60%, transparent 75%);
     filter:blur(3px); box-shadow:0 0 28px 10px rgba(255,106,26,0.55);
-    animation:orbitTravel 12s linear infinite;
+    transform:translate(-50%,-50%) rotate(0deg) translateY(-200px);
   }
   .orbit-light.l2{
     width:16px; height:16px;
     background:radial-gradient(circle, rgba(255,241,234,0.95), rgba(255,145,66,0.4) 55%, transparent 75%);
     filter:blur(2px); box-shadow:0 0 20px 7px rgba(255,145,66,0.5);
-    animation:orbitTravel2 18s linear infinite reverse;
+    transform:translate(-50%,-50%) rotate(0deg) translateY(-264px);
   }
-  @keyframes orbitTravel{from{transform:translate(-50%,-50%) rotate(0deg) translateY(-200px);}to{transform:translate(-50%,-50%) rotate(360deg) translateY(-200px);}}
-  @keyframes orbitTravel2{from{transform:translate(-50%,-50%) rotate(0deg) translateY(-264px);}to{transform:translate(-50%,-50%) rotate(360deg) translateY(-264px);}}
+
+  /* ===== Éclairs — croisement des boules & survol du noyau ===== */
+  .orbit-spark-layer{position:absolute; inset:0; pointer-events:none; z-index:4; overflow:visible;}
+  .orbit-bolt{position:absolute; inset:0; width:100%; height:100%; overflow:visible;}
+  .bolt-line{
+    fill:none; stroke:var(--orange-bright); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round;
+    filter:drop-shadow(0 0 6px rgba(255,106,26,0.9)) drop-shadow(0 0 16px rgba(255,106,26,0.55));
+    opacity:0; animation:boltFlash .38s ease-out forwards;
+  }
+  .bolt-line.thin{
+    stroke:#fff8ef; stroke-width:1; opacity:0;
+    filter:drop-shadow(0 0 4px rgba(255,255,255,0.9));
+    animation:boltFlash .38s ease-out forwards;
+  }
+  @keyframes boltFlash{
+    0%{opacity:0;} 15%{opacity:1;} 40%{opacity:0.25;} 55%{opacity:0.95;} 100%{opacity:0;}
+  }
+  .orbit-flash-pop{
+    position:absolute; width:10px; height:10px; margin:-5px 0 0 -5px; border-radius:50%;
+    background:radial-gradient(circle, #fff, rgba(255,194,102,0.85) 40%, transparent 70%);
+    box-shadow:0 0 26px 11px rgba(255,150,60,0.6);
+    animation:flashPop .5s ease-out forwards; pointer-events:none;
+  }
+  @keyframes flashPop{
+    0%{transform:scale(0.2); opacity:0;} 30%{transform:scale(1.5); opacity:1;} 100%{transform:scale(2.3); opacity:0;}
+  }
+  .orbit-core{cursor:pointer;}
 
   .orbit-core{
     position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
@@ -380,10 +405,10 @@
 
   /* Verrou idées */
   #ideesLock input{
-    width:200px; text-align:center; padding:10px 14px;
+    width:220px; max-width:100%; text-align:center; padding:12px 16px;
     border-radius:100px; border:1px solid var(--line);
-    background:var(--surface-2); font-size:0.86rem; font-family:var(--body);
-    color:var(--text); outline:none; margin-right:8px;
+    background:var(--surface-2); font-size:0.9rem; font-family:var(--body);
+    color:var(--text); outline:none;
     transition:border-color .2s;
   }
   #ideesLock input:focus{border-color:var(--orange);}
@@ -526,8 +551,8 @@
             <div id="ideesLock" class="glist" style="padding:26px 20px; text-align:center;">
               <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:14px;">Section protégée — entre le code pour l'afficher</p>
               <input id="ideesPwd" type="password" placeholder="Code d'accès" onkeydown="if(event.key==='Enter'){unlockIdees();}">
-              <button onclick="unlockIdees()" class="btn primary" style="border:none; cursor:pointer;">Déverrouiller</button>
               <div id="ideesError" style="color:#ff5a4d; font-size:0.78rem; margin-top:10px; display:none;">Code incorrect</div>
+              <div class="footnote" style="margin-top:12px;">Tape le code puis appuie sur Entrée.</div>
             </div>
 
             <div id="ideesContent" class="glist" style="display:none;">
@@ -568,6 +593,7 @@
             <div class="orbit-ring r2"></div>
             <div class="orbit-light l1"></div>
             <div class="orbit-light l2"></div>
+            <div class="orbit-spark-layer"></div>
             <div class="orbit-core">Я</div>
 
             <div class="orbit-item" style="transform:rotate(0deg) translateY(-200px) rotate(0deg);">
@@ -871,6 +897,124 @@
     const collapsed = wrap.classList.toggle('collapsed');
     btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
   }
+
+  // orbite : boules pilotées en JS + éclairs (croisement des boules & survol du noyau)
+  (function(){
+    const shell = document.querySelector('.orbit-shell');
+    if(!shell) return;
+    const l1 = shell.querySelector('.orbit-light.l1');
+    const l2 = shell.querySelector('.orbit-light.l2');
+    const sparkLayer = shell.querySelector('.orbit-spark-layer');
+    const core = shell.querySelector('.orbit-core');
+    if(!l1 || !l2 || !sparkLayer) return;
+
+    const CENTER = 280; // moitié de 560px
+    const R1 = 200, R2 = 264;
+    const P1 = 12000, P2 = 18000;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function angleAt(t, period, reverse){
+      let a = (t % period) / period * 360;
+      if(reverse) a = -a;
+      return ((a % 360) + 360) % 360;
+    }
+    function pointAt(angleDeg, r){
+      const rad = angleDeg * Math.PI / 180;
+      return { x: CENTER + r * Math.sin(rad), y: CENTER - r * Math.cos(rad) };
+    }
+    function angularDiff(a, b){
+      const d = Math.abs(a - b) % 360;
+      return d > 180 ? 360 - d : d;
+    }
+    function jaggedPath(p1, p2, segments){
+      segments = segments || 4;
+      const pts = [p1];
+      const dx = p2.x - p1.x, dy = p2.y - p1.y;
+      const len = Math.hypot(dx, dy) || 1;
+      const nx = -dy / len, ny = dx / len;
+      for(let i = 1; i < segments; i++){
+        const t = i / segments;
+        const jitter = (Math.random() - 0.5) * Math.min(26, len * 0.4);
+        pts.push({ x: p1.x + dx * t + nx * jitter, y: p1.y + dy * t + ny * jitter });
+      }
+      pts.push(p2);
+      return pts.map(p => p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+    }
+    function spawnBolt(p1, p2, opts){
+      opts = opts || {};
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(svgNS, 'svg');
+      svg.setAttribute('class', 'orbit-bolt');
+      svg.setAttribute('viewBox', '0 0 560 560');
+      const poly = document.createElementNS(svgNS, 'polyline');
+      poly.setAttribute('points', jaggedPath(p1, p2, opts.segments || 4));
+      poly.setAttribute('class', opts.thin ? 'bolt-line thin' : 'bolt-line');
+      svg.appendChild(poly);
+      sparkLayer.appendChild(svg);
+      setTimeout(() => svg.remove(), opts.duration || 400);
+    }
+    function spawnFlashPop(p){
+      const dot = document.createElement('div');
+      dot.className = 'orbit-flash-pop';
+      dot.style.left = p.x + 'px';
+      dot.style.top = p.y + 'px';
+      sparkLayer.appendChild(dot);
+      setTimeout(() => dot.remove(), 500);
+    }
+
+    if(reduceMotion){
+      l1.style.transform = 'translate(-50%,-50%) rotate(0deg) translateY(-' + R1 + 'px)';
+      l2.style.transform = 'translate(-50%,-50%) rotate(0deg) translateY(-' + R2 + 'px)';
+      return; // pas d'animation ni d'éclairs si mouvement réduit demandé
+    }
+
+    let crossed = false;
+
+    function loop(t){
+      const a1 = angleAt(t, P1, false);
+      const a2 = angleAt(t, P2, true);
+      l1.style.transform = 'translate(-50%,-50%) rotate(' + a1 + 'deg) translateY(-' + R1 + 'px)';
+      l2.style.transform = 'translate(-50%,-50%) rotate(' + a2 + 'deg) translateY(-' + R2 + 'px)';
+
+      const diff = angularDiff(a1, a2);
+      if(diff < 5){
+        if(!crossed){
+          crossed = true;
+          const p1 = pointAt(a1, R1), p2 = pointAt(a2, R2);
+          spawnBolt(p1, p2, { duration: 420, segments: 5 });
+          spawnBolt(p1, p2, { duration: 420, segments: 5, thin: true });
+          spawnFlashPop({ x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 });
+        }
+      } else {
+        crossed = false;
+      }
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    // survol / touch du noyau central : éclairs vers les deux boules en orbite
+    let hovering = false;
+    let hoverTimer = null;
+    function boltsToCore(){
+      if(!hovering) return;
+      const t = performance.now();
+      const a1 = angleAt(t, P1, false);
+      const a2 = angleAt(t, P2, true);
+      const p1 = pointAt(a1, R1), p2 = pointAt(a2, R2);
+      const center = { x: CENTER, y: CENTER };
+      spawnBolt(center, p1, { duration: 260, segments: 4 });
+      spawnBolt(center, p2, { duration: 260, segments: 4 });
+      hoverTimer = setTimeout(boltsToCore, 180);
+    }
+    function startHover(){ if(hovering) return; hovering = true; boltsToCore(); }
+    function endHover(){ hovering = false; clearTimeout(hoverTimer); }
+    if(core){
+      core.addEventListener('mouseenter', startHover);
+      core.addEventListener('mouseleave', endHover);
+      core.addEventListener('touchstart', startHover, { passive: true });
+      core.addEventListener('touchend', endHover);
+    }
+  })();
 
   // notes rapides : sauvegarde locale (sur cet appareil), pas de serveur, pas d'envoi
   const notesArea = document.getElementById('notesArea');
