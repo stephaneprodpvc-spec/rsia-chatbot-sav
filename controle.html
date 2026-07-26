@@ -172,38 +172,107 @@
     color:var(--text-muted); background:var(--surface-2);
     border:1px solid var(--line); padding:5px 11px; border-radius:100px;
   }
+  .shead-right{display:flex; align-items:center; gap:10px;}
+  .toggle-btn{
+    display:flex; align-items:center; justify-content:center;
+    width:30px; height:30px; border-radius:50%; flex-shrink:0;
+    background:var(--surface-2); border:1px solid var(--line); color:var(--orange-bright);
+    cursor:pointer; transition:border-color .2s, background .2s, transform .2s;
+  }
+  .toggle-btn:hover{border-color:var(--line-bright); background:rgba(255,106,26,0.1);}
+  .toggle-btn svg{width:14px; height:14px; transition:transform .3s ease;}
+  .toggle-btn[aria-expanded="false"] svg{transform:rotate(-90deg);}
+  .collapse-wrap{
+    display:grid; grid-template-rows:1fr; transition:grid-template-rows .35s ease;
+  }
+  .collapse-wrap.collapsed{grid-template-rows:0fr;}
+  .collapse-inner{overflow:hidden;}
 
-  /* ===== Grille outils ===== */
-  .tool-grid{
-    display:grid; grid-template-columns:repeat(auto-fill, minmax(128px, 1fr)); gap:12px;
+  /* ===== Outils — orbite de sphères ===== */
+  .orbit-shell{
+    position:relative; width:420px; height:420px; max-width:100%;
+    margin:10px auto 6px;
   }
-  .tool-card{
-    position:relative;
-    background:var(--surface); border:1px solid var(--line); border-radius:14px;
-    padding:18px 12px; text-align:center;
-    display:flex; flex-direction:column; align-items:center; gap:10px;
-    transition:border-color .25s, transform .25s, box-shadow .25s;
+  .orbit-ring{
+    position:absolute; border-radius:50%; border:1px dashed var(--line);
+    top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none;
   }
-  .tool-card:hover{border-color:var(--line-bright); transform:translateY(-5px); box-shadow:0 16px 40px rgba(0,0,0,0.4);}
-  .tool-card::after{
-    content:''; position:absolute; inset:0; border-radius:14px; opacity:0; pointer-events:none;
-    background:radial-gradient(160px circle at var(--mx,50%) var(--my,50%), rgba(255,106,26,0.15), transparent 65%);
+  .orbit-ring.r1{width:300px; height:300px; animation:spinCW 90s linear infinite;}
+  .orbit-ring.r2{width:396px; height:396px; border-color:rgba(255,106,26,0.09); animation:spinCCW 70s linear infinite;}
+  @keyframes spinCW{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(360deg);}}
+  @keyframes spinCCW{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(-360deg);}}
+
+  .orbit-light{
+    position:absolute; top:50%; left:50%; width:22px; height:22px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,194,102,0.95), rgba(255,106,26,0.35) 60%, transparent 75%);
+    filter:blur(3px); box-shadow:0 0 24px 8px rgba(255,106,26,0.5);
+    animation:orbitTravel 14s linear infinite;
+    pointer-events:none;
+  }
+  @keyframes orbitTravel{from{transform:translate(-50%,-50%) rotate(0deg) translateY(-150px);}to{transform:translate(-50%,-50%) rotate(360deg) translateY(-150px);}}
+
+  .orbit-core{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:78px; height:78px; border-radius:50%; z-index:3;
+    background:
+      radial-gradient(circle at 32% 26%, rgba(255,255,255,0.4), transparent 45%),
+      radial-gradient(circle at 68% 80%, rgba(0,0,0,0.55), transparent 60%),
+      radial-gradient(circle at 42% 40%, var(--surface-2), #0c0a0f 85%);
+    border:1px solid var(--line-bright);
+    box-shadow:inset 0 2px 5px rgba(255,255,255,0.1), inset 0 -8px 14px rgba(0,0,0,0.55), 0 0 30px rgba(255,106,26,0.35);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--display); font-weight:700; font-size:1.7rem; color:var(--orange-bright);
+    animation:corePulse 3.2s ease-in-out infinite;
+  }
+  @keyframes corePulse{0%,100%{box-shadow:inset 0 2px 5px rgba(255,255,255,0.1), inset 0 -8px 14px rgba(0,0,0,0.55), 0 0 30px rgba(255,106,26,0.35);}50%{box-shadow:inset 0 2px 5px rgba(255,255,255,0.1), inset 0 -8px 14px rgba(0,0,0,0.55), 0 0 46px rgba(255,106,26,0.6);}}
+
+  .orbit-item{
+    position:absolute; top:50%; left:50%; width:0; height:0; z-index:2;
+  }
+  .orbit-ic-link{
+    position:absolute; display:flex; flex-direction:column; align-items:center; gap:8px;
+    width:80px; margin-left:-40px;
+    animation:iconFloat 3.6s ease-in-out infinite;
+    animation-delay:var(--d, 0s);
+  }
+  .orbit-ic-link::before{
+    content:''; position:absolute; top:0; left:0; width:58px; height:58px; border-radius:50%;
+    pointer-events:none; opacity:0;
+    background:radial-gradient(40px circle at var(--mx,50%) var(--my,50%), rgba(255,194,102,0.5), transparent 70%);
     transition:opacity .3s;
   }
-  .tool-card:hover::after{opacity:1;}
-  .tool-card .ic{
-    width:50px; height:50px; border-radius:50%;
+  .orbit-ic-link:hover::before{opacity:1;}
+  @keyframes iconFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+  .orbit-ic{
+    width:58px; height:58px; border-radius:50%; margin:0 auto;
     background:
-      radial-gradient(circle at 32% 28%, rgba(255,255,255,0.35), transparent 42%),
-      radial-gradient(circle at 68% 78%, rgba(0,0,0,0.5), transparent 60%),
-      radial-gradient(circle at 40% 40%, var(--surface-2), #0c0a0f 85%);
+      radial-gradient(circle at 32% 26%, rgba(255,255,255,0.35), transparent 45%),
+      radial-gradient(circle at 68% 80%, rgba(0,0,0,0.5), transparent 60%),
+      radial-gradient(circle at 42% 40%, var(--surface-2), #0c0a0f 85%);
     border:1px solid var(--line-bright);
-    box-shadow:inset 0 2px 4px rgba(255,255,255,0.08), inset 0 -6px 10px rgba(0,0,0,0.5), 0 6px 16px rgba(0,0,0,0.4);
+    box-shadow:inset 0 2px 4px rgba(255,255,255,0.08), inset 0 -6px 10px rgba(0,0,0,0.5), 0 6px 18px rgba(0,0,0,0.45);
     display:flex; align-items:center; justify-content:center;
     transition:transform .3s ease, box-shadow .3s ease;
   }
-  .tool-card:hover .ic{transform:scale(1.1) translateY(-2px); box-shadow:inset 0 2px 4px rgba(255,255,255,0.1), inset 0 -6px 10px rgba(0,0,0,0.5), 0 10px 26px rgba(255,106,26,0.35);}
-  .tool-card b{font-family:var(--display); font-weight:600; font-size:0.84rem;}
+  .orbit-ic img{width:28px; height:28px; border-radius:6px; object-fit:contain;}
+  .orbit-ic-link:hover .orbit-ic{transform:scale(1.14) translateY(-3px); box-shadow:inset 0 2px 4px rgba(255,255,255,0.1), inset 0 -6px 10px rgba(0,0,0,0.5), 0 12px 28px rgba(255,106,26,0.45);}
+  .orbit-label{font-family:var(--display); font-weight:600; font-size:0.74rem; text-align:center; color:var(--text-muted); transition:color .2s;}
+  .orbit-ic-link:hover .orbit-label{color:var(--orange-bright);}
+
+  @media (prefers-reduced-motion: reduce){
+    .orbit-ring, .orbit-light, .orbit-ic-link, .orbit-core{animation:none;}
+  }
+
+  /* repli mobile : grille simple, plus d'orbite */
+  .tool-grid-fallback{display:none;}
+  @media (max-width: 720px){
+    .orbit-shell{display:none;}
+    .tool-grid-fallback{
+      display:grid; grid-template-columns:repeat(auto-fill, minmax(96px, 1fr)); gap:12px;
+    }
+    .tool-grid-fallback .orbit-ic-link{position:static; width:auto; animation:none; margin:0;}
+    .tool-grid-fallback .orbit-item{position:static; width:auto; height:auto;}
+  }
 
   /* ===== Listes (projets, suite, sécurité) ===== */
   .glist{
@@ -421,20 +490,84 @@
 
     <section id="outils" class="reveal">
       <div class="shead"><h2>Outils</h2><span class="count">8 accès directs</span></div>
-      <div class="tool-grid">
-        <a class="tool-card" href="https://claude.ai/new" target="_blank" onclick="return openClaudeWindow(event)" title="Nouvelle conversation"><div class="ic"><img src="https://cdn.simpleicons.org/anthropic/FF6A1A" style="width:24px;height:24px;" alt=""></div><b>Claude</b></a>
-        <a class="tool-card" href="https://claude.ai" target="_blank" title="Tâches autonomes"><div class="ic"><img src="https://cdn.simpleicons.org/anthropic/FF9142" style="width:24px;height:24px;" alt=""></div><b>Cowork</b></a>
-        <a class="tool-card" href="https://github.com/stephaneprodpvc-spec/rsia-chatbot-sav" target="_blank" title="rsia-chatbot-sav"><div class="ic"><img src="https://cdn.simpleicons.org/github/F5F1EA" style="width:24px;height:24px;" alt=""></div><b>GitHub</b></a>
-        <a class="tool-card" href="https://vercel.com/akial/rsia-chatbot-sav" target="_blank" title="Déploiements"><div class="ic"><img src="https://cdn.simpleicons.org/vercel/F5F1EA" style="width:24px;height:24px;" alt=""></div><b>Vercel</b></a>
-        <a class="tool-card" href="https://airtable.com/appFqAT8WeX0UTudy" target="_blank" title="Tickets & Planning"><div class="ic"><img src="https://cdn.simpleicons.org/airtable/FFC266" style="width:24px;height:24px;" alt=""></div><b>Airtable</b></a>
-        <a class="tool-card" href="https://www.make.com" target="_blank" title="3 scénarios actifs"><div class="ic"><img src="https://cdn.simpleicons.org/make/FF9142" style="width:24px;height:24px;" alt=""></div><b>Make</b></a>
-        <a class="tool-card" href="https://mail.google.com/mail/u/0/#inbox" target="_blank" title="Boîte perso"><div class="ic"><img src="https://cdn.simpleicons.org/gmail/FF6A1A" style="width:24px;height:24px;" alt=""></div><b>Gmail</b></a>
-        <a class="tool-card" href="https://www.meshy.ai" target="_blank" title="Génération 3D"><div class="ic"><img src="https://www.google.com/s2/favicons?domain=meshy.ai&sz=64" style="width:24px;height:24px;border-radius:6px;" alt=""></div><b>Meshy</b></a>
+      <div class="orbit-shell">
+        <div class="orbit-ring r1"></div>
+        <div class="orbit-ring r2"></div>
+        <div class="orbit-light"></div>
+        <div class="orbit-core">Я</div>
+
+        <div class="orbit-item" style="transform:rotate(0deg) translateY(-150px) rotate(0deg);">
+          <a class="orbit-ic-link" href="https://claude.ai/new" target="_blank" onclick="return openClaudeWindow(event)" title="Nouvelle conversation" style="--d:0s">
+            <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=claude.ai&sz=128" alt=""></span>
+            <span class="orbit-label">Claude</span>
+          </a>
+        </div>
+        <div class="orbit-item" style="transform:rotate(45deg) translateY(-150px) rotate(-45deg);">
+          <a class="orbit-ic-link" href="https://claude.ai" target="_blank" title="Tâches autonomes" style="--d:0.2s">
+            <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=claude.ai&sz=128" alt=""></span>
+            <span class="orbit-label">Cowork</span>
+          </a>
+        </div>
+        <div class="orbit-item" style="transform:rotate(90deg) translateY(-150px) rotate(-90deg);">
+          <a class="orbit-ic-link" href="https://github.com/stephaneprodpvc-spec/rsia-chatbot-sav" target="_blank" title="rsia-chatbot-sav" style="--d:0.4s">
+            <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=github.com&sz=128" alt=""></span>
+            <span class="orbit-label">GitHub</span>
+          </a>
+        </div>
+        <div class="orbit-item" style="transform:rotate(135deg) translateY(-150px) rotate(-135deg);">
+          <a class="orbit-ic-link" href="https://vercel.com/akial/rsia-chatbot-sav" target="_blank" title="Déploiements" style="--d:0.6s">
+            <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=vercel.com&sz=128" alt=""></span>
+            <span class="orbit-label">Vercel</span>
+          </a>
+        </div>
+        <div class="orbit-item" style="transform:rotate(180deg) translateY(-150px) rotate(-180deg);">
+          <a class="orbit-ic-link" href="https://airtable.com/appFqAT8WeX0UTudy" target="_blank" title="Tickets & Planning" style="--d:0.8s">
+            <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=airtable.com&sz=128" alt=""></span>
+            <span class="orbit-label">Airtable</span>
+          </a>
+        </div>
+        <div class="orbit-item" style="transform:rotate(225deg) translateY(-150px) rotate(-225deg);">
+          <a class="orbit-ic-link" href="https://www.make.com" target="_blank" title="3 scénarios actifs" style="--d:1s">
+            <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=make.com&sz=128" alt=""></span>
+            <span class="orbit-label">Make</span>
+          </a>
+        </div>
+        <div class="orbit-item" style="transform:rotate(270deg) translateY(-150px) rotate(-270deg);">
+          <a class="orbit-ic-link" href="https://mail.google.com/mail/u/0/#inbox" target="_blank" title="Boîte perso" style="--d:1.2s">
+            <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=mail.google.com&sz=128" alt=""></span>
+            <span class="orbit-label">Gmail</span>
+          </a>
+        </div>
+        <div class="orbit-item" style="transform:rotate(315deg) translateY(-150px) rotate(-315deg);">
+          <a class="orbit-ic-link" href="https://www.meshy.ai" target="_blank" title="Génération 3D" style="--d:1.4s">
+            <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=meshy.ai&sz=128" alt=""></span>
+            <span class="orbit-label">Meshy</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="tool-grid-fallback">
+        <div class="orbit-item"><a class="orbit-ic-link" href="https://claude.ai/new" target="_blank" onclick="return openClaudeWindow(event)" title="Nouvelle conversation"><span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=claude.ai&sz=128" alt=""></span><span class="orbit-label">Claude</span></a></div>
+        <div class="orbit-item"><a class="orbit-ic-link" href="https://claude.ai" target="_blank" title="Tâches autonomes"><span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=claude.ai&sz=128" alt=""></span><span class="orbit-label">Cowork</span></a></div>
+        <div class="orbit-item"><a class="orbit-ic-link" href="https://github.com/stephaneprodpvc-spec/rsia-chatbot-sav" target="_blank" title="rsia-chatbot-sav"><span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=github.com&sz=128" alt=""></span><span class="orbit-label">GitHub</span></a></div>
+        <div class="orbit-item"><a class="orbit-ic-link" href="https://vercel.com/akial/rsia-chatbot-sav" target="_blank" title="Déploiements"><span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=vercel.com&sz=128" alt=""></span><span class="orbit-label">Vercel</span></a></div>
+        <div class="orbit-item"><a class="orbit-ic-link" href="https://airtable.com/appFqAT8WeX0UTudy" target="_blank" title="Tickets & Planning"><span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=airtable.com&sz=128" alt=""></span><span class="orbit-label">Airtable</span></a></div>
+        <div class="orbit-item"><a class="orbit-ic-link" href="https://www.make.com" target="_blank" title="3 scénarios actifs"><span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=make.com&sz=128" alt=""></span><span class="orbit-label">Make</span></a></div>
+        <div class="orbit-item"><a class="orbit-ic-link" href="https://mail.google.com/mail/u/0/#inbox" target="_blank" title="Boîte perso"><span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=mail.google.com&sz=128" alt=""></span><span class="orbit-label">Gmail</span></a></div>
+        <div class="orbit-item"><a class="orbit-ic-link" href="https://www.meshy.ai" target="_blank" title="Génération 3D"><span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=meshy.ai&sz=128" alt=""></span><span class="orbit-label">Meshy</span></a></div>
       </div>
     </section>
 
     <section id="projets" class="reveal">
-      <div class="shead"><h2>Projets</h2><span class="count">4 actifs</span></div>
+      <div class="shead"><h2>Projets</h2>
+        <div class="shead-right">
+          <span class="count">4 actifs</span>
+          <button class="toggle-btn" aria-expanded="true" aria-label="Afficher/masquer les projets" onclick="toggleSection(this,'projets-list')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+        </div>
+      </div>
+      <div class="collapse-wrap" id="projets-list"><div class="collapse-inner">
       <div class="glist">
 
         <div class="grow">
@@ -474,6 +607,7 @@
         </div>
 
       </div>
+      </div></div>
     </section>
 
     <div class="grid-2">
@@ -523,7 +657,15 @@
     </div>
 
     <section id="suite" class="reveal">
-      <div class="shead"><h2>Suite interne</h2><span class="count">3 outils</span></div>
+      <div class="shead"><h2>Suite interne</h2>
+        <div class="shead-right">
+          <span class="count">3 outils</span>
+          <button class="toggle-btn" aria-expanded="true" aria-label="Afficher/masquer la suite interne" onclick="toggleSection(this,'suite-list')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+        </div>
+      </div>
+      <div class="collapse-wrap" id="suite-list"><div class="collapse-inner">
       <div class="glist">
 
         <div class="grow">
@@ -554,10 +696,19 @@
         </div>
 
       </div>
+      </div></div>
     </section>
 
     <section id="securite" class="reveal">
-      <div class="shead"><h2>Sécurité</h2><span class="count">9/9 vérifiés</span></div>
+      <div class="shead"><h2>Sécurité</h2>
+        <div class="shead-right">
+          <span class="count">9/9 vérifiés</span>
+          <button class="toggle-btn" aria-expanded="true" aria-label="Afficher/masquer la sécurité" onclick="toggleSection(this,'securite-list')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+        </div>
+      </div>
+      <div class="collapse-wrap" id="securite-list"><div class="collapse-inner">
       <div class="glist">
         <div class="grow sec"><div class="check-ic">✓</div>
           <div class="gtext"><b>Token Airtable protégé</b><span class="date">11 juil.</span></div></div>
@@ -571,16 +722,25 @@
           <div class="gtext"><b>api/ticket.js corrigé</b><span class="date">11 juil.</span></div></div>
       </div>
       <div class="footnote">Pour relancer une vérification complète, dis à Claude : <b>« relance l'audit sécurité de mes projets »</b></div>
+      </div></div>
     </section>
 
     <section id="journal" class="reveal">
-      <div class="shead"><h2>Journal</h2></div>
+      <div class="shead"><h2>Journal</h2>
+        <div class="shead-right">
+          <button class="toggle-btn" aria-expanded="true" aria-label="Afficher/masquer le journal" onclick="toggleSection(this,'journal-list')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+        </div>
+      </div>
+      <div class="collapse-wrap" id="journal-list"><div class="collapse-inner">
       <div class="glist">
         <div class="jrow"><span class="jdate">11 juil.</span><span class="jtext"><b>Audit sécurité complet</b> — 2 fuites supplémentaires corrigées</span></div>
         <div class="jrow"><span class="jdate">11 juil.</span><span class="jtext"><b>Sécurisation token Airtable</b> — serverless + variables d'environnement</span></div>
         <div class="jrow"><span class="jdate">10 juil.</span><span class="jtext"><b>Site enrichi</b> — tilt 3D, visuel Iko en fond, galerie duotone</span></div>
         <div class="jrow"><span class="jdate">9 juil.</span><span class="jtext"><b>Démo replanification</b> — modale technicien fonctionnelle</span></div>
       </div>
+      </div></div>
     </section>
 
   </main>
@@ -664,14 +824,22 @@
     progressBar.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + '%';
   }, {passive:true});
 
-  // glow qui suit la souris sur les cartes outils
-  document.querySelectorAll('.tool-card').forEach(card=>{
+  // glow qui suit la souris sur les sphères outils
+  document.querySelectorAll('.orbit-ic-link').forEach(card=>{
     card.addEventListener('mousemove', e=>{
       const r = card.getBoundingClientRect();
       card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
       card.style.setProperty('--my', (e.clientY - r.top) + 'px');
     });
   });
+
+  // accordéons : Projets, Suite interne, Sécurité, Journal
+  function toggleSection(btn, id){
+    const wrap = document.getElementById(id);
+    if(!wrap) return;
+    const collapsed = wrap.classList.toggle('collapsed');
+    btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+  }
 
   // notes rapides : sauvegarde locale (sur cet appareil), pas de serveur, pas d'envoi
   const notesArea = document.getElementById('notesArea');
