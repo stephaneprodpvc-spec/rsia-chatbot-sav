@@ -190,11 +190,11 @@
 
   /* ===== Outils — layout deux colonnes ===== */
   .outils-layout{
-    display:grid; grid-template-columns:300px 1fr; gap:28px; align-items:start;
+    display:grid; grid-template-columns:300px 1fr; gap:28px; align-items:stretch;
   }
   .outils-side{display:flex; flex-direction:column; gap:16px;}
   .outils-side .shead{margin-bottom:12px;}
-  .outils-orbit{display:flex; justify-content:center;}
+  .outils-orbit{display:flex; align-items:center; justify-content:center;}
   @media (max-width: 900px){
     .outils-layout{grid-template-columns:1fr;}
     .outils-side{flex-direction:row; flex-wrap:wrap;}
@@ -203,15 +203,15 @@
 
   /* ===== Outils — orbite de sphères ===== */
   .orbit-shell{
-    position:relative; width:420px; height:420px; max-width:100%;
-    margin:10px auto 6px;
+    position:relative; width:560px; height:560px; max-width:100%;
+    margin:0 auto;
   }
   .orbit-ring{
     position:absolute; border-radius:50%; border:1px dashed var(--line);
     top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none;
   }
-  .orbit-ring.r1{width:300px; height:300px; animation:spinCW 90s linear infinite;}
-  .orbit-ring.r2{width:396px; height:396px; border-color:rgba(255,106,26,0.09); animation:spinCCW 70s linear infinite;}
+  .orbit-ring.r1{width:400px; height:400px; animation:spinCW 90s linear infinite;}
+  .orbit-ring.r2{width:528px; height:528px; border-color:rgba(255,106,26,0.09); animation:spinCCW 70s linear infinite;}
   @keyframes spinCW{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(360deg);}}
   @keyframes spinCCW{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(-360deg);}}
 
@@ -220,23 +220,23 @@
     pointer-events:none;
   }
   .orbit-light.l1{
-    width:22px; height:22px;
+    width:24px; height:24px;
     background:radial-gradient(circle, rgba(255,194,102,0.95), rgba(255,106,26,0.35) 60%, transparent 75%);
-    filter:blur(3px); box-shadow:0 0 26px 9px rgba(255,106,26,0.55);
+    filter:blur(3px); box-shadow:0 0 28px 10px rgba(255,106,26,0.55);
     animation:orbitTravel 12s linear infinite;
   }
   .orbit-light.l2{
-    width:14px; height:14px;
+    width:16px; height:16px;
     background:radial-gradient(circle, rgba(255,241,234,0.95), rgba(255,145,66,0.4) 55%, transparent 75%);
-    filter:blur(2px); box-shadow:0 0 18px 6px rgba(255,145,66,0.5);
+    filter:blur(2px); box-shadow:0 0 20px 7px rgba(255,145,66,0.5);
     animation:orbitTravel2 18s linear infinite reverse;
   }
-  @keyframes orbitTravel{from{transform:translate(-50%,-50%) rotate(0deg) translateY(-150px);}to{transform:translate(-50%,-50%) rotate(360deg) translateY(-150px);}}
-  @keyframes orbitTravel2{from{transform:translate(-50%,-50%) rotate(0deg) translateY(-198px);}to{transform:translate(-50%,-50%) rotate(360deg) translateY(-198px);}}
+  @keyframes orbitTravel{from{transform:translate(-50%,-50%) rotate(0deg) translateY(-200px);}to{transform:translate(-50%,-50%) rotate(360deg) translateY(-200px);}}
+  @keyframes orbitTravel2{from{transform:translate(-50%,-50%) rotate(0deg) translateY(-264px);}to{transform:translate(-50%,-50%) rotate(360deg) translateY(-264px);}}
 
   .orbit-core{
     position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-    width:78px; height:78px; border-radius:50%; z-index:3;
+    width:96px; height:96px; border-radius:50%; z-index:3;
     background:
       radial-gradient(circle at 32% 26%, rgba(255,255,255,0.4), transparent 45%),
       radial-gradient(circle at 68% 80%, rgba(0,0,0,0.55), transparent 60%),
@@ -244,7 +244,7 @@
     border:1px solid var(--line-bright);
     box-shadow:inset 0 2px 5px rgba(255,255,255,0.1), inset 0 -8px 14px rgba(0,0,0,0.55), 0 0 30px rgba(255,106,26,0.35);
     display:flex; align-items:center; justify-content:center;
-    font-family:var(--display); font-weight:700; font-size:1.7rem; color:var(--orange-bright);
+    font-family:var(--display); font-weight:700; font-size:2.1rem; color:var(--orange-bright);
     animation:corePulse 3.2s ease-in-out infinite;
   }
   @keyframes corePulse{0%,100%{box-shadow:inset 0 2px 5px rgba(255,255,255,0.1), inset 0 -8px 14px rgba(0,0,0,0.55), 0 0 30px rgba(255,106,26,0.35);}50%{box-shadow:inset 0 2px 5px rgba(255,255,255,0.1), inset 0 -8px 14px rgba(0,0,0,0.55), 0 0 46px rgba(255,106,26,0.6);}}
@@ -254,20 +254,20 @@
   }
   .orbit-ic-link{
     position:absolute; display:flex; flex-direction:column; align-items:center; gap:8px;
-    width:80px; margin-left:-40px;
+    width:92px; margin-left:-46px;
     animation:iconFloat 3.6s ease-in-out infinite;
     animation-delay:var(--d, 0s);
   }
   .orbit-ic-link::before{
-    content:''; position:absolute; top:0; left:0; width:58px; height:58px; border-radius:50%;
+    content:''; position:absolute; top:0; left:50%; margin-left:-33px; width:66px; height:66px; border-radius:50%;
     pointer-events:none; opacity:0;
-    background:radial-gradient(40px circle at var(--mx,50%) var(--my,50%), rgba(255,194,102,0.5), transparent 70%);
+    background:radial-gradient(44px circle at var(--mx,50%) var(--my,50%), rgba(255,194,102,0.5), transparent 70%);
     transition:opacity .3s;
   }
   .orbit-ic-link:hover::before{opacity:1;}
   @keyframes iconFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
   .orbit-ic{
-    width:58px; height:58px; border-radius:50%; margin:0 auto;
+    width:66px; height:66px; border-radius:50%; margin:0 auto;
     background:
       radial-gradient(circle at 32% 26%, rgba(255,255,255,0.35), transparent 45%),
       radial-gradient(circle at 68% 80%, rgba(0,0,0,0.5), transparent 60%),
@@ -277,9 +277,9 @@
     display:flex; align-items:center; justify-content:center;
     transition:transform .3s ease, box-shadow .3s ease;
   }
-  .orbit-ic img{width:28px; height:28px; border-radius:6px; object-fit:contain;}
+  .orbit-ic img{width:32px; height:32px; border-radius:6px; object-fit:contain;}
   .orbit-ic-link:hover .orbit-ic{transform:scale(1.14) translateY(-3px); box-shadow:inset 0 2px 4px rgba(255,255,255,0.1), inset 0 -6px 10px rgba(0,0,0,0.5), 0 12px 28px rgba(255,106,26,0.45);}
-  .orbit-label{font-family:var(--display); font-weight:600; font-size:0.74rem; text-align:center; color:var(--text-muted); transition:color .2s;}
+  .orbit-label{font-family:var(--display); font-weight:600; font-size:0.78rem; text-align:center; color:var(--text-muted); transition:color .2s;}
   .orbit-ic-link:hover .orbit-label{color:var(--orange-bright);}
 
   @media (prefers-reduced-motion: reduce){
@@ -288,12 +288,13 @@
 
   /* repli mobile : grille simple, plus d'orbite */
   .tool-grid-fallback{display:none;}
-  @media (max-width: 720px){
+  @media (max-width: 900px){
     .orbit-shell{display:none;}
     .tool-grid-fallback{
       display:grid; grid-template-columns:repeat(auto-fill, minmax(96px, 1fr)); gap:12px;
     }
     .tool-grid-fallback .orbit-ic-link{position:static; width:auto; animation:none; margin:0;}
+    .tool-grid-fallback .orbit-ic-link::before{display:none;}
     .tool-grid-fallback .orbit-item{position:static; width:auto; height:auto;}
   }
 
@@ -512,7 +513,6 @@
     </div>
 
     <section id="outils" class="reveal">
-      <div class="shead"><h2>Outils</h2><span class="count">8 accès directs</span></div>
 
       <div class="outils-layout">
 
@@ -570,49 +570,49 @@
             <div class="orbit-light l2"></div>
             <div class="orbit-core">Я</div>
 
-            <div class="orbit-item" style="transform:rotate(0deg) translateY(-150px) rotate(0deg);">
+            <div class="orbit-item" style="transform:rotate(0deg) translateY(-200px) rotate(0deg);">
               <a class="orbit-ic-link" href="https://claude.ai/new" target="_blank" onclick="return openClaudeWindow(event)" title="Nouvelle conversation" style="--d:0s">
                 <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=claude.ai&sz=128" alt=""></span>
                 <span class="orbit-label">Claude</span>
               </a>
             </div>
-            <div class="orbit-item" style="transform:rotate(45deg) translateY(-150px) rotate(-45deg);">
+            <div class="orbit-item" style="transform:rotate(45deg) translateY(-200px) rotate(-45deg);">
               <a class="orbit-ic-link" href="https://claude.ai" target="_blank" title="Tâches autonomes" style="--d:0.2s">
                 <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=claude.ai&sz=128" alt=""></span>
                 <span class="orbit-label">Cowork</span>
               </a>
             </div>
-            <div class="orbit-item" style="transform:rotate(90deg) translateY(-150px) rotate(-90deg);">
+            <div class="orbit-item" style="transform:rotate(90deg) translateY(-200px) rotate(-90deg);">
               <a class="orbit-ic-link" href="https://github.com/stephaneprodpvc-spec/rsia-chatbot-sav" target="_blank" title="rsia-chatbot-sav" style="--d:0.4s">
                 <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=github.com&sz=128" alt=""></span>
                 <span class="orbit-label">GitHub</span>
               </a>
             </div>
-            <div class="orbit-item" style="transform:rotate(135deg) translateY(-150px) rotate(-135deg);">
+            <div class="orbit-item" style="transform:rotate(135deg) translateY(-200px) rotate(-135deg);">
               <a class="orbit-ic-link" href="https://vercel.com/akial/rsia-chatbot-sav" target="_blank" title="Déploiements" style="--d:0.6s">
                 <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=vercel.com&sz=128" alt=""></span>
                 <span class="orbit-label">Vercel</span>
               </a>
             </div>
-            <div class="orbit-item" style="transform:rotate(180deg) translateY(-150px) rotate(-180deg);">
+            <div class="orbit-item" style="transform:rotate(180deg) translateY(-200px) rotate(-180deg);">
               <a class="orbit-ic-link" href="https://airtable.com/appFqAT8WeX0UTudy" target="_blank" title="Tickets & Planning" style="--d:0.8s">
                 <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=airtable.com&sz=128" alt=""></span>
                 <span class="orbit-label">Airtable</span>
               </a>
             </div>
-            <div class="orbit-item" style="transform:rotate(225deg) translateY(-150px) rotate(-225deg);">
+            <div class="orbit-item" style="transform:rotate(225deg) translateY(-200px) rotate(-225deg);">
               <a class="orbit-ic-link" href="https://www.make.com" target="_blank" title="3 scénarios actifs" style="--d:1s">
                 <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=make.com&sz=128" alt=""></span>
                 <span class="orbit-label">Make</span>
               </a>
             </div>
-            <div class="orbit-item" style="transform:rotate(270deg) translateY(-150px) rotate(-270deg);">
+            <div class="orbit-item" style="transform:rotate(270deg) translateY(-200px) rotate(-270deg);">
               <a class="orbit-ic-link" href="https://mail.google.com/mail/u/0/#inbox" target="_blank" title="Boîte perso" style="--d:1.2s">
                 <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=mail.google.com&sz=128" alt=""></span>
                 <span class="orbit-label">Gmail</span>
               </a>
             </div>
-            <div class="orbit-item" style="transform:rotate(315deg) translateY(-150px) rotate(-315deg);">
+            <div class="orbit-item" style="transform:rotate(315deg) translateY(-200px) rotate(-315deg);">
               <a class="orbit-ic-link" href="https://www.meshy.ai" target="_blank" title="Génération 3D" style="--d:1.4s">
                 <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=meshy.ai&sz=128" alt=""></span>
                 <span class="orbit-label">Meshy</span>
