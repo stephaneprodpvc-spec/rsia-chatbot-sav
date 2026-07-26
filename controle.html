@@ -248,15 +248,6 @@
   @keyframes boltFlash{
     0%{opacity:0;} 15%{opacity:1;} 40%{opacity:0.25;} 55%{opacity:0.95;} 100%{opacity:0;}
   }
-  .orbit-flash-pop{
-    position:absolute; width:10px; height:10px; margin:-5px 0 0 -5px; border-radius:50%;
-    background:radial-gradient(circle, #fff, rgba(255,194,102,0.85) 40%, transparent 70%);
-    box-shadow:0 0 26px 11px rgba(255,150,60,0.6);
-    animation:flashPop .5s ease-out forwards; pointer-events:none;
-  }
-  @keyframes flashPop{
-    0%{transform:scale(0.2); opacity:0;} 30%{transform:scale(1.5); opacity:1;} 100%{transform:scale(2.3); opacity:0;}
-  }
   .orbit-core{cursor:pointer;}
 
   .orbit-core{
@@ -602,46 +593,52 @@
                 <span class="orbit-label">Claude</span>
               </a>
             </div>
-            <div class="orbit-item" style="transform:rotate(45deg) translateY(-200px) rotate(-45deg);">
+            <div class="orbit-item" style="transform:rotate(40deg) translateY(-200px) rotate(-40deg);">
               <a class="orbit-ic-link" href="https://claude.ai" target="_blank" title="Tâches autonomes" style="--d:0.2s">
                 <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=claude.ai&sz=128" alt=""></span>
                 <span class="orbit-label">Cowork</span>
               </a>
             </div>
-            <div class="orbit-item" style="transform:rotate(90deg) translateY(-200px) rotate(-90deg);">
+            <div class="orbit-item" style="transform:rotate(80deg) translateY(-200px) rotate(-80deg);">
               <a class="orbit-ic-link" href="https://github.com/stephaneprodpvc-spec/rsia-chatbot-sav" target="_blank" title="rsia-chatbot-sav" style="--d:0.4s">
                 <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=github.com&sz=128" alt=""></span>
                 <span class="orbit-label">GitHub</span>
               </a>
             </div>
-            <div class="orbit-item" style="transform:rotate(135deg) translateY(-200px) rotate(-135deg);">
+            <div class="orbit-item" style="transform:rotate(120deg) translateY(-200px) rotate(-120deg);">
               <a class="orbit-ic-link" href="https://vercel.com/akial/rsia-chatbot-sav" target="_blank" title="Déploiements" style="--d:0.6s">
                 <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=vercel.com&sz=128" alt=""></span>
                 <span class="orbit-label">Vercel</span>
               </a>
             </div>
-            <div class="orbit-item" style="transform:rotate(180deg) translateY(-200px) rotate(-180deg);">
+            <div class="orbit-item" style="transform:rotate(160deg) translateY(-200px) rotate(-160deg);">
               <a class="orbit-ic-link" href="https://airtable.com/appFqAT8WeX0UTudy" target="_blank" title="Tickets & Planning" style="--d:0.8s">
                 <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=airtable.com&sz=128" alt=""></span>
                 <span class="orbit-label">Airtable</span>
               </a>
             </div>
-            <div class="orbit-item" style="transform:rotate(225deg) translateY(-200px) rotate(-225deg);">
+            <div class="orbit-item" style="transform:rotate(200deg) translateY(-200px) rotate(-200deg);">
               <a class="orbit-ic-link" href="https://www.make.com" target="_blank" title="3 scénarios actifs" style="--d:1s">
                 <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=make.com&sz=128" alt=""></span>
                 <span class="orbit-label">Make</span>
               </a>
             </div>
-            <div class="orbit-item" style="transform:rotate(270deg) translateY(-200px) rotate(-270deg);">
+            <div class="orbit-item" style="transform:rotate(240deg) translateY(-200px) rotate(-240deg);">
               <a class="orbit-ic-link" href="https://mail.google.com/mail/u/0/#inbox" target="_blank" title="Boîte perso" style="--d:1.2s">
                 <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=mail.google.com&sz=128" alt=""></span>
                 <span class="orbit-label">Gmail</span>
               </a>
             </div>
-            <div class="orbit-item" style="transform:rotate(315deg) translateY(-200px) rotate(-315deg);">
+            <div class="orbit-item" style="transform:rotate(280deg) translateY(-200px) rotate(-280deg);">
               <a class="orbit-ic-link" href="https://www.meshy.ai" target="_blank" title="Génération 3D" style="--d:1.4s">
                 <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=meshy.ai&sz=128" alt=""></span>
                 <span class="orbit-label">Meshy</span>
+              </a>
+            </div>
+            <div class="orbit-item" style="transform:rotate(320deg) translateY(-200px) rotate(-320deg);">
+              <a class="orbit-ic-link" href="https://app.pixverse.ai/creation/video" target="_blank" title="Génération vidéo IA" style="--d:1.6s">
+                <span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=pixverse.ai&sz=128" alt=""></span>
+                <span class="orbit-label">Pixverse</span>
               </a>
             </div>
           </div>
@@ -655,6 +652,7 @@
             <div class="orbit-item"><a class="orbit-ic-link" href="https://www.make.com" target="_blank" title="3 scénarios actifs"><span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=make.com&sz=128" alt=""></span><span class="orbit-label">Make</span></a></div>
             <div class="orbit-item"><a class="orbit-ic-link" href="https://mail.google.com/mail/u/0/#inbox" target="_blank" title="Boîte perso"><span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=mail.google.com&sz=128" alt=""></span><span class="orbit-label">Gmail</span></a></div>
             <div class="orbit-item"><a class="orbit-ic-link" href="https://www.meshy.ai" target="_blank" title="Génération 3D"><span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=meshy.ai&sz=128" alt=""></span><span class="orbit-label">Meshy</span></a></div>
+        <div class="orbit-item"><a class="orbit-ic-link" href="https://app.pixverse.ai/creation/video" target="_blank" title="Génération vidéo IA"><span class="orbit-ic"><img src="https://www.google.com/s2/favicons?domain=pixverse.ai&sz=128" alt=""></span><span class="orbit-label">Pixverse</span></a></div>
           </div>
         </div>
 
@@ -922,10 +920,6 @@
       const rad = angleDeg * Math.PI / 180;
       return { x: CENTER + r * Math.sin(rad), y: CENTER - r * Math.cos(rad) };
     }
-    function angularDiff(a, b){
-      const d = Math.abs(a - b) % 360;
-      return d > 180 ? 360 - d : d;
-    }
     function jaggedPath(p1, p2, segments){
       segments = segments || 4;
       const pts = [p1];
@@ -953,14 +947,6 @@
       sparkLayer.appendChild(svg);
       setTimeout(() => svg.remove(), opts.duration || 400);
     }
-    function spawnFlashPop(p){
-      const dot = document.createElement('div');
-      dot.className = 'orbit-flash-pop';
-      dot.style.left = p.x + 'px';
-      dot.style.top = p.y + 'px';
-      sparkLayer.appendChild(dot);
-      setTimeout(() => dot.remove(), 500);
-    }
 
     if(reduceMotion){
       l1.style.transform = 'translate(-50%,-50%) rotate(0deg) translateY(-' + R1 + 'px)';
@@ -968,26 +954,11 @@
       return; // pas d'animation ni d'éclairs si mouvement réduit demandé
     }
 
-    let crossed = false;
-
     function loop(t){
       const a1 = angleAt(t, P1, false);
       const a2 = angleAt(t, P2, true);
       l1.style.transform = 'translate(-50%,-50%) rotate(' + a1 + 'deg) translateY(-' + R1 + 'px)';
       l2.style.transform = 'translate(-50%,-50%) rotate(' + a2 + 'deg) translateY(-' + R2 + 'px)';
-
-      const diff = angularDiff(a1, a2);
-      if(diff < 5){
-        if(!crossed){
-          crossed = true;
-          const p1 = pointAt(a1, R1), p2 = pointAt(a2, R2);
-          spawnBolt(p1, p2, { duration: 420, segments: 5 });
-          spawnBolt(p1, p2, { duration: 420, segments: 5, thin: true });
-          spawnFlashPop({ x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 });
-        }
-      } else {
-        crossed = false;
-      }
       requestAnimationFrame(loop);
     }
     requestAnimationFrame(loop);
