@@ -1,5 +1,5 @@
 // ============================================================
-// STEF — Assistant 3D Falliero pour la page SAV
+// STEF — Assistant 3D Iko pour la page SAV
 // Usage : <script type="module" src="stef-widget.js"></script>
 // Requiert : stef.glb à la racine du site
 // ============================================================
@@ -134,7 +134,7 @@ import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/
   }
 
   // ---------- Bulle de présentation (machine à écrire) ----------
-  const INTRO = "Bonjour, je suis Stef \u{1F44B} votre conseiller SAV Falliero. Une fen\u00EAtre qui coince, un vitrage \u00E0 remplacer, un r\u00E9glage \u00E0 faire ? Je vous guide, \u00E7a prend 2 minutes.";
+  const INTRO = "Bonjour, je suis Stef \u{1F44B} votre conseiller SAV Iko. Une fen\u00EAtre qui coince, un vitrage \u00E0 remplacer, un r\u00E9glage \u00E0 faire ? Je vous guide, \u00E7a prend 2 minutes.";
   function typeIntro() {
     bubble.classList.add('visible');
     const el = bubble.querySelector('#stef-bubble-text');

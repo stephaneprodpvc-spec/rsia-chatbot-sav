@@ -734,7 +734,7 @@
       <a href="#dashboard">Tableau de bord</a>
       <a href="#technicien">Terrain</a>
     </nav>
-    <a href="https://falliero-chatbot-sav-4znu.vercel.app/" target="_blank" rel="noopener" class="nav-cta">Demander une démo</a>
+    <a href="index.html" target="_blank" rel="noopener" class="nav-cta">Demander une démo</a>
   </div>
 </header>
 
@@ -748,7 +748,7 @@
       <h1>Le SAV qui prend<br><span>rendez-vous</span> tout seul.</h1>
       <p class="lead">Iko planifie les interventions, informe vos techniciens et donne à chaque agence une vue claire sur son activité — sans appel, sans tableur, sans double saisie.</p>
       <div class="hero-actions">
-        <a href="https://falliero-chatbot-sav-4znu.vercel.app/" target="_blank" rel="noopener" class="btn-primary">Demander une démo</a>
+        <a href="index.html" target="_blank" rel="noopener" class="btn-primary">Demander une démo</a>
         <a href="#fonctionnement" class="btn-ghost">Voir comment ça marche</a>
       </div>
       <div class="hero-stats">
@@ -912,10 +912,10 @@
       <div class="mockup-pad">
         <div class="mockup-agences-row">
           <span class="agence-pill active">🌐 Toutes agences</span>
-          <span class="agence-pill">Ibos (65)</span>
-          <span class="agence-pill">Tarnos (40)</span>
-          <span class="agence-pill">Lescar (64)</span>
-          <span class="agence-pill">Saint-Gaudens (31)</span>
+          <span class="agence-pill">Agence 1</span>
+          <span class="agence-pill">Agence 2</span>
+          <span class="agence-pill">Agence 3</span>
+          <span class="agence-pill">Agence 4</span>
         </div>
 
         <div class="mockup-stats-row">
@@ -945,32 +945,32 @@
             <span class="tprod">Fenêtre — Fermeture difficile</span>
             <span class="tbadge urgent">URGENT</span>
             <span class="tstatus nouveau">Nouveau</span>
-            <span class="tagence">Lescar (64)</span>
+            <span class="tagence">Agence 3</span>
           </div>
           <div class="ticket-row">
             <span class="tid">SAV-2026-4733</span>
             <span class="tprod">Fenêtre — Fermeture difficile</span>
             <span class="tstatus nouveau">Nouveau</span>
-            <span class="tagence">Ibos (65)</span>
+            <span class="tagence">Agence 1</span>
           </div>
           <div class="ticket-row">
             <span class="tid">SAV-2026-4018</span>
             <span class="tprod">Coulissant — Serrure défaillante</span>
             <span class="tstatus nouveau">Nouveau</span>
-            <span class="tagence">Ibos (65)</span>
+            <span class="tagence">Agence 1</span>
           </div>
           <div class="ticket-row urgent">
             <span class="tid">SAV-2026-0138</span>
             <span class="tprod">Portail — Gond arraché</span>
             <span class="tbadge urgent">URGENT</span>
             <span class="tstatus nouveau">Nouveau</span>
-            <span class="tagence">Tarnos (40)</span>
+            <span class="tagence">Agence 2</span>
           </div>
           <div class="ticket-row done">
             <span class="tid">SAV-2026-0135</span>
             <span class="tprod">Porte de garage — Ressort cassé</span>
             <span class="tstatus termine">Terminé</span>
-            <span class="tagence">Saint-Gaudens (31)</span>
+            <span class="tagence">Agence 4</span>
           </div>
         </div>
 
@@ -1026,7 +1026,7 @@
             <div class="demo-head-badge">Я</div>
             <div>
               <div class="demo-head-title">Espace <span>Technicien</span></div>
-              <div class="demo-head-sub">Ibos (65) · Iko</div>
+              <div class="demo-head-sub">Agence 1 · Iko</div>
             </div>
           </div>
           <span class="demo-head-live">● Live</span>
@@ -1074,7 +1074,7 @@
   <div class="wrap">
     <h2 class="reveal">Voir <span>Iko</span> fonctionner sur votre SAV</h2>
     <p class="reveal">Une démonstration de 20 minutes, avec vos agences et vos cas réels.</p>
-    <a href="https://falliero-chatbot-sav-4znu.vercel.app/" target="_blank" rel="noopener" class="btn-primary reveal">Demander une démo</a>
+    <a href="index.html" target="_blank" rel="noopener" class="btn-primary reveal">Demander une démo</a>
   </div>
 </section>
 
@@ -1242,7 +1242,7 @@
       }
     }
   }  // ---------- INTERACTIVE CHATBOT DEMO ----------
-  const DEMO_AGENCES = ["Ibos (65)", "Lescar (64)", "Tarnos (40)", "Saint-Gaudens (31)"];
+  const DEMO_AGENCES = ["Agence 1", "Agence 3", "Agence 2", "Agence 4"];
   const DEMO_PRODUITS = ["Fenêtre","Coulissant","Volet roulant","Portail","Porte de garage","Véranda"];
   const DEMO_PROBLEMES = {
     "Fenêtre": [["Fermeture difficile",false],["Infiltration d'eau",false],["Vitrage fissuré",false],["Fenêtre bloquée ouverte",true]],
@@ -1366,7 +1366,7 @@
     html += '</div>';
 
     html += `<div class="rp-card ${rpState.flash==='updated'?'updated':''}">
-      <div class="rp-card-head"><span>${rpState.tid}</span><span>Ibos (65)</span></div>
+      <div class="rp-card-head"><span>${rpState.tid}</span><span>Agence 1</span></div>
       <div class="rp-card-body">
         <h5>${rpState.client}</h5>
         <div class="rp-tags"><span>${rpState.produit}</span><span>${rpState.probleme}</span></div>

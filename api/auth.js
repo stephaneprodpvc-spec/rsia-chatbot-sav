@@ -12,10 +12,10 @@ export default async function handler(req, res) {
   // jamais dans le code source public.
   const PASSWORDS = {
     [process.env.DASHBOARD_PW_GLOBAL]: 'global',
-    [process.env.DASHBOARD_PW_IBOS]: 'Ibos (65)',
-    [process.env.DASHBOARD_PW_TARNOS]: 'Tarnos (40)',
-    [process.env.DASHBOARD_PW_LESCAR]: 'Lescar (64)',
-    [process.env.DASHBOARD_PW_STGAUDENS]: 'Saint-Gaudens (31)',
+    [process.env.DASHBOARD_PW_IBOS]: 'Agence 1',
+    [process.env.DASHBOARD_PW_TARNOS]: 'Agence 2',
+    [process.env.DASHBOARD_PW_LESCAR]: 'Agence 3',
+    [process.env.DASHBOARD_PW_STGAUDENS]: 'Agence 4',
   };
 
   const access = PASSWORDS[password.trim()];

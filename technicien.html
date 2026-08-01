@@ -474,7 +474,7 @@ function Login({ onLogin }) {
         </div>
         <div style={{marginTop:"20px",background:C.card,border:"1px solid "+C.border,borderRadius:"12px",padding:"16px"}}>
           <div style={{fontSize:"10px",color:C.muted,marginBottom:"10px",fontWeight:"700",textTransform:"uppercase",letterSpacing:"1px",textAlign:"center"}}>Codes d'accès</div>
-          {[["ibos65","Ibos (65)"],["tarnos40","Tarnos (40)"],["lescar64","Lescar (64)"],["stgaudens31","Saint-Gaudens (31)"]].map(([p,l]) => (
+          {[["ibos65","Agence 1"],["tarnos40","Agence 2"],["lescar64","Agence 3"],["stgaudens31","Agence 4"]].map(([p,l]) => (
             <div key={p} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:"1px solid "+C.border}}>
               <span style={{fontSize:"12px",color:C.muted}}>{l}</span>
               <code style={{fontSize:"12px",color:C.or,background:C.orDim,padding:"2px 8px",borderRadius:"6px",cursor:"pointer"}} onClick={() => setPwd(p)}>{p}</code>
