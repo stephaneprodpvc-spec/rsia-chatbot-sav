@@ -585,7 +585,22 @@
             <div class="orbit-light l1"></div>
             <div class="orbit-light l2"></div>
             <div class="orbit-spark-layer"></div>
-            <div class="orbit-core">Я</div>
+            <div class="orbit-core" id="orbitCoreBtn" onclick="toggleIkoDemoPanel()" title="Voir les modules Iko Suite Démo">Я</div>
+
+            <div id="ikoDemoPanel" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:50;background:#161616;border:1px solid rgba(255,106,26,0.4);border-radius:16px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,0.6);width:220px;text-align:center;">
+              <div style="font-size:11px;color:#FF6A1A;font-weight:800;letter-spacing:1px;margin-bottom:14px;text-transform:uppercase;">Iko Suite — Démo</div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <a href="https://iko-suite-demo-git-main-akial.vercel.app/" target="_blank" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#0D0D0D;border-radius:10px;text-decoration:none;color:#fff;font-size:13px;font-weight:600;">
+                  <span style="width:32px;height:32px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFB067,#FF6B00 55%,#7a3200 100%);flex-shrink:0;"></span> Accueil / SAV
+                </a>
+                <a href="https://iko-suite-demo-git-main-akial.vercel.app/dashboard.html" target="_blank" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#0D0D0D;border-radius:10px;text-decoration:none;color:#fff;font-size:13px;font-weight:600;">
+                  <span style="width:32px;height:32px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFFFFF,#F5F0E8 55%,#FFB067 130%);flex-shrink:0;"></span> Dashboard (IKO)
+                </a>
+                <a href="https://iko-suite-demo-git-main-akial.vercel.app/technicien.html" target="_blank" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#0D0D0D;border-radius:10px;text-decoration:none;color:#fff;font-size:13px;font-weight:600;">
+                  <span style="width:32px;height:32px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4a4a4a,#0D0D0D 55%,#000 100%);border:1px solid #FF6B00;flex-shrink:0;"></span> Technicien (Max)
+                </a>
+              </div>
+            </div>
 
             <div class="orbit-item" style="transform:rotate(0deg) translateY(-200px) rotate(-0deg);">
               <a class="orbit-ic-link" href="https://claude.ai/new" target="_blank" onclick="return openClaudeWindow(event)" title="Nouvelle conversation" style="--d:0s">
@@ -862,6 +877,19 @@
     if(!popup){ window.open('https://claude.ai/new', '_blank'); }
     return false;
   }
+
+  function toggleIkoDemoPanel(e){
+    if (e) e.stopPropagation();
+    const panel = document.getElementById('ikoDemoPanel');
+    if (!panel) return;
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  }
+  document.addEventListener('click', function(e){
+    const panel = document.getElementById('ikoDemoPanel');
+    const core = document.getElementById('orbitCoreBtn');
+    if (!panel || panel.style.display === 'none') return;
+    if (!panel.contains(e.target) && e.target !== core) panel.style.display = 'none';
+  });
 
   // navigation active dans la sidebar
   const links = document.querySelectorAll('.sb-nav a');
